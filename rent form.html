@@ -1,0 +1,59 @@
+<html>
+	<head>
+		<title>Get Location</title>
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<script typr="text/javascript">
+			$(document).ready(function(){
+				$("input[name='place']").click(function(event){
+					console.log('Posting details');
+					var details = {};
+					details.id = $("input[name='bookid']").val();
+					details.bookname = $("input[name='bookname']").val();
+					details.isbn = $("input[name='isbn']").val();
+					console.log(details);
+					var xhrArgs = {
+					url : 'http://localhost:8080/bookworm/rentBooks',
+					data: details,
+					dataType: 'json',
+					success : function(data) {
+						console.log(data);
+					}};
+					$.post(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
+				});
+				$("input[name='fetch']").click(function(event){
+					console.log('Fetching details');
+					
+					var xhrArgs = {
+					url : 'http://localhost:8080/bookworm/allRentalBooks',
+					dataType: 'json',
+					success : function(data) {
+						// console.log(data);
+						data = JSON.parse(data);
+						var e = $("<ul><li><div class='bar'>bla</div></li></ul>");						
+						for(var index in data) {
+							console.log(data[index]);
+							var li = $('<li>',{ text : data[index].name});
+							$(e).append(li);
+						}
+						$('#someDiv').empty();
+						$('#someDiv').append(e); // put it into the DOM
+					}};
+					$.get(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
+				});
+			});
+		</script>
+	</head>
+	<body>
+		
+		<div class="ui-widget">
+			ID : <input type="Text" name="bookid"/> <br/>
+			Name : <input type="Text" name="bookname"/> <br/>
+			ISBN : <input type="text" name="isbn"/> <br/>
+			<input type ="button" name="place" value="Store books"/>
+		</div>
+		<input type ="button" name="fetch" value="Get books"/>
+		<div id="someDiv"></div>
+	</body>
+</html>
