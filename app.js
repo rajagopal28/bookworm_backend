@@ -1,29 +1,30 @@
 var http = require("http")
-	,express = require("express")
-	,app = express()
-	,logger = require('express-logger')
-	,json = require('express-json')
-	,methodOverride = require('method-override')
-	,cookieParser = require('cookie-parser')
-	,session = require('express-session')
-	,errorHandler = require('errorhandler')
-	,mongoose = require('mongoose')
-	,mongodb = require("mongodb")
-	,MongoClient = mongodb.MongoClient
-	,Server = mongodb.Server
-	,BSON = mongodb.BSONPure
-	,Db = mongodb.Db
-	,MongoServer = mongodb.Server
-	,bodyParser = require('body-parser')
-	,favicon = require('serve-favicon')
-	,path = require('path');
+	, express = require("express")
+	, app = express()
+	, morgan = require('morgan')
+    , fs = require('fs')
+	, json = require('express-json')
+	, methodOverride = require('method-override')
+	, cookieParser = require('cookie-parser')
+	, session = require('express-session')
+	, errorHandler = require('errorhandler')
+	, mongoose = require('mongoose')
+	, mongodb = require("mongodb")
+	, MongoClient = mongodb.MongoClient
+	, Server = mongodb.Server
+	, BSON = mongodb.BSONPure
+	, Db = mongodb.Db
+	, MongoServer = mongodb.Server
+	, bodyParser = require('body-parser')
+	, favicon = require('serve-favicon')
+	, path = require('path');
 
 // Express middleware to populate 'req.body' so we can access POST variables
 // app.use(express.bodyParser());
 
 //var mongoclient = new MongoClient(new Server('localhost','27017'),{'native_parser' : true});
 //var db = new Db('local', new MongoServer('localhost', 27017, { 'native_parser': true }));
-mongoose.connect("mongodb://raju:raju@localhost:27017/admin");
+mongoose.connect("mongodb://root@localhost:27017/admin");
 var db = mongoose.connection;
 db.once('open', function () {
 	app.listen(8080);
@@ -54,13 +55,15 @@ db.once('open', function () {
 //db.open(function (err, something) {
 //});
 // all environments
+accessLogStream = fs.createWriteStream(__dirname + '/public/logfile.txt', {flags: 'a'})
 app.set('port', process.env.PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 //app.use(express.favicon());
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // app.use(express.logger('dev'));
-app.use(logger({path: __dirname +"/public/logfile.txt"}));
+//app.use(logger({path: __dirname +"/public/logfile.txt"}));
+//app.use(morgan('combined', {stream: accessLogStream}))
 app.use(json());
 //app.use(bodyParser.urlencoded());
 app.use(methodOverride('X-HTTP-Method-Override'));
@@ -96,13 +99,16 @@ app.post('/bookworm/rentBooks',function(req,res) {
 		item.id =  req.body['id'];
 		item.name = req.body['bookname'];
 		item.isbn = req.body['isbn'];
+        item.exchange_only = req.body['exchange_only'] == 'true';
 		item.is_available= true;
 		item.created_ts = new Date().getTime();
 		rent.insert([item],function(err,items) {
 			if(err) {
 				res.send(err);
+                console.error(JSON.stringify(err));
 			} else {
 				res.send(items);
+                console.log("Success insertion: " + JSON.stringify(items));
 			}
 		});
 	}
@@ -111,8 +117,21 @@ app.post('/bookworm/rentBooks',function(req,res) {
 
 app.get('/bookworm/allRentalBooks',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
+    console.log(req.query);
+	console.log(req.body);
+	console.log(req.params);
+    var search_query = {};
+        search_query.is_available = true;
+        if(req.query['bookname']) {
+            search_query.name = {'$regex': req.query['bookname']};
+        }
+        if(req.query['isbn']) {
+            search_query.isbn = req.query['isbn'];
+        }
+		
 	var rent = db.collection('rent_books');
-	rent.find({is_available : true}).toArray(function(err,items) {
+    console.log(JSON.stringify(search_query));
+	rent.find(search_query).toArray(function(err,items) {
 		if(err) {
 			res.send(err);
 		} else {
@@ -120,6 +139,7 @@ app.get('/bookworm/allRentalBooks',function(req,res) {
 		}
 	});
 });
+
 app.get('/test/test',function(req,res) {
 	var rent = db.collection('rent_books');
 	rent.find({is_available : true}).toArray(function(err,items) {

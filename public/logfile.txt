@@ -75,3 +75,7 @@
 127.0.0.1 - - [Wed, 09 Sep 2015 09:31:32 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0"
 127.0.0.1 - - [Wed, 09 Sep 2015 09:31:38 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0"
 127.0.0.1 - - [Wed, 09 Sep 2015 09:32:09 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "-" "Mozilla/5.0 (Windows NT 6.1; rv:40.0) Gecko/20100101 Firefox/40.0"
+::1 - - [Fri, 13 Nov 2015 09:32:25 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 200 1327 "http://127.0.0.1:54494/rent%20form.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"
+::1 - - [Fri, 13 Nov 2015 09:33:34 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "http://127.0.0.1:54494/rent%20form.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"
+::1 - - [Fri, 13 Nov 2015 09:33:35 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "http://127.0.0.1:54494/rent%20form.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"
+::1 - - [Fri, 13 Nov 2015 09:41:23 GMT] "GET /bookworm/allRentalBooks HTTP/1.1" 304 - "http://127.0.0.1:54494/rent%20form.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"

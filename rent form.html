@@ -12,6 +12,8 @@
 					details.id = $("input[name='bookid']").val();
 					details.bookname = $("input[name='bookname']").val();
 					details.isbn = $("input[name='isbn']").val();
+                    details.is_available = $("input[name='is_available']").val() == 'on';
+                    details.exchange_only = $("input[name='exchange_only']").val() == 'on';
 					console.log(details);
 					var xhrArgs = {
 					url : 'http://localhost:8080/bookworm/rentBooks',
@@ -34,7 +36,11 @@
 						var e = $("<ul><li><div class='bar'>bla</div></li></ul>");						
 						for(var index in data) {
 							console.log(data[index]);
-							var li = $('<li>',{ text : data[index].name});
+                            var textVal = 'Name :' + data[index].name
+                            + ' ISBN: ' + data[index].isbn 
+                            + ' Exchange Only:' 
+                            + (data[index].exchange_only=='true' ? 'Yes' : 'No');
+							var li = $('<li>',{ text : textVal});
 							$(e).append(li);
 						}
 						$('#someDiv').empty();
@@ -51,6 +57,9 @@
 			ID : <input type="Text" name="bookid"/> <br/>
 			Name : <input type="Text" name="bookname"/> <br/>
 			ISBN : <input type="text" name="isbn"/> <br/>
+            <input type="checkbox" name="is_available"/>Available
+            <input type="checkbox" name="exchange_only"/>Exchange Only
+            
 			<input type ="button" name="place" value="Store books"/>
 		</div>
 		<input type ="button" name="fetch" value="Get books"/>
