@@ -1,0 +1,35 @@
+<div class="main portfolio">
+    <div class="jumbotron slideshow">
+        <div class="slideshow-container">
+            <div class="slide">
+                <img alt="Slide01" src="../www/Portfolio_files/slide01-9d5c1b911de14032bbc4cc7b19514447.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide02" src="../www/Portfolio_files/slide02-3c9662ea3f8d9ce479b5a76aedfa3f7b.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide03" src="../www/Portfolio_files/slide03-4e85ff59d4201786022aecf410d35d4f.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide04" src="../www/Portfolio_files/slide04-38bd2e1296452662195acbb9cabafda6.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide05" src="../www/Portfolio_files/slide05-0d54918a8bf7af849bbe49da704e6bb6.jpg">
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="media" ng-repeat="book in availableBooks">
+          <div class="media-left media-middle">
+            <a href="#">
+              <img class="media-object" src="http://books.google.co.in/books/content?id=yZ1APgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="{{book.volumeInfo.title}}">
+            </a>
+          </div>
+          <div class="media-body">
+              {{book.volumeInfo.imageLinks.thumbnail}}
+            <h4 class="media-heading">{{book.name}}</h4>
+            {{book.volumeInfo.description}}
+          </div>
+        </div>
+    </div>
+</div>

@@ -6,6 +6,22 @@
 		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 		<script typr="text/javascript">
 			$(document).ready(function(){
+                $( "input[name='dob']" ).datepicker({autoSize: true});
+                
+                $("input[name='register']").click(function(event){
+					console.log('Posting details');
+					var data = {};
+                    $("#register_form").serializeArray().map(function(x){data[x.name] = x.value;}); 
+					console.log(data);
+					var xhrArgs = {
+					url : 'http://localhost:8080/bookworm/registerUser',
+					data: data,
+					dataType: 'json',
+					success : function(data) {
+						console.log(data);
+					}};
+					$.post(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
+				});
 				$("input[name='place']").click(function(event){
 					console.log('Posting details');
 					var details = {};
@@ -63,6 +79,18 @@
 			<input type ="button" name="place" value="Store books"/>
 		</div>
 		<input type ="button" name="fetch" value="Get books"/>
+		<div id="someDiv"></div>
+        <div class="ui-widget">
+            <form id="register_form">
+			First name : <input type="Text" name="fname"/> <br/>
+			Last name : <input type="Text" name="lname"/> <br/>
+			DOB : <input type="text" name="dob"/> <br/>
+            Gender: male<input type="radio" name="gender" value="male"/>&nbsp;female<input type="radio" name="gender" value="female"/>
+            City : <input type="text" name="city"/> <br/>
+            State : <input type="text" name="state"/> <br/>
+			<input type ="button" name="register" value="Enroll me"/>
+                </form>
+		</div>
 		<div id="someDiv"></div>
 	</body>
 </html>

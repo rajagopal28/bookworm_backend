@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- saved from url=(0043)https://portfolio-rails-2633.herokuapp.com/ -->
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Portfolio</title>
+    <!--        Static vendor CSS files      -->
+	<link rel="stylesheet" type="text/css" href="./vendors/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./vendors/css/bootstrap-datepicker.min.css">
+    <!--        Static CSS files        -->
+    <link data-turbolinks-track="true" href="./static/css/main.css" media="all" rel="stylesheet">
+    
+    <!--        Static Vendor Javascripts -->
+    <script src = "./vendors/js/angular-1.4.8.min.js"></script>
+    <script src = "./vendors/js/angular-route-1.4.8.min.js"></script>
+    <script src = "./vendors/js/jquery-2.1.4.min.js"></script>
+    <script src = "./vendors/js/bootstrap-3.3.5.min.js"></script>
+	<script src = "./vendors/js/bootstrap-datepicker.min.js"></script>
+    <script src = "./vendors/js/socket.io-1.3.7.min.js"></script>
+    <!--        Static Vendor module Javascripts -->
+    <script src = "./vendors/js/modules/bootstrap-angular-ui.js"></script>
+</head>
+
+<body ng-app="bookworm-ui">
+    <div ng-include="'./includes/header.htm'"></div>
+	<div ng-view></div>
+	<div ng-include="'./includes/footer.htm'"></div>
+    <!--        Static app JS files      -->
+    <!--        Static DOM related scripts -->
+    <script src = "./static/js/other/app-script.js"></script>
+    <!--        Main App Module JS      -->
+    <script src = "./static/js/app.js"></script>
+    <!--        Controller JS Files      -->
+    <script src = "./static/js/controllers/home-controller.js"></script>
+    <script src = "./static/js/controllers/main-controller.js"></script>
+    <script src = "./static/js/controllers/users-controller.js"></script>
+    <script src = "./static/js/controllers/books-controller.js"></script>
+    <!--        Directive JS Files      -->
+    <script src = "./static/js/directives/equals-directive.js"></script>
+    <!--        Services JS Files      -->
+    <script src = "./static/js/services/books-service.js"></script>
+</body>
+
+</html>
