@@ -1,4 +1,4 @@
-var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap']);
+var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switch']);
    app.config(['$routeProvider',
       function($routeProvider) {
         $routeProvider

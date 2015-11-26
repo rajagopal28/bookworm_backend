@@ -2,19 +2,19 @@
     <div class="jumbotron slideshow">
         <div class="slideshow-container">
             <div class="slide">
-                <img alt="Slide01" src="../www/Portfolio_files/slide01-9d5c1b911de14032bbc4cc7b19514447.jpg">
+                <img alt="Slide01" src="../static/images/slide01.jpg">
             </div>
             <div class="slide">
-                <img alt="Slide02" src="../www/Portfolio_files/slide02-3c9662ea3f8d9ce479b5a76aedfa3f7b.jpg">
+                <img alt="Slide02" src="../static/images/slide02.jpg">
             </div>
             <div class="slide">
-                <img alt="Slide03" src="../www/Portfolio_files/slide03-4e85ff59d4201786022aecf410d35d4f.jpg">
+                <img alt="Slide03" src="../static/images/slide03.jpg">
             </div>
             <div class="slide">
-                <img alt="Slide04" src="../www/Portfolio_files/slide04-38bd2e1296452662195acbb9cabafda6.jpg">
+                <img alt="Slide04" src="../static/images/slide04.jpg">
             </div>
             <div class="slide">
-                <img alt="Slide05" src="../www/Portfolio_files/slide05-0d54918a8bf7af849bbe49da704e6bb6.jpg">
+                <img alt="Slide05" src="../static/images/slide05jpg">
             </div>
         </div>
     </div>
@@ -39,10 +39,11 @@
                     <div class="row form-group">
                         <label class="control-label col-xs-3">Sort</label>
                     <div class="input-group col-xs-8">
-                        <div ng-switch="search.sortAscending">
-                             <button ng-switch-when="true" type="button" class="btn btn-primary" ng-click="changeSorting(true)" >Ascending</button>
-                            <button type="button" class="btn btn-primary" ng-switch-when="false" ng-click="changeSorting(false)" >Descending</button>
-                        </div>
+            <toggle-switch
+              ng-model="search.sortAscending"
+              on-label="Ascending"
+              off-label="Descending">
+            </toggle-switch>
                     </div><!-- /input-group -->
                     </div><!-- row -->
                   </div><!-- panel body-->
