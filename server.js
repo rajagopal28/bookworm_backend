@@ -14,13 +14,40 @@ var http = require("http")
 	, bodyParser = require('body-parser')
 	, favicon = require('serve-favicon')
 	, path = require('path')
-    ,io = require('socket.io')(server,{
-      serveClient: (process.env === 'production') ? false : true,
+    , socketServer = app.listen(8080)
+    , io = require('socket.io')(socketServer,{
+      serveClient: true,
       path: '/socket.io'
     });
-
-io.set('transports',['xhr-polling']);
+//io.set('transports',['xhr-polling']);
 var db;
+var requestToDBKeys = {
+    'firsName' : 'firsName',
+    'lastName' : 'lastName',
+    'gender' : 'gender',
+    'dob' : 'dob',
+    'bookTitle' : 'name',
+    'authorName' : 'author',
+    'lendtDate' : 'createdDate',
+    'isAvailable' : 'is_available',
+    'exhangeOnly' : 'exchange_only'
+};
+function parseRequestToDBKeys(request_attributes){
+    var db_key_values = {};
+    for(var key in request_attributes) {
+        if(requestToDBKeys[key] && request_attributes[key].trim() !=''){
+            var db_key = requestToDBKeys[key];
+            db_key_values[db_key] = request_attributes[key].trim();
+        }
+    }
+    return db_key_values;
+}
+function addRegexOption(value, caseSensitive){
+    if(!caseSensitive) {
+        // value = '^' + value + '$';
+    }
+    return {'$regex': value}
+}
 console.log(mongoose.connection.readyState);
 if(mongoose.connection.readyState != mongoose.Connection.STATES.connected ) {
     mongoose.connect("mongodb://root@localhost:27017/admin");
@@ -28,7 +55,6 @@ if(mongoose.connection.readyState != mongoose.Connection.STATES.connected ) {
 db = mongoose.connection;
 
 db.once('open', function () {
-	app.listen(8080);
 	console.log('MongoDB connection successful.');
 });
 
@@ -66,20 +92,10 @@ app.post('/bookworm/api/rentBooks',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
 	var rent = db.collection('rent_books');
 	console.log("Renting books");
-	// console.log(req.query);
-	// console.log(req.body);
-	// console.log(req.params);
     var input_params = req.body;
-    if(input_params['fname']) {
-        
-    }
-	if(input_params['bookname']) {
+    var item = parseRequestToDBKeys(input_params);
+	if(item.name) {
 		console.log('has book details');
-		var item = {};
-		item.id =  input_params['id'];
-		item.name = input_params['bookname'];
-		item.isbn = input_params['isbn'];
-        item.exchange_only = req.body['exchange_only'] == 'true';
 		item.is_available= true;
 		item.created_ts = new Date().getTime();
 		rent.insert([item],function(err,items) {
@@ -97,17 +113,15 @@ app.post('/bookworm/api/rentBooks',function(req,res) {
 
 app.get('/bookworm/api/allRentalBooks',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
-    // console.log(req.query);
-	// console.log(req.body);
-	// console.log(req.params);
     var input_params = req.query;
-    var search_query = {};
+    var search_query = parseRequestToDBKeys(input_params);
+    
     search_query.is_available = true;
-    if(input_params['bookname']) {
-        search_query.name = {'$regex': input_params['bookname']};
+    if(search_query.name) {
+        search_query.name = addRegexOption(search_query.name);
     }
-    if(input_params['isbn']) {
-        search_query.isbn = input_params['isbn'];
+    if(search_query.author) {
+        search_query.isbn = addRegexOption(search_query.author);
     }
 		
 	var rent = db.collection('rent_books');
@@ -163,7 +177,10 @@ app.get('/test/test',function(req,res) {
 
 // socket IO -----------------------------------------------------------------
 io.sockets.on('connection', function (socket) {
+console.log('new socket connection');
   socket.on('ferret', function (name, fn) {
     console.log('woot');
+      console.log(name);
+      // console.log(fn);
   });
 });

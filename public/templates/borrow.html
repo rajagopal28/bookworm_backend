@@ -19,8 +19,38 @@
         </div>
     </div>
     <div class="container">
-        <div class="media" ng-repeat="book in availableBooks">
-          <div class="media-left media-middle">
+        <div class="row">
+          <div class="col-lg-5">
+              <div class="panel panel-primary">
+                  <div class="panel-heading">Filter search</div>
+                  <div class="panel-body">
+                   <div class="row form-group">
+                        <label class="control-label col-xs-3">Title</label>
+                    <div class="input-group col-xs-8">
+                      <input type="text" class="form-control" placeholder="Book title" ng-model="search.bookTitle">
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                      <div class="row form-group">
+                        <label class="control-label col-xs-3">Author</label>
+                    <div class="input-group col-xs-8">
+                      <input type="text" class="form-control" placeholder="Author name" ng-model="search.authorName">
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                    <div class="row form-group">
+                        <label class="control-label col-xs-3">Sort</label>
+                    <div class="input-group col-xs-8">
+                        <div ng-switch="search.sortAscending">
+                             <button ng-switch-when="true" type="button" class="btn btn-primary" ng-click="changeSorting(true)" >Ascending</button>
+                            <button type="button" class="btn btn-primary" ng-switch-when="false" ng-click="changeSorting(false)" >Descending</button>
+                        </div>
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                  </div><!-- panel body-->
+                  <div class="panel-footer text-right"><button type="button" class="btn btn-primary" ng-click="searchBooks()">Apply</button></div><!-- panel footer -->
+                </div><!-- panel -->
+          </div><!-- /.col-lg-6 -->
+              <div class="col-lg-6"><div class="media" ng-repeat="book in availableBooks">
+          <div class="media-left">
             <a href="#">
               <img class="media-object" src="http://books.google.co.in/books/content?id=yZ1APgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="{{book.volumeInfo.title}}">
             </a>
@@ -28,8 +58,10 @@
           <div class="media-body">
               {{book.volumeInfo.imageLinks.thumbnail}}
             <h4 class="media-heading">{{book.name}}</h4>
-            {{book.volumeInfo.description}}
+              <div><span class="label label-success">Success</span></div>
+            sdsfsdfdsfdsf {{book.volumeInfo.description}}
           </div>
-        </div>
+                  </div></div>
+</div><!-- /.row -->
     </div>
 </div>

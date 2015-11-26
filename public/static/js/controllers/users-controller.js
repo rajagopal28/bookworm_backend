@@ -42,6 +42,13 @@ app.controller('UserRegistrationController', ['$scope', '$http','$uibModal', fun
         });
         
     };
+    $scope.pingServer = function() {
+        // TIP: io() with no args does auto-discovery
+        socket.emit('ferret', {cricket: 'tobi', alt : 'Jiminy', context : 'Bazinga'}, function (data) {
+          console.log(data); // data will be 'woot'
+        });
+
+    };
     $scope.dismissAlert = function(){
         $scope.status.success = false;
         $scope.status.error = false;

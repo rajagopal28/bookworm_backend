@@ -344,7 +344,7 @@ app.service('BooksService', [ '$http', function($http){
    }
   }
  ];
-    this.all = function(){
-        return $http.get('/bookworm/api/allRentalBooks');
+    this.all = function(options){
+        return $http.get('/bookworm/api/allRentalBooks', {params : options});
     }
 }])
