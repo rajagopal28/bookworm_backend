@@ -22,22 +22,55 @@ var http = require("http")
 //io.set('transports',['xhr-polling']);
 var db;
 var requestToDBKeys = {
-    'firsName' : 'firsName',
+    'firstName' : 'firstName',
     'lastName' : 'lastName',
     'gender' : 'gender',
     'dob' : 'dob',
-    'bookTitle' : 'name',
+    'email' : 'email',
+    'genres' : 'genres',
+    'thumbnail' : 'thumbnailURL',
+    'bookName' : 'name',
+    'description':'description',
+    'username' : 'username',
+    'password' : 'password',
+    'confirmPassword' : 'password',
     'authorName' : 'author',
-    'lendtDate' : 'createdDate',
+    'lendDate' : 'created_lent_ts',
     'isAvailable' : 'is_available',
     'exhangeOnly' : 'exchange_only'
 };
+function reverseKeyValuePairs(key_value_pairs){
+  var value_key_pairs = {};
+    for(var key in key_value_pairs){
+        var value = key_value_pairs[key];
+        if(value.trim() != '')
+            value_key_pairs[value] = key; 
+    }
+    return value_key_pairs;
+}
 function parseRequestToDBKeys(request_attributes){
     var db_key_values = {};
     for(var key in request_attributes) {
-        if(requestToDBKeys[key] && request_attributes[key].trim() !=''){
-            var db_key = requestToDBKeys[key];
-            db_key_values[db_key] = request_attributes[key].trim();
+        // console.log(request_attributes[key]);
+        if(requestToDBKeys[key]){
+            if(request_attributes[key] instanceof Array) {
+                request_attributes[key] = request_attributes[key].join(",");
+            }
+           if( request_attributes[key].trim() !=''){
+                var db_key = requestToDBKeys[key];
+                db_key_values[db_key] = request_attributes[key].trim();
+            } 
+        } 
+    }
+    return db_key_values;
+}
+function parseDBToResponseKeys(db_key_values){
+    var db_key_values = {};
+    var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
+    for(var key in db_key_values) {
+        if(dbToResponseKeys[key] && db_key_values[key].trim() !=''){
+            var db_key = dbToResponseKeys[key];
+            db_key_values[db_key] = dbToRequestKeys[key].trim();
         }
     }
     return db_key_values;
@@ -45,6 +78,7 @@ function parseRequestToDBKeys(request_attributes){
 function addRegexOption(value, caseSensitive){
     if(!caseSensitive) {
         // value = '^' + value + '$';
+        return {'$regex': value, $options: 'i'}
     }
     return {'$regex': value}
 }
@@ -93,11 +127,13 @@ app.post('/bookworm/api/rentBooks',function(req,res) {
 	var rent = db.collection('rent_books');
 	console.log("Renting books");
     var input_params = req.body;
+    
     var item = parseRequestToDBKeys(input_params);
+    console.log(item);
 	if(item.name) {
 		console.log('has book details');
 		item.is_available= true;
-		item.created_ts = new Date().getTime();
+		item.created_lent_ts = new Date().getTime();
 		rent.insert([item],function(err,items) {
 			if(err) {
 				res.send(err);
@@ -130,7 +166,11 @@ app.get('/bookworm/api/allRentalBooks',function(req,res) {
 		if(err) {
 			res.send(err);
 		} else {
-			res.send(items);
+            var parsedItems = [];
+            for(var item in items) {
+                parsedItems.push(parseDBToResponseKeys(item));
+            }
+			res.send(parsedItems);
 		}
 	});
 });
@@ -139,7 +179,8 @@ app.post('/bookworm/api/registerUser',function(req,res) {
     console.log(req.query);
 	console.log(req.body);
 	console.log(req.params);
-    var personal_info = req.body;
+    var personal_info = parseRequestToDBKeys(req.body);
+    console.log(personal_info);
     if(personal_info.firstName)// check for not empty
     {
         var users = db.collection('user_worms');

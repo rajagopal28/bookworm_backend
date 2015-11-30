@@ -1,4 +1,4 @@
-app.controller('UserRegistrationController', ['$scope', '$http','$uibModal', function($scope, $http,$uibModal){
+app.controller('UserRegistrationController', ['$scope', '$http','$uibModal','UsersService', function($scope, $http,$uibModal,UsersService){
     $scope.user = {};
     $scope.user.gender="male";
     $scope.$on('date-set', function(event, args){
@@ -32,7 +32,7 @@ app.controller('UserRegistrationController', ['$scope', '$http','$uibModal', fun
     };
     $scope.signup = function(){  
     console.log($scope.user);
-        $http.post('/bookworm/api/registerUser', $scope.user,{timeout: 1000})
+        UsersService.registerUser($scope.user)
         .then(function(response){
             $scope.status.success = true;
             $scope.status.error = false;

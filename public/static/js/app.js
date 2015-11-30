@@ -1,4 +1,4 @@
-var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switch']);
+var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switch','ngTagsInput']);
    app.config(['$routeProvider',
       function($routeProvider) {
         $routeProvider
@@ -17,6 +17,10 @@ var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switc
         .when('/bookworm/borrow', {
             templateUrl: 'templates/borrow.html',
             controller: 'BorrowBooksController'
+        })
+        .when('/bookworm/lend', {
+            templateUrl: 'templates/lend.html',
+            controller: 'LendBooksController'
         })
         .when('/bookworm/forum', {
             templateUrl: 'templates/contact.html',

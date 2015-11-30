@@ -344,7 +344,13 @@ app.service('BooksService', [ '$http', function($http){
    }
   }
  ];
-    this.all = function(options){
+    this.rentalBooks = function(options){
         return $http.get('/bookworm/api/allRentalBooks', {params : options});
-    }
+    };
+    this.searchBooks = function(options){
+        return $http.get('https://www.googleapis.com/books/v1/volumes', {params : options});
+    };
+    this.lendBook = function(options) {
+        return $http.post('/bookworm/api/rentBooks', options,{timeout: 1000});
+    };
 }])

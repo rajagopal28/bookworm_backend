@@ -14,7 +14,7 @@
                 <img alt="Slide04" src="../static/images/slide04.jpg">
             </div>
             <div class="slide">
-                <img alt="Slide05" src="../static/images/slide05jpg">
+                <img alt="Slide05" src="../static/images/slide05.jpg">
             </div>
         </div>
     </div>
@@ -22,18 +22,39 @@
         <div class="row">
           <div class="col-lg-5">
               <div class="panel panel-primary">
-                  <div class="panel-heading">Filter search</div>
+                  <div class="panel-heading"><span class="glyphicon glyphicon-filter" aria-hidden="true">&nbsp;</span>Filter search</div>
                   <div class="panel-body">
                    <div class="row form-group">
                         <label class="control-label col-xs-3">Title</label>
                     <div class="input-group col-xs-8">
-                      <input type="text" class="form-control" placeholder="Book title" ng-model="search.bookTitle">
+                      <input type="text" class="form-control" placeholder="Song of Ice and Fire" ng-model="search.bookTitle">
                     </div><!-- /input-group -->
                     </div><!-- row -->
-                      <div class="row form-group">
+                    <div class="row form-group">
                         <label class="control-label col-xs-3">Author</label>
                     <div class="input-group col-xs-8">
-                      <input type="text" class="form-control" placeholder="Author name" ng-model="search.authorName">
+                      <input type="text" class="form-control" placeholder="R.R.Martin" ng-model="search.authorName">
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                    <div class="row form-group">
+                        <label class="control-label col-xs-3">City</label>
+                    <div class="input-group col-xs-8">
+                        <input type="text" ng-model="search.city" uib-typeahead="city for city in getLocations($viewValue) | limitTo:8" class="form-control" placeholder="Kings Landing">
+
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                    <div class="row form-group">
+                        <label class="control-label col-xs-3">Locality</label>
+                    <div class="input-group col-xs-8">
+                        <input type="text" ng-model="search.locality" uib-typeahead="locality for locality in getLocations($viewValue) | limitTo:8" class="form-control" placeholder="Castle">
+
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                    <div class="row form-group">
+                        <label class="control-label col-xs-3">Genres</label>
+                    <div class="input-group col-xs-8">
+                        <tags-input ng-model="search.genres" placeholder="Add genres"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
+
                     </div><!-- /input-group -->
                     </div><!-- row -->
                     <div class="row form-group">
@@ -43,6 +64,16 @@
               ng-model="search.sortAscending"
               on-label="Ascending"
               off-label="Descending">
+            </toggle-switch>
+                    </div><!-- /input-group -->
+                    </div><!-- row -->
+                    <div class="row form-group">
+                        <label class="control-label col-xs-3">Available only</label>
+                    <div class="input-group col-xs-8">
+            <toggle-switch
+              ng-model="search.availableOnly"
+              on-label="Yes"
+              off-label="No">
             </toggle-switch>
                     </div><!-- /input-group -->
                     </div><!-- row -->
