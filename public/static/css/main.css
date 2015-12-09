@@ -327,3 +327,54 @@ a.btn:hover,
 .vert-offset-bottom-0{
     margin-bottom: 0em;
 }
+
+.meta{
+    height: 60px;
+    margin-bottom: 17px;
+    margin-top: 10px;
+    position: relative;
+}
+.avatar {
+    border-radius: 30px 30px 30px 30px;
+    height: 60px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 60px;
+}
+.author{
+    color: inherit;
+    font-family: "Merriweather", "Skolar Bold", "Palatino", "Cambria", "Droid Serif", "Georgia", "Times New Roman", "Times", "serif";
+    font-size: 20px;
+    font-weight: 700;
+    left: 73px;
+    line-height: 29px;
+    padding: 0px 7px 0px 7px;
+    position: absolute;
+    text-decoration: none;
+    top: 3px;
+}
+.author.owner{
+    background-color: #DC3128;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 1px #333333;
+}
+.date{
+    color: #666666;
+    font-size: 14px;
+    font-weight: 300;
+    left: 80px;
+    line-height: 19px;
+    position: absolute;
+    text-decoration: none;
+    top: 35px;
+}
+.count{
+    color: #999999;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    position: absolute;
+    right: 0px;
+    top: 35px;
+}

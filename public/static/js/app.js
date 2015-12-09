@@ -1,4 +1,4 @@
-var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switch','ngTagsInput']);
+var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap','ngTagsInput']);
    app.config(['$routeProvider',
       function($routeProvider) {
         $routeProvider
@@ -22,13 +22,17 @@ var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap', 'toggle-switc
             templateUrl: 'templates/lend.html',
             controller: 'LendBooksController'
         })
-        .when('/bookworm/forum', {
-            templateUrl: 'templates/contact.html',
-            controller: 'userCtrl'
+        .when('/bookworm/forums', {
+            templateUrl: 'templates/forums.html',
+            controller: 'DiscussionController'
+        })
+        .when('/bookworm/forums/:forumId', {
+            templateUrl: 'templates/forums.html',
+            controller: 'DiscussionController'
         })
         .when('/bookworm/contact', {
             templateUrl: 'templates/contact.html',
-            controller: 'userCtrl'
+            controller: 'MainController'
         })
         .otherwise({
             redirectTo: '/bookworm/home'

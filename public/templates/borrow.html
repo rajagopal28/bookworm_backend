@@ -60,21 +60,17 @@
                     <div class="row form-group">
                         <label class="control-label col-xs-3">Sort</label>
                     <div class="input-group col-xs-8">
-            <toggle-switch
-              ng-model="search.sortAscending"
-              on-label="Ascending"
-              off-label="Descending">
-            </toggle-switch>
+                    <div class="btn-group">
+                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="true" uncheckable>Ascending</label>
+                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="false" uncheckable>Descending</label>
+                </div>
                     </div><!-- /input-group -->
                     </div><!-- row -->
                     <div class="row form-group">
                         <label class="control-label col-xs-3">Available only</label>
-                    <div class="input-group col-xs-8">
-            <toggle-switch
-              ng-model="search.availableOnly"
-              on-label="Yes"
-              off-label="No">
-            </toggle-switch>
+                    <div class="input-group col-xs-8"><div class="btn-group">
+                        <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="true" uncheckable>Yes</label>
+                        <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="false" uncheckable>No</label></div>
                     </div><!-- /input-group -->
                     </div><!-- row -->
                   </div><!-- panel body-->
