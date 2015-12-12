@@ -342,21 +342,33 @@ a.btn:hover,
     top: 0px;
     width: 60px;
 }
+.avatar.chat-owner{
+    right:0px;
+    left: initial;
+}
 .author{
     color: inherit;
     font-family: "Merriweather", "Skolar Bold", "Palatino", "Cambria", "Droid Serif", "Georgia", "Times New Roman", "Times", "serif";
     font-size: 20px;
-    font-weight: 700;
-    left: 73px;
+    font-weight: 700;    
     line-height: 29px;
     padding: 0px 7px 0px 7px;
     position: absolute;
     text-decoration: none;
+    left: 73px;
     top: 3px;
 }
+
 .author.owner{
     background-color: #DC3128;
     color: #FFFFFF;
+    text-shadow: 1px 1px 1px #333333;
+}
+.author.chat-owner{
+    background-color: #DC3128;
+    color: #FFFFFF;
+    right: 73px;
+    left: initial;
     text-shadow: 1px 1px 1px #333333;
 }
 .date{
@@ -369,6 +381,10 @@ a.btn:hover,
     text-decoration: none;
     top: 35px;
 }
+.date.chat-owner{
+    right: 80px;
+    left: initial;
+}
 .count{
     color: #999999;
     font-size: 14px;
@@ -377,4 +393,33 @@ a.btn:hover,
     position: absolute;
     right: 0px;
     top: 35px;
+}
+.count.chat-owner {
+   left: 0px; 
+   right: initial;
+}
+.chat-content, .chat-content-mine {
+    background-color: #FFFFFF;
+    border: 1px solid #DADADA;
+    border-radius: 4px 4px 4px 4px;
+    padding: 22px 25px 22px 25px;
+    position: relative;
+}
+.chat-content:before {
+    background:     url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAARCAYAAABTnsXCAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABR0RVh0Q3JlYXRpb24gVGltZQAzLzkvMTQztGkvAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAIdJREFUSIm90rkNwDAMQ1FlGO+/jzwMUwQOcviQRNu/J/AKipCpKpg9QM0vAAAwEApRAKUoJIz4AhhICNECRCFuxAgQgbgQVoAXYkZ4AR6ICREFWCFDBAuwQLqIWYARpImYDehBqohVgBbkh1gNqEFeiF2AL+RG7AY8IQDkUFWklOoP3VDOWU4aQSUqU7BUOQAAAABJRU5ErkJggg==") 50% 0px no-repeat;
+    content: "";
+    height: 10px;
+    left: 13px;
+    position: absolute;
+    top: -10px;
+    width: 33px;
+}
+.chat-content-mine:before {
+    background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAARCAYAAABTnsXCAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABR0RVh0Q3JlYXRpb24gVGltZQAzLzkvMTQztGkvAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAIdJREFUSIm90rkNwDAMQ1FlGO+/jzwMUwQOcviQRNu/J/AKipCpKpg9QM0vAAAwEApRAKUoJIz4AhhICNECRCFuxAgQgbgQVoAXYkZ4AR6ICREFWCFDBAuwQLqIWYARpImYDehBqohVgBbkh1gNqEFeiF2AL+RG7AY8IQDkUFWklOoP3VDOWU4aQSUqU7BUOQAAAABJRU5ErkJggg==") 50% 0px no-repeat;
+    content: "";
+    height: 10px;
+    right: 13px;
+    position: absolute;
+    top: -10px;
+    width: 33px;
 }

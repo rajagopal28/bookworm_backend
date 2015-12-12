@@ -1,0 +1,39 @@
+<div class="main portfolio">
+    <div class="jumbotron slideshow">
+        <div class="slideshow-container">
+            <div class="slide">
+                <img alt="Slide04" src="../static/images/slide04.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide05" src="../static/images/slide05.jpg">
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-primary">
+<div class="panel-heading">
+  <h3 class="panel-title">Chats:{{discussion.title}}</h3></div>
+        <div>
+            <div class="panel-body">
+                <div class="container" ng-repeat="chat in discussionChats">
+                    <div class="meta">
+                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg" class="avatar" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+
+                        <a href="/members/7390-brad-newman.htm" class="author" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">{{chat.creator.name}}</a>
+
+                        <a href="#comments_43710" class="date" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+                            <time datetime="2013-11-08">Nov 8, 2013 at 8:16 PM</time>
+                        </a>
+
+                        <div class="count" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+                            5 Comments
+                        </div>
+
+                    </div><!-- div meta -->
+                    <div ng-class="isCommentorAuthor(chat) ? 'chat-content-mine' : 'chat-content'">
+                        <p>Not sure/understanding why you want to go this direction. The HMTL is now controling which data is loaded. I still try to see HTML as presentation without (to much) logic, what to load. That's all inside js. Preloading sounds to me like against all the whole async idea?</p><p>If you put things inside  lazy controllers, the controller is always fired first,  the 2way binding scope magic will do its job if needed.</p><p>So the magic is the html controller call thatnmakes any controller prebind/load the JS.</p><p>As always thank for your greatcontributions, insides and doubts.</p>
+                    </div><!-- div content-->
+                </div><!-- div container -->
+            </div><!-- div container-->
+        </div><!-- div panel body-->
+    </div><!-- div panel -->
+</div><!-- main -->

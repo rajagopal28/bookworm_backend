@@ -26,9 +26,9 @@ var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap','ngTagsInput']
             templateUrl: 'templates/forums.html',
             controller: 'DiscussionController'
         })
-        .when('/bookworm/forums/:forumId', {
-            templateUrl: 'templates/forums.html',
-            controller: 'DiscussionController'
+        .when('/bookworm/forums/:discussionId', {
+            templateUrl: 'templates/forum-chats.html',
+            controller: 'DiscussionChatController'
         })
         .when('/bookworm/contact', {
             templateUrl: 'templates/contact.html',
