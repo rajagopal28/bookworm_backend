@@ -27,7 +27,7 @@
                    <div class="row form-group">
                         <label class="control-label col-xs-3">Title</label>
                     <div class="input-group col-xs-8">
-                      <input type="text" class="form-control" placeholder="Song of Ice and Fire" ng-model="search.bookTitle">
+                      <input type="text" class="form-control" placeholder="Song of Ice and Fire" ng-model="search.bookName">
                     </div><!-- /input-group -->
                     </div><!-- row -->
                     <div class="row form-group">
@@ -53,7 +53,7 @@
                     <div class="row form-group">
                         <label class="control-label col-xs-3">Genres</label>
                     <div class="input-group col-xs-8">
-                        <tags-input ng-model="search.genres" placeholder="Add genres"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
+                        <tags-input ng-model="genres" placeholder="Add genres"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
 
                     </div><!-- /input-group -->
                     </div><!-- row -->

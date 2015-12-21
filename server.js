@@ -22,19 +22,24 @@ var http = require("http")
 //io.set('transports',['xhr-polling']);
 var db;
 var requestToDBKeys = {
-    'firstName' : 'firstName',
-    'lastName' : 'lastName',
+    'firstName' : 'first_name',
+    'lastName' : 'last_name',
     'gender' : 'gender',
     'dob' : 'dob',
     'email' : 'email',
     'genres' : 'genres',
     'thumbnail' : 'thumbnailURL',
     'bookName' : 'name',
+    'discussionTitle':'discussion_title',
     'description':'description',
     'username' : 'username',
     'password' : 'password',
     'confirmPassword' : 'password',
     'authorName' : 'author',
+    'creator':'creator_name',
+    'createdTS':'created_ts',
+    'lastModifiedTS':'last_modified_ts',
+    'commentsCount':'comments_count',
     'lendDate' : 'created_lent_ts',
     'isAvailable' : 'is_available',
     'exhangeOnly' : 'exchange_only'
@@ -44,7 +49,7 @@ function reverseKeyValuePairs(key_value_pairs){
     for(var key in key_value_pairs){
         var value = key_value_pairs[key];
         if(value.trim() != '')
-            value_key_pairs[value] = key; 
+            value_key_pairs[value.toString()] = key.toString(); 
     }
     return value_key_pairs;
 }
@@ -65,15 +70,17 @@ function parseRequestToDBKeys(request_attributes){
     return db_key_values;
 }
 function parseDBToResponseKeys(db_key_values){
-    var db_key_values = {};
+    // console.log(db_key_values);
+    var response_key_values = {};
     var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
+    // console.log(dbToResponseKeys);
     for(var key in db_key_values) {
-        if(dbToResponseKeys[key] && db_key_values[key].trim() !=''){
-            var db_key = dbToResponseKeys[key];
-            db_key_values[db_key] = dbToRequestKeys[key].trim();
+        if(dbToResponseKeys[key.toString()] && db_key_values[key] !=''){
+            var db_key = dbToResponseKeys[key.toString()];
+            response_key_values[db_key] = db_key_values[key];
         }
     }
-    return db_key_values;
+    return response_key_values;
 }
 function addRegexOption(value, caseSensitive){
     if(!caseSensitive) {
@@ -122,7 +129,7 @@ if ('development' == app.get('env')) {
 // routes ======================================================================
 
 // api ---------------------------------------------------------------------
-app.post('/bookworm/api/rentBooks',function(req,res) {
+app.post('/bookworm/api/books/rental/add',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
 	var rent = db.collection('rent_books');
 	console.log("Renting books");
@@ -133,6 +140,10 @@ app.post('/bookworm/api/rentBooks',function(req,res) {
 	if(item.name) {
 		console.log('has book details');
 		item.is_available= true;
+        if(item.author) {
+            item.author = item.author.split(", ");
+        }
+        
 		item.created_lent_ts = new Date().getTime();
 		rent.insert([item],function(err,items) {
 			if(err) {
@@ -147,17 +158,29 @@ app.post('/bookworm/api/rentBooks',function(req,res) {
 	
 });
 
-app.get('/bookworm/api/allRentalBooks',function(req,res) {
+app.get('/bookworm/api/books/rental/all',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
     var input_params = req.query;
     var search_query = parseRequestToDBKeys(input_params);
-    
+    var $or =[];
     search_query.is_available = true;
     if(search_query.name) {
         search_query.name = addRegexOption(search_query.name);
+        $or.push({name: search_query.name});
+        delete search_query.name;// remove the key value pair
     }
     if(search_query.author) {
-        search_query.isbn = addRegexOption(search_query.author);
+        search_query.author = addRegexOption(search_query.author);
+        $or.push({author: {$elemMatch : search_query.author }});
+        delete search_query.author;// remove the key value pair
+    }
+    if(search_query.genres) {
+        search_query.genres = search_query.genres.split(",");
+        $or.push({genres: {$elemMatch : search_query.genres }});
+        delete search_query.genres;// remove the key value pair
+    }
+    if($or.length > 0) {
+        search_query.$or = $or;
     }
 		
 	var rent = db.collection('rent_books');
@@ -166,23 +189,47 @@ app.get('/bookworm/api/allRentalBooks',function(req,res) {
 		if(err) {
 			res.send(err);
 		} else {
+           
             var parsedItems = [];
-            for(var item in items) {
-                parsedItems.push(parseDBToResponseKeys(item));
+            for(var index in items) {
+           // console.log(items[index]);
+                parsedItems.push(parseDBToResponseKeys(items[index]));
+                // console.log(parseDBToResponseKeys(items[index]));    
             }
 			res.send(parsedItems);
 		}
 	});
 });
-app.post('/bookworm/api/registerUser',function(req,res) {
+app.get('/bookworm/api/discussions/all',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
-    console.log(req.query);
-	console.log(req.body);
-	console.log(req.params);
+    var input_params = req.query;
+    var search_query = parseRequestToDBKeys(input_params);
+    if(search_query.name) {
+        search_query.name = addRegexOption(search_query.name);
+    }
+		
+	var rent = db.collection('worm_discussions');
+    console.log(JSON.stringify(search_query));
+	rent.find(search_query).toArray(function(err,items) {
+		if(err) {
+			res.send(err);
+		} else {
+            var parsedItems = [];
+            for(var index in items) {
+                parsedItems.push(parseDBToResponseKeys(items[index]));
+            }
+			res.send(parsedItems);
+		}
+	});
+});
+app.post('/bookworm/api/users/register',function(req,res) {
+	res.header('Access-Control-Allow-Origin', "*");
     var personal_info = parseRequestToDBKeys(req.body);
     console.log(personal_info);
-    if(personal_info.firstName)// check for not empty
+    if(personal_info.first_name)// check for not empty
     {
+        personal_info.created_ts = new Date().getTime();
+        personal_info.last_modified_ts = new Date().getTime();
         var users = db.collection('user_worms');
         console.log(JSON.stringify(personal_info));
         users.insert([personal_info],function(err,items) {
@@ -200,9 +247,34 @@ app.post('/bookworm/api/registerUser',function(req,res) {
 	
 });
 
+app.post('/bookworm/api/discussions/add',function(req,res) {
+	res.header('Access-Control-Allow-Origin', "*");
+    var discussion_item = parseRequestToDBKeys(req.body);
+    console.log(discussion_item);
+    if(discussion_item.title)// check for not empty
+    {
+        discussion_item.created_ts = new Date().getTime();
+        discussion_item.last_modified_ts = new Date().getTime();
+        var users = db.collection('worm_discussions');
+        console.log(JSON.stringify(discussion_item));
+        users.insert([discussion_item],function(err,items) {
+                if(err) {
+                    res.send(err);
+                    console.error(JSON.stringify(err));
+                } else {
+                    res.send(items);
+                    console.log("Success insertion: " + JSON.stringify(items));
+                }
+            });
+    } else {
+        res.send();
+    }
+	
+});
+
 app.get('/test/test',function(req,res) {
 	var rent = db.collection('rent_books');
-	rent.find({is_available : true}).toArray(function(err,items) {
+	rent.find({}).toArray(function(err,items) {
 		if(err) {
 			res.send(err);
 		} else {

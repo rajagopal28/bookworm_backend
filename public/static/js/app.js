@@ -30,6 +30,10 @@ var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap','ngTagsInput']
             templateUrl: 'templates/forum-chats.html',
             controller: 'DiscussionChatController'
         })
+        .when('/bookworm/new-forum', {
+            templateUrl: 'templates/new-forum.html',
+            controller: 'NewDiscussionController'
+        })
         .when('/bookworm/contact', {
             templateUrl: 'templates/contact.html',
             controller: 'MainController'

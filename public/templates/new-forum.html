@@ -1,0 +1,53 @@
+<div class="main portfolio">
+    <div class="jumbotron slideshow">
+        <div class="slideshow-container">
+            <div class="slide">
+                <img alt="Slide01" src="../static/images/slide02.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide03" src="../static/images/slide03.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide04" src="../static/images/slide04.jpg">
+            </div>
+            <div class="slide">
+                <img alt="Slide05" src="../static/images/slide05.jpg">
+            </div>
+        </div>
+    </div>
+    
+    <div class="panel panel-primary">
+<div class="panel-heading">
+  <h3 class="panel-title">Create new forum</h3></div>
+        <div>
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="forumTitle" class="control-label col-xs-2">Title</label>
+                        <div class="col-xs-5">
+                            <input type="text" class="form-control" id="forum.forumTitle" placeholder="Why Tyrion killed Tywin Lannister?">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword" class="control-label col-xs-2">Description</label>
+                        <div class="col-xs-5">
+                            <textarea class="form-control" rows="5" ng-model="forum.description" name="description" placeholder="Because he was a mean father."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword" class="control-label col-xs-2">Reference book</label>
+                        <div class="col-xs-5">
+                             <input ng-model="book.bookName" type="text" class="form-control" name="bookName" placeholder="Song of Ice and Fire" ng-required="true" typeahead-loading="loadingBooks" uib-typeahead="ibook.bookName for ibook in loadBookDetails($viewValue) | limitTo:8" typeahead-min-length="5" typeahead-on-select="onBookSelect($item, $model, $label)">
+            <input type="hidden" ng-model="book.bookName" value="{{book.title}}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-2 col-xs-5">
+                            <button type="submit" class="btn btn-primary" ng-click="addDicsussion()">Start Discussion</button>
+                        </div>
+                    </div>
+                </form>
+            </div><!-- div panel body-->
+        </div><!-- div container-->
+    </div><!-- div panel -->
+</div><!-- main -->
