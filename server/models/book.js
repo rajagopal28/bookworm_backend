@@ -1,4 +1,5 @@
 function Book(mongoose) {
+    'use strict';
     var self = this;
     var bookSchemaDefinition = {
         book_name : String,
@@ -6,8 +7,8 @@ function Book(mongoose) {
         description : String,
         author_name : { type: [String], index : true},
         genres : { type: [String]},
-        created_lent_ts : { type : Date , Default : Date.now},
-        last_modified_ts : { type : Date , Default : Date.now},
+        created_lent_ts : { type : Date, default : Date.now},
+        last_modified_ts : { type : Date, default : Date.now},
         is_available : Boolean,
         exchange_only : Boolean
     };

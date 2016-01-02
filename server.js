@@ -11,6 +11,7 @@ var http = require("http")
 	, errorHandler = require('errorhandler')
     , utils = require('./server/models/utils')
     , book = require('./server/models/book')
+    , user = require('./server/models/user')
 	, mongoose = require('mongoose')
 	, mongodb = require("mongodb")
     , BSON = mongodb.BSONPure
@@ -26,7 +27,7 @@ var http = require("http")
 /* Models */
 var mUtils = new utils.Utils();
 var Books = new book.Book(mongoose);
-
+var Users = new user.User(mongoose);
 console.log(mongoose.connection.readyState);
 if(mongoose.connection.readyState != mongoose.Connection.STATES.connected ) {
     mongoose.connect("mongodb://root@localhost:27017/admin");
@@ -134,17 +135,35 @@ app.get('/bookworm/api/forums/all',function(req,res) {
 		}
 	});
 });
+app.get('/bookworm/api/users/check-unique',function(req,res) {
+	res.header('Access-Control-Allow-Origin', "*");
+    var inputParams = req.query;
+    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    if(searchQuery.username) {
+        Users.Model.find(searchQuery)
+            .exec(function(err,items) {
+                    if(err) {
+                        res.send(err);
+                    } else {
+                        var isUserUnique = 
+                            items.length === 0;
+                        res.send({isUserUnique : isUserUnique});
+                    }
+                });
+    }
+		
+	var rent = db.collection('worm_forums');
+    console.log(JSON.stringify(searchQuery));
+	rent.find(searchQuery).toArray();
+});
 app.post('/bookworm/api/users/register',function(req,res) {
 	res.header('Access-Control-Allow-Origin', "*");
     var personal_info = mUtils.parseRequestToDBKeys(req.body);
     console.log(personal_info);
     if(personal_info.first_name)// check for not empty
     {
-        personal_info.created_ts = new Date().getTime();
-        personal_info.last_modified_ts = new Date().getTime();
-        var users = db.collection('user_worms');
-        console.log(JSON.stringify(personal_info));
-        users.insert([personal_info],function(err,items) {
+        var new_user = new Users.Model(personal_info);
+        new_user.save(function(err,items) {
                 if(err) {
                     res.send(err);
                     console.error(JSON.stringify(err));
