@@ -80,14 +80,14 @@
               <div class="col-lg-6"><div class="media" ng-repeat="book in availableBooks">
           <div class="media-left">
             <a href="#">
-              <img class="media-object" src="http://books.google.co.in/books/content?id=yZ1APgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api" alt="{{book.volumeInfo.title}}">
+              <img class="media-object" src="{{book.thumbnail}}" alt="{{book.bookName}}">
             </a>
           </div>
           <div class="media-body">
-              {{book.volumeInfo.imageLinks.thumbnail}}
-            <h4 class="media-heading">{{book.name}}</h4>
-              <div><span class="label label-success">Success</span></div>
-            sdsfsdfdsfdsf {{book.volumeInfo.description}}
+            <h4 class="media-heading">{{book.bookName}}</h4>
+              <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
+              <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
+     {{book.description}}
           </div>
                   </div></div>
 </div><!-- /.row -->

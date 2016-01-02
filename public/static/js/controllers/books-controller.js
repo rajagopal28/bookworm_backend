@@ -11,7 +11,7 @@ app.controller('BorrowBooksController', ['$scope', '$http','BooksService','Googl
               });
             });
    };
-    $scope.genres = ['History','Romance','Drama','Mystery', 'Science', 'Fiction'];
+    $scope.genres = BooksService.availableGenres();
     $scope.search.sortAscending = true;
     $scope.search.availableOnly = true;
     $scope.genres = ['Drama','Mystery'];
@@ -24,9 +24,9 @@ app.controller('BorrowBooksController', ['$scope', '$http','BooksService','Googl
     };
     $scope.loadListsView = function() {  
     $scope.search.genres = [];
-    for(var index in $scope.search.genres){
+    for(var index in $scope.genres){
        var text = $scope.genres[index].text? $scope.genres[index].text : $scope.genres[index];
-                $scope.search.genres.push($scope.genres[index].text);
+                $scope.search.genres.push(text);
         
     }
     
@@ -92,13 +92,18 @@ app.controller('BorrowBooksController', ['$scope', '$http','BooksService','Googl
         console.log($model);
         console.log($label);
     };
-    $scope.genres = ['History','Romance','Drama','Mystery', 'Science', 'Fiction'];
-    $scope.book.genres = ['Drama','Mystery'];
+    $scope.genres = BooksService.availableGenres();
+    $scope.book.genresList = [ {text: 'Drama'},{text:'Mystery' }];
     $scope.changeSorting = function(value) {
         $scope.search.sortAscending = !value;
     };
     $scope.lendBook = function(){
         console.log($scope.book);
+        $scope.book.genres = [];
+        for(var index = 0; index <$scope.book.genresList.length; index++ ) {
+            var item = $scope.book.genresList[index];
+           $scope.book.genres.push(item.text); 
+        }
         BooksService.lendBook($scope.book)
             .then(function(response){
             console.log(response);

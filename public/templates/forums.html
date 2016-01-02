@@ -26,12 +26,12 @@
                 </div>
                 
             <uib-accordion close-others="true">
-                <uib-accordion-group is-open="status[discussion.id].open" ng-repeat="discussion in discussions">
+                <uib-accordion-group is-open="status[forum.id].open" ng-repeat="forum in forums">
             <uib-accordion-heading>
-                   {{discussion.title}} <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status[discussion.id].open, 'glyphicon-chevron-right': !status[discussion.id].open}"></i>
+                   {{forum.forumTitle}} <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status[forum.id].open, 'glyphicon-chevron-right': !status[forum.id].open}"></i>
           </uib-accordion-heading>
-                 {{discussion.description}}
-                    <a href="#/bookworm/forums/{{discussion.id}}">View talks</a>
+                 {{forum.description}}
+                    <a href="#/bookworm/forums/{{forum.id}}">View talks</a>
                     <div class="meta">
 
                                 <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg" class="avatar">

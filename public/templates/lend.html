@@ -37,7 +37,7 @@
          <div class="form-group">
             <label for="authorName" class="control-label col-xs-2">Author name</label>
             <div class="col-xs-10">
-                <input type="text" ng-model="book.author" class="form-control" name="authorName" placeholder="R.R.Martin" ng-required="true">
+                <input type="text" ng-model="book.authorName" class="form-control" name="authorName" placeholder="R.R.Martin" ng-required="true">
             </div>
         </div>
         <div class="form-group">
@@ -49,7 +49,7 @@
         <div class="form-group">
             <label for="genres" class="control-label col-xs-2">Genres</label>
             <div class="col-xs-10">
-                <tags-input ng-model="search.genres" uib-tooltip="Add genres for better search results" tooltip-trigger="focus" tooltip-placement="top" placeholder="Add genres for better search"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
+                <tags-input ng-model="book.genresList" uib-tooltip="Add genres for better search results" tooltip-trigger="focus" tooltip-placement="top" placeholder="Add genres for better search"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
             </div>
         </div>
         <div class="form-group">

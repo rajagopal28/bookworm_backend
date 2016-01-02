@@ -356,7 +356,7 @@ app.service('BooksService', [ '$http', function($http){
         item.description = gBook.volumeInfo.description;
         item.bookName = gBook.volumeInfo.title;
         if(gBook.volumeInfo.authors && gBook.volumeInfo.authors.length > 0){
-            item.author = gBook.volumeInfo.authors.join(", ");
+            item.authorName = gBook.volumeInfo.authors;
         }
         item.thumbnail = gBook.volumeInfo.imageLinks ? gBook.volumeInfo.imageLinks.thumbnail : defaultThumbnail;
         
@@ -368,5 +368,9 @@ app.service('BooksService', [ '$http', function($http){
             }
         }
         return item;
+    };
+    var allGenres = ['History','Romance','Drama','Mystery', 'Science', 'Fiction','Thriller','Comedy'];
+    this.availableGenres = function(){
+        return allGenres;
     };
 }])

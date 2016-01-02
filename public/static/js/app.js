@@ -24,15 +24,15 @@ var app = angular.module('bookworm-ui', ['ngRoute','ui.bootstrap','ngTagsInput']
         })
         .when('/bookworm/forums', {
             templateUrl: 'templates/forums.html',
-            controller: 'DiscussionController'
+            controller: 'ForumController'
         })
-        .when('/bookworm/forums/:discussionId', {
+        .when('/bookworm/forums/:forumId', {
             templateUrl: 'templates/forum-chats.html',
-            controller: 'DiscussionChatController'
+            controller: 'ForumChatController'
         })
         .when('/bookworm/new-forum', {
             templateUrl: 'templates/new-forum.html',
-            controller: 'NewDiscussionController'
+            controller: 'NewForumController'
         })
         .when('/bookworm/contact', {
             templateUrl: 'templates/contact.html',

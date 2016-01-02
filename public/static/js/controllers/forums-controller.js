@@ -1,36 +1,37 @@
-// DiscussionController
-app.controller('DiscussionController', ['$scope','DiscussionsService', function($scope, DiscussionsService){
+// ForumController
+app.controller('ForumController', ['$scope','ForumsService', function($scope, ForumsService){
     $scope.status = {};
-    $scope.discussions = [];
-    // make service call to get list of discussions
+    $scope.forums = [];
+    // make service call to get list of forums
     var options = {};
-    DiscussionsService.allDiscussions(options).then(
+    ForumsService.allForums(options).then(
     function(response){
-        $scope.discussions = response.data;
+        $scope.forums = response.data;
     });
 }])
-.controller('DiscussionChatController', ['$scope','$routeParams','DiscussionsService', function($scope, $routeParams, DiscussionsService){
-    var discussionId = $routeParams.discussionId;
-    console.log(discussionId);
+.controller('ForumChatController', ['$scope','$routeParams','ForumsService', function($scope, $routeParams, ForumsService){
+    var forumId = $routeParams.forumId;
+    console.log(forumId);
     $scope.isCommentorAuthor = function(chatItem) {
-        return chatItem.creator.id === $scope.discussion.creator.id;
+        return chatItem.creator.id === $scope.forum.creator.id;
     };
-    $scope.discussion = {};
-    $scope.discussionChats = [];
-    // make service call to get list of discussion chats 
-    var options = {discussionId : discussionId};
-    DiscussionsService.allChats(options).then(
+    $scope.forum = {};
+    $scope.forumChats = [];
+    // make service call to get list of forum chats 
+    var options = {forumId : forumId};
+    ForumsService.allChats(options).then(
     function(response){
-        $scope.discussion = response.data.discussion;
-        $scope.discussionChats = response.data.chats;
+        $scope.forum = response.data.forum;
+        $scope.forumChats = response.data.chats;
     });    
 }])
-.controller('NewDiscussionController', ['$scope','$routeParams','DiscussionsService','BooksService','GoogleAPIService', function($scope, $routeParams, DiscussionsService, BooksService, GoogleAPIService){
+.controller('NewForumController', ['$scope','$routeParams','ForumsService','BooksService','GoogleAPIService', function($scope, $routeParams, ForumsService, BooksService, GoogleAPIService){
     $scope.book = {};
+    $scope.forum = {};
     $scope.addDicsussion = function() {
         $scope.forum.referredBook = $scope.book;
         console.log($scope.forum);
-       DiscussionsService.addDiscussion($scope.forum); 
+       ForumsService.addForum($scope.forum); 
     };
     $scope.loadBookDetails = function(searchText) {
         console.log("searchText="+searchText);
