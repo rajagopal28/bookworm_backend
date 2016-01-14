@@ -3,29 +3,35 @@
     <h3 class="panel-title">Sign in</h3>
   </div>
   <div class="panel-body">
+      
+      <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span aria-hidden="true">&times;</span></button>
+          <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">Error:</span>Error!</strong> {{errorMessage}}
+        </div>
     <form class="form-horizontal">
         <div class="form-group">
             <label for="inputEmail" class="control-label col-xs-2">Login</label>
             <div class="col-xs-5">
-                <input type="email" class="form-control" id="inputEmail" placeholder="Email/Username">
+                <input class="form-control" ng-model="user.username" id="inputEmail" placeholder="Email/Username">
             </div>
         </div>
         <div class="form-group">
             <label for="inputPassword" class="control-label col-xs-2">Password</label>
             <div class="col-xs-5">
-                <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                <input type="password" class="form-control" id="inputPassword" ng-model="user.password" placeholder="Password">
             </div>
         </div>
         <div class="form-group">
             <div class="col-xs-offset-2 col-xs-5">
                 <div class="checkbox">
-                    <label><input type="checkbox"> Remember me</label>
+                    <label><input ng-model="user.rememberMe" type="checkbox"> Remember me</label>
                 </div>
             </div>
         </div>
         <div class="form-group">
             <div class="col-xs-offset-2 col-xs-5">
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary" ng-click="login()">Login</button>
             </div>
         </div>
     </form>

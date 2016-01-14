@@ -1,4 +1,4 @@
-app.controller('UserRegistrationController', ['$scope', '$http','$uibModal','UsersService', function($scope, $http,$uibModal,UsersService){
+app.controller('UserRegistrationController', ['$scope','$uibModal','UsersService', function($scope,$uibModal,UsersService){
     $scope.user = {};
     $scope.user.gender="male";
     $scope.$on('date-set', function(event, args){
@@ -42,6 +42,20 @@ app.controller('UserRegistrationController', ['$scope', '$http','$uibModal','Use
         });
         
     };
+    $scope.checkUsername = function() {
+       UsersService.usernameUnique($scope.user)
+           .then(function(response){
+           console.log(response);
+            if(response.data) {
+                $scope.user.isUsernameAvailable = response.data.isUsernameAvailable;
+                if(response.data.isUsernameAvailable) {
+                    $scope.user.customMessage = 'User name available';
+                } else {
+                   $scope.user.customMessage = 'User name is not available'; 
+                }
+            }
+       }); 
+    };
     $scope.pingServer = function() {
         // TIP: io() with no args does auto-discovery
         socket.emit('ferret', {cricket: 'tobi', alt : 'Jiminy', context : 'Bazinga'}, function (data) {
@@ -55,9 +69,28 @@ app.controller('UserRegistrationController', ['$scope', '$http','$uibModal','Use
         $scope.status.warn = false;
     };
 }])
-.controller('UserLoginController', ['$scope', '$http','$uibModal', function($scope, $http, $uibModal){  
-    $scope.login = function(data) {
-        
+.controller('UserLoginController', ['$scope','$location', '$uibModal','UsersService', function($scope, $location, $uibModal,UsersService){  
+    $scope.user = {};
+    $scope.errorMessage = DEFAULT_ERROR_MESSAGE;
+    $scope.status = {error : false};
+    var DEFAULT_ERROR_MESSAGE = 'Problem submitting the details. Try after sometime!';
+    $scope.dismissMessage = function(){
+        $scope.status.error=false;
+    };
+    $scope.login = function() {        
+        UsersService.loginUser($scope.user).then(function(response){
+            if(response.data){
+                if(response.data.authSuccess) {
+                    $location.path('/bookworm/home');
+                    $scope.status.error=false;
+                } else {
+                    $scope.errorMessage = 'Invalid credentials!!';
+                    $scope.status.error=true;
+                }
+            }else {
+                $scope.errorMessage = DEFAULT_ERROR_MESSAGE;
+            }    
+        });
     };
     $scope.showLogin = function(){
       var modalInstance = $uibModal.open({

@@ -17,6 +17,7 @@ function Utils() {
         'username': 'username',
         'password': 'password',
         'confirmPassword': 'password',
+        'rememberMe' : 'remember_me',
         'authorName': 'author_name',
         'googleId': 'google_id',
         'author': 'author',

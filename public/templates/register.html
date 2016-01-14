@@ -54,7 +54,9 @@
         <div class="form-group">
             <label for="username" class="control-label col-xs-2">Username</label>
             <div class="col-xs-5">
-                <input ng-model="user.username" type="text" class="form-control" name="username" placeholder="coinmaster26">
+                <input ng-model="user.username" type="text" class="form-control" name="username" placeholder="coinmaster26" ng-blur="checkUsername()">
+                <div ng-if="user.customMessage" ng-class="{'alert-error' : !user.isUsernameAvailable, 'alert-success' : user.isUsernameAvailable}">{{user.customMessage}}&nbsp;<i class="glyphicon" ng-class="{'glyphicon-ok': user.isUsernameAvailable , 'glyphicon-remove' : !user.isUsernameAvailable} "></i>
+                </div>
             </div>
         </div>
         <div class="form-group">

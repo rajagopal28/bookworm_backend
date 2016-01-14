@@ -1,5 +1,5 @@
 var http = require("http")
-    ,server = http.Server(app)
+    , server = http.Server(app)
 	, express = require("express")
 	, app = express()
 	, morgan = require('morgan')
@@ -9,6 +9,7 @@ var http = require("http")
 	, cookieParser = require('cookie-parser')
 	, session = require('express-session')
 	, errorHandler = require('errorhandler')
+    , bcrypt = require('bcrypt')
     , utils = require('./server/models/utils')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
@@ -27,7 +28,7 @@ var http = require("http")
 /* Models */
 var mUtils = new utils.Utils();
 var Books = new book.Book(mongoose);
-var Users = new user.User(mongoose);
+var Users = new user.User(mongoose, bcrypt);
 console.log(mongoose.connection.readyState);
 if(mongoose.connection.readyState != mongoose.Connection.STATES.connected ) {
     mongoose.connect("mongodb://root@localhost:27017/admin");
@@ -65,12 +66,17 @@ app.use(session({
 if ('development' == app.get('env')) {
   app.use(errorHandler());
 }
+// allow cross origin access
+app.use(function(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+    next();
+});
 // routes ======================================================================
 
 // api ---------------------------------------------------------------------
 app.post('/bookworm/api/books/rental/add',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
-	var rent = db.collection('rent_books');
 	console.log("Renting books");
     var inputParams = req.body;
     console.log(inputParams);
@@ -89,7 +95,7 @@ app.post('/bookworm/api/books/rental/add',function(req,res) {
 });
 
 app.get('/bookworm/api/books/rental/all',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
+	
     var inputParams = req.query;
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
     console.log(searchQuery);
@@ -108,7 +114,7 @@ app.get('/bookworm/api/books/rental/all',function(req,res) {
 	});
 });
 app.get('/bookworm/api/forums/all',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
+	
     var inputParams = req.query;
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
     if(searchQuery.title) {
@@ -135,9 +141,9 @@ app.get('/bookworm/api/forums/all',function(req,res) {
 		}
 	});
 });
-app.get('/bookworm/api/users/check-unique',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
-    var inputParams = req.query;
+app.post('/bookworm/api/users/check-unique',function(req,res) {
+	
+    var inputParams = req.body;
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
     if(searchQuery.username) {
         Users.Model.find(searchQuery)
@@ -145,19 +151,30 @@ app.get('/bookworm/api/users/check-unique',function(req,res) {
                     if(err) {
                         res.send(err);
                     } else {
-                        var isUserUnique = 
+                        var isUsernameAvailable = 
                             items.length === 0;
-                        res.send({isUserUnique : isUserUnique});
+                        res.send({isUsernameAvailable : isUsernameAvailable});
                     }
                 });
     }
-		
-	var rent = db.collection('worm_forums');
-    console.log(JSON.stringify(searchQuery));
-	rent.find(searchQuery).toArray();
+});
+app.post('/bookworm/api/users/login-auth',function(req,res) {
+	
+    var inputParams = req.body;
+    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    if(searchQuery.username) {
+        Users.authenticateUser(searchQuery,function(err, isMatch, token) {
+            if (err) {
+                res.send(err);
+            } 
+            else{
+                res.send({authSuccess : isMatch, token: token});
+            }
+        });
+    }
 });
 app.post('/bookworm/api/users/register',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
+	
     var personal_info = mUtils.parseRequestToDBKeys(req.body);
     console.log(personal_info);
     if(personal_info.first_name)// check for not empty
@@ -179,7 +196,6 @@ app.post('/bookworm/api/users/register',function(req,res) {
 });
 
 app.post('/bookworm/api/forums/add',function(req,res) {
-	res.header('Access-Control-Allow-Origin', "*");
     console.log(req.body);
     var forum_item = mUtils.parseRequestToDBKeys(req.body);
     console.log(forum_item);
@@ -204,7 +220,7 @@ app.post('/bookworm/api/forums/add',function(req,res) {
 	
 });
 
-app.get('/test/test',function(req,res) {
+app.get('/test/test', ensureAuthorized ,function(req,res) {
 	var rent = db.collection('rent_books');
 	rent.find({}).toArray(function(err,items) {
 		if(err) {
@@ -219,7 +235,18 @@ app.get('/test/test',function(req,res) {
     app.get('*', function(req, res) {
         res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
     });
-
+function ensureAuthorized(req, res, next) {
+    var bearerToken;
+    var bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== 'undefined') {
+        var bearer = bearerHeader.split(" ");
+        bearerToken = bearer[1];
+        req.token = bearerToken;
+        next();
+    } else {
+        res.sendStatus(403);
+    }
+}
 // socket IO -----------------------------------------------------------------
 io.sockets.on('connection', function (socket) {
 console.log('new socket connection');
