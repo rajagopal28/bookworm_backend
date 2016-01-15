@@ -1,33 +1,37 @@
 <div class="header" ng-controller="HomeController">
     <div class="navbar navbar-primary">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="#">BookWorm</a>
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">BookWorm</a>
+            </div>
+            <div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li>
+                        <a href="https://portfolio-rails-2633.herokuapp.com/portfolio">Portfolio</a>
+                    </li>
+                    <li>
+                        <a href="https://medium.com/about-codecademy">Blog</a>
+                    <li>
+                        <a href="#/bookworm/forums">Forums</a>
+                    </li>
+                    </li>
+                    <li>
+                        <a href="https://portfolio-rails-2633.herokuapp.com/about">About</a>
+                    </li>
+                    <li>
+                        <a href="#/bookworm/contact">Contact</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" ng-if="isLoggedIn()">
+                    <li class="navbar-text">Welcome {{ userName }}</li>
+                    <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" ng-if="!isLoggedIn()">
+                    <li><a href="#/bookworm/login"><span class="glyphicon glyphicon-user"></span> SignIn</a></li>
+                    <li><a href="#/bookworm/register"><span class="glyphicon glyphicon-log-in"></span> Register</a></li>
+                </ul>
+            </div>
         </div>
-        <div>
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li>
-                <a href="https://portfolio-rails-2633.herokuapp.com/portfolio">Portfolio</a>
-            </li>
-            <li>
-                <a href="https://medium.com/about-codecademy">Blog</a>
-            <li>
-                <a href="#/bookworm/forums">Forums</a>
-            </li>
-            </li>
-            <li>
-                <a href="https://portfolio-rails-2633.herokuapp.com/about">About</a>
-            </li>
-            <li>
-                <a href="#/bookworm/contact">Contact</a>
-            </li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a ng-click="showLogin()" href="#/bookworm/login" ><span class="glyphicon glyphicon-user"></span> SignIn</a></li>
-            <li><a href="#/bookworm/register"><span class="glyphicon glyphicon-log-in"></span> Register</a></li>
-          </ul>
-        </div>
-      </div>
     </div>
 </div>

@@ -1,96 +1,102 @@
 <html>
-	<head>
-		<title>Get Location</title>
-		<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-		<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-		<script typr="text/javascript">
-			$(document).ready(function(){
-                $( "input[name='dob']" ).datepicker({autoSize: true});
-                
-                $("input[name='register']").click(function(event){
-					console.log('Posting details');
-					var data = {};
-                    $("#register_form").serializeArray().map(function(x){data[x.name] = x.value;}); 
-					console.log(data);
-					var xhrArgs = {
-					url : 'http://localhost:8080/bookworm/registerUser',
-					data: data,
-					dataType: 'json',
-					success : function(data) {
-						console.log(data);
-					}};
-					$.post(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
-				});
-				$("input[name='place']").click(function(event){
-					console.log('Posting details');
-					var details = {};
-					details.id = $("input[name='bookid']").val();
-					details.bookname = $("input[name='bookname']").val();
-					details.isbn = $("input[name='isbn']").val();
-                    details.is_available = $("input[name='is_available']").val() == 'on';
-                    details.exchange_only = $("input[name='exchange_only']").val() == 'on';
-					console.log(details);
-					var xhrArgs = {
-					url : 'http://localhost:8080/bookworm/rentBooks',
-					data: details,
-					dataType: 'json',
-					success : function(data) {
-						console.log(data);
-					}};
-					$.post(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
-				});
-				$("input[name='fetch']").click(function(event){
-					console.log('Fetching details');
-					
-					var xhrArgs = {
-					url : 'http://localhost:8080/bookworm/allRentalBooks',
-					dataType: 'json',
-					success : function(data) {
-						// console.log(data);
-						data = JSON.parse(data);
-						var e = $("<ul><li><div class='bar'>bla</div></li></ul>");						
-						for(var index in data) {
-							console.log(data[index]);
+<head>
+    <title>Get Location</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script typr="text/javascript">
+        $(document).ready(function () {
+            $("input[name='dob']").datepicker({autoSize: true});
+
+            $("input[name='register']").click(function (event) {
+                console.log('Posting details');
+                var data = {};
+                $("#register_form").serializeArray().map(function (x) {
+                    data[x.name] = x.value;
+                });
+                console.log(data);
+                var xhrArgs = {
+                    url: 'http://localhost:8080/bookworm/registerUser',
+                    data: data,
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                    }
+                };
+                $.post(xhrArgs.url, xhrArgs.data).done(xhrArgs.success);
+            });
+            $("input[name='place']").click(function (event) {
+                console.log('Posting details');
+                var details = {};
+                details.id = $("input[name='bookid']").val();
+                details.bookname = $("input[name='bookname']").val();
+                details.isbn = $("input[name='isbn']").val();
+                details.is_available = $("input[name='is_available']").val() == 'on';
+                details.exchange_only = $("input[name='exchange_only']").val() == 'on';
+                console.log(details);
+                var xhrArgs = {
+                    url: 'http://localhost:8080/bookworm/rentBooks',
+                    data: details,
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                    }
+                };
+                $.post(xhrArgs.url, xhrArgs.data).done(xhrArgs.success);
+            });
+            $("input[name='fetch']").click(function (event) {
+                console.log('Fetching details');
+
+                var xhrArgs = {
+                    url: 'http://localhost:8080/bookworm/allRentalBooks',
+                    dataType: 'json',
+                    success: function (data) {
+                        // console.log(data);
+                        data = JSON.parse(data);
+                        var e = $("<ul><li><div class='bar'>bla</div></li></ul>");
+                        for (var index in data) {
+                            console.log(data[index]);
                             var textVal = 'Name :' + data[index].name
-                            + ' ISBN: ' + data[index].isbn 
-                            + ' Exchange Only:' 
-                            + (data[index].exchange_only=='true' ? 'Yes' : 'No');
-							var li = $('<li>',{ text : textVal});
-							$(e).append(li);
-						}
-						$('#someDiv').empty();
-						$('#someDiv').append(e); // put it into the DOM
-					}};
-					$.get(xhrArgs.url,xhrArgs.data).done(xhrArgs.success);
-				});
-			});
-		</script>
-	</head>
-	<body>
-		
-		<div class="ui-widget">
-			ID : <input type="Text" name="bookid"/> <br/>
-			Name : <input type="Text" name="bookname"/> <br/>
-			ISBN : <input type="text" name="isbn"/> <br/>
-            <input type="checkbox" name="is_available"/>Available
-            <input type="checkbox" name="exchange_only"/>Exchange Only
-            
-			<input type ="button" name="place" value="Store books"/>
-		</div>
-		<input type ="button" name="fetch" value="Get books"/>
-		<div id="someDiv"></div>
-        <div class="ui-widget">
-            <form id="register_form">
-			First name : <input type="Text" name="fname"/> <br/>
-			Last name : <input type="Text" name="lname"/> <br/>
-			DOB : <input type="text" name="dob"/> <br/>
-            Gender: male<input type="radio" name="gender" value="male"/>&nbsp;female<input type="radio" name="gender" value="female"/>
-            City : <input type="text" name="city"/> <br/>
-            State : <input type="text" name="state"/> <br/>
-			<input type ="button" name="register" value="Enroll me"/>
-                </form>
-		</div>
-		<div id="someDiv"></div>
-	</body>
+                                    + ' ISBN: ' + data[index].isbn
+                                    + ' Exchange Only:'
+                                    + (data[index].exchange_only == 'true' ? 'Yes' : 'No');
+                            var li = $('<li>', {text: textVal});
+                            $(e).append(li);
+                        }
+                        $('#someDiv').empty();
+                        $('#someDiv').append(e); // put it into the DOM
+                    }
+                };
+                $.get(xhrArgs.url, xhrArgs.data).done(xhrArgs.success);
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="ui-widget">
+    ID : <input type="Text" name="bookid"/> <br/>
+    Name : <input type="Text" name="bookname"/> <br/>
+    ISBN : <input type="text" name="isbn"/> <br/>
+    <input type="checkbox" name="is_available"/>Available
+    <input type="checkbox" name="exchange_only"/>Exchange Only
+
+    <input type="button" name="place" value="Store books"/>
+</div>
+<input type="button" name="fetch" value="Get books"/>
+<div id="someDiv"></div>
+<div class="ui-widget">
+    <form id="register_form">
+        First name : <input type="Text" name="fname"/> <br/>
+        Last name : <input type="Text" name="lname"/> <br/>
+        DOB : <input type="text" name="dob"/> <br/>
+        Gender: male<input type="radio" name="gender" value="male"/>&nbsp;female<input type="radio" name="gender"
+                                                                                       value="female"/>
+        City : <input type="text" name="city"/> <br/>
+        State : <input type="text" name="state"/> <br/>
+        <input type="button" name="register" value="Enroll me"/>
+    </form>
+</div>
+<div id="someDiv"></div>
+</body>
 </html>

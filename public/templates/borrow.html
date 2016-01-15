@@ -20,76 +20,95 @@
     </div>
     <div class="container">
         <div class="row">
-          <div class="col-lg-5">
-              <div class="panel panel-primary">
-                  <div class="panel-heading"><span class="glyphicon glyphicon-filter" aria-hidden="true">&nbsp;</span>Filter search</div>
-                  <div class="panel-body">
-                   <div class="row form-group">
-                        <label class="control-label col-xs-3">Title</label>
-                    <div class="input-group col-xs-8">
-                      <input type="text" class="form-control" placeholder="Song of Ice and Fire" ng-model="search.bookName">
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">Author</label>
-                    <div class="input-group col-xs-8">
-                      <input type="text" class="form-control" placeholder="R.R.Martin" ng-model="search.authorName">
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">City</label>
-                    <div class="input-group col-xs-8">
-                        <input type="text" ng-model="search.city" uib-typeahead="city for city in getLocations($viewValue) | limitTo:8" class="form-control" placeholder="Kings Landing">
+            <div class="col-lg-5">
+                <div class="panel panel-primary">
+                    <div class="panel-heading"><span class="glyphicon glyphicon-filter" aria-hidden="true">&nbsp;</span>Filter
+                        search
+                    </div>
+                    <div class="panel-body">
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Title</label>
+                            <div class="input-group col-xs-8">
+                                <input type="text" class="form-control" placeholder="Song of Ice and Fire"
+                                       ng-model="search.bookName">
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Author</label>
+                            <div class="input-group col-xs-8">
+                                <input type="text" class="form-control" placeholder="R.R.Martin"
+                                       ng-model="search.authorName">
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">City</label>
+                            <div class="input-group col-xs-8">
+                                <input type="text" ng-model="search.city"
+                                       uib-typeahead="city for city in getLocations($viewValue) | limitTo:8"
+                                       class="form-control" placeholder="Kings Landing">
 
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">Locality</label>
-                    <div class="input-group col-xs-8">
-                        <input type="text" ng-model="search.locality" uib-typeahead="locality for locality in getLocations($viewValue) | limitTo:8" class="form-control" placeholder="Castle">
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Locality</label>
+                            <div class="input-group col-xs-8">
+                                <input type="text" ng-model="search.locality"
+                                       uib-typeahead="locality for locality in getLocations($viewValue) | limitTo:8"
+                                       class="form-control" placeholder="Castle">
 
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">Genres</label>
-                    <div class="input-group col-xs-8">
-                        <tags-input ng-model="genres" placeholder="Add genres"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Genres</label>
+                            <div class="input-group col-xs-8">
+                                <tags-input ng-model="genres" placeholder="Add genres">
+                                    <auto-complete source=" genres | filter:$query"></auto-complete>
+                                </tags-input>
 
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">Sort</label>
-                    <div class="input-group col-xs-8">
-                    <div class="btn-group">
-                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="true" uncheckable>Ascending</label>
-                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="false" uncheckable>Descending</label>
-                </div>
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                    <div class="row form-group">
-                        <label class="control-label col-xs-3">Available only</label>
-                    <div class="input-group col-xs-8"><div class="btn-group">
-                        <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="true" uncheckable>Yes</label>
-                        <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="false" uncheckable>No</label></div>
-                    </div><!-- /input-group -->
-                    </div><!-- row -->
-                  </div><!-- panel body-->
-                  <div class="panel-footer text-right"><button type="button" class="btn btn-primary" ng-click="searchBooks()">Apply</button></div><!-- panel footer -->
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Sort</label>
+                            <div class="input-group col-xs-8">
+                                <div class="btn-group">
+                                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="true"
+                                           uncheckable>Ascending</label>
+                                    <label class="btn btn-primary" ng-model="search.sortAscending" uib-btn-radio="false"
+                                           uncheckable>Descending</label>
+                                </div>
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                        <div class="row form-group">
+                            <label class="control-label col-xs-3">Available only</label>
+                            <div class="input-group col-xs-8">
+                                <div class="btn-group">
+                                    <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="true"
+                                           uncheckable>Yes</label>
+                                    <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="false"
+                                           uncheckable>No</label></div>
+                            </div><!-- /input-group -->
+                        </div><!-- row -->
+                    </div><!-- panel body-->
+                    <div class="panel-footer text-right">
+                        <button type="button" class="btn btn-primary" ng-click="searchBooks()">Apply</button>
+                    </div><!-- panel footer -->
                 </div><!-- panel -->
-          </div><!-- /.col-lg-6 -->
-              <div class="col-lg-6"><div class="media" ng-repeat="book in availableBooks">
-          <div class="media-left">
-            <a href="#">
-              <img class="media-object" src="{{book.thumbnail}}" alt="{{book.bookName}}">
-            </a>
-          </div>
-          <div class="media-body">
-            <h4 class="media-heading">{{book.bookName}}</h4>
-              <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
-              <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
-     {{book.description}}
-          </div>
-                  </div></div>
-</div><!-- /.row -->
+            </div><!-- /.col-lg-6 -->
+            <div class="col-lg-6">
+                <div class="media" ng-repeat="book in availableBooks">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" src="{{ book.thumbnailURL }}" alt="{{ book.bookName }}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading">{{ book.bookName }}</h4>
+                        <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
+                            <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
+                        {{ book.description }}
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.row -->
     </div>
 </div>

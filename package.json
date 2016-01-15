@@ -11,14 +11,14 @@
     "express-generator": "4.13.1",
     "express-json": "1.0.0",
     "morgan": "1.0.1",
-    "supervisor":"latest",
+    "supervisor": "latest",
     "express-session": "1.11.3",
     "method-override": "2.3.5",
     "mongodb": "2.0.42",
     "mongoose": "4.1.5",
     "serve-favicon": "2.3.0",
-    "socket.io" :"1.4.4",
-    "bcrypt" : "0.8.5"
+    "socket.io": "1.4.4",
+    "bcrypt": "0.8.5"
   },
   "author": "Rajagopal",
   "license": "BSD"

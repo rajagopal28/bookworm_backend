@@ -1,69 +1,87 @@
 <div class="panel panel-primary">
-  <div class="panel-heading">
-      <h3 class="panel-title">Book details</h3></div>
-  <div class="panel-body">
-      <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span aria-hidden="true">&times;</span></button>
-          <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-  <span class="sr-only">Error:</span>Sucess!</strong> Your details have been submitted.
+    <div class="panel-heading">
+        <h3 class="panel-title">Book details</h3></div>
+    <div class="panel-body">
+        <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>Sucess!</strong> Your details have been submitted.
         </div>
-      <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span aria-hidden="true">&times;</span></button>
-          <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-  <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
+        <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
         </div>
-      <div class="alert alert-info alert-dismissible" role="alert">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span aria-hidden="true">&times;</span></button>
-          <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-  <span class="sr-only">Info:</span></strong> This form has autocomplete enabled for some fields. Type in ISBN or Book name to fill in details.
+        <div class="alert alert-info alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Info:</span></strong> This form has autocomplete enabled for some fields. Type in
+            ISBN or Book name to fill in details.
         </div>
-    <div class="row">
-    <div class="col-xs-6">
-        <form class="form-horizontal" name="lendForm">
-            <div class="form-group">
-            <label for="isbn" class="control-label col-xs-2">ISBN</label>
-            <div class="col-xs-10">
-                <input ng-model="book.isbn" type="text" class="form-control" name="isbn" placeholder="12345678" ng-required="true" uib-tooltip="Enter a 13or10 digit ISBN no." ng-blur="loadBookDetails()" tooltip-trigger="focus" tooltip-placement="top">
-                
+        <div class="row">
+            <div class="col-xs-6">
+                <form class="form-horizontal" name="lendForm">
+                    <div class="form-group">
+                        <label for="isbn" class="control-label col-xs-2">ISBN</label>
+                        <div class="col-xs-10">
+                            <input ng-model="book.isbn" type="text" class="form-control" name="isbn"
+                                   placeholder="12345678" ng-required="true" uib-tooltip="Enter a 13or10 digit ISBN no."
+                                   ng-blur="loadBookDetails()" tooltip-trigger="focus" tooltip-placement="top">
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookName" class="control-label col-xs-2">Book name</label>
+                        <div class="col-xs-10">
+                            <input ng-model="book.bookName" type="text" class="form-control" name="bookName"
+                                   placeholder="Song of Ice and Fire" ng-required="true"
+                                   typeahead-loading="loadingBooks"
+                                   uib-typeahead="ibook.bookName for ibook in loadBookDetails($viewValue) | limitTo:8"
+                                   typeahead-min-length="5" typeahead-on-select="onBookSelect($item, $model, $label)">
+                            <input type="hidden" ng-model="book.bookName" value="{{ book.title }}"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="authorName" class="control-label col-xs-2">Author name</label>
+                        <div class="col-xs-10">
+                            <input type="text" ng-model="book.authorName" class="form-control" name="authorName"
+                                   placeholder="R.R.Martin" ng-required="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="control-label col-xs-2">Description</label>
+                        <div class="col-xs-10">
+                            <textarea class="form-control" rows="5" ng-model="book.description"
+                                      name="comment"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="genres" class="control-label col-xs-2">Genres</label>
+                        <div class="col-xs-10">
+                            <tags-input ng-model="book.genresList" uib-tooltip="Add genres for better search results"
+                                        tooltip-trigger="focus" tooltip-placement="top"
+                                        placeholder="Add genres for better search">
+                                <auto-complete source=" genres | filter:$query"></auto-complete>
+                            </tags-input>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-2 col-xs-10">
+                            <button type="submit" class="btn btn-primary" ng-click="lendBook()"
+                                    ng-disabled="!lendForm.$valid">Lend
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-5">
+                <a href="#" class="thumbnail">
+                    <img src="{{ book.thumbnailURL }}" alt="No Image">
+                </a>
             </div>
         </div>
-         <div class="form-group">
-            <label for="bookName" class="control-label col-xs-2">Book name</label>
-            <div class="col-xs-10">
-                <input ng-model="book.bookName" type="text" class="form-control" name="bookName" placeholder="Song of Ice and Fire" ng-required="true" typeahead-loading="loadingBooks" uib-typeahead="ibook.bookName for ibook in loadBookDetails($viewValue) | limitTo:8" typeahead-min-length="5" typeahead-on-select="onBookSelect($item, $model, $label)">
-            <input type="hidden" ng-model="book.bookName" value="{{book.title}}"/>
-            </div>
-        </div>
-         <div class="form-group">
-            <label for="authorName" class="control-label col-xs-2">Author name</label>
-            <div class="col-xs-10">
-                <input type="text" ng-model="book.authorName" class="form-control" name="authorName" placeholder="R.R.Martin" ng-required="true">
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="description" class="control-label col-xs-2">Description</label>
-            <div class="col-xs-10">
-                <textarea class="form-control" rows="5" ng-model="book.description" name="comment"></textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="genres" class="control-label col-xs-2">Genres</label>
-            <div class="col-xs-10">
-                <tags-input ng-model="book.genresList" uib-tooltip="Add genres for better search results" tooltip-trigger="focus" tooltip-placement="top" placeholder="Add genres for better search"><auto-complete source=" genres | filter:$query"></auto-complete></tags-input>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-xs-offset-2 col-xs-10">
-                <button type="submit" class="btn btn-primary" ng-click="lendBook()" ng-disabled="!lendForm.$valid">Lend</button>
-            </div>
-        </div>
-    </form>
-    </div>   
-    <div class="col-lg-5">
-        <a href="#" class="thumbnail">
-      <img src="{{book.thumbnail}}" alt="No Image">
-    </a>
     </div>
-    </div>
-  </div>
 </div>

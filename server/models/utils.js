@@ -1,7 +1,7 @@
 function Utils() {
     'use strict';
     var self = this;
-    this.requestToDBKeys = {
+    var requestToDBKeys = {
         'id': '_id',
         'firstName': 'first_name',
         'lastName': 'last_name',
@@ -10,15 +10,17 @@ function Utils() {
         'email': 'email',
         'genres': 'genres',
         'isbn': 'isbn',
-        'thumbnail': 'thumbnail_url',
+        'thumbnailURL': 'thumbnail_url',
         'bookName': 'book_name',
+        'authSuccess': 'auth_success',
         'forumTitle': 'forum_title',
-        'forumId' : 'forum_id',
+        'forumId': 'forum_id',
         'description': 'description',
         'username': 'username',
+        'token': 'token',
         'password': 'password',
         'confirmPassword': 'password',
-        'rememberMe' : 'remember_me',
+        'rememberMe': 'remember_me',
         'authorName': 'author_name',
         'googleId': 'google_id',
         'author': 'author',
@@ -29,12 +31,14 @@ function Utils() {
         'commentsCount': 'comments_count',
         'lendDate': 'created_lent_ts',
         'isAvailable': 'is_available',
-        'exhangeOnly': 'exchange_only',
+        'availableOnly': 'is_available',
+        'exchangeOnly': 'exchange_only',
         'referredBook': 'referred_book',
-        'chats' : 'chats',
-        'chatComment' : 'chat_comment'
+        'chats': 'chats',
+        'chatComment': 'chat_comment'
     };
-    this.reverseKeyValuePairs = function (key_value_pairs) {
+
+    function reverseKeyValuePairs(key_value_pairs) {
         var value_key_pairs = {}, key, value;
         for (key in key_value_pairs) {
             if (key_value_pairs.hasOwnProperty(key)) {
@@ -45,51 +49,45 @@ function Utils() {
             }
         }
         return value_key_pairs;
-    };
-    this.parseRequestToDBKeys = function (request_attributes) {
-        var db_key_values = {}, key;
-        for(key in request_attributes) {
-            // console.log(request_attributes[key]);
-            var value = request_attributes[key];
-            var db_key = self.requestToDBKeys[key];
-            if (self.requestToDBKeys[key]) {
-                if (value instanceof Array) {
-                    for(var index=0; index < value.length; index++) {
-                     value[index] = self.parseRequestToDBKeys(value);   
-                    }
-                    db_key_values[db_key] = value;
-                }
-                else if (typeof value === 'object') {
-                    db_key_values[db_key] = self.parseRequestToDBKeys(value);
-                } else {
-                    if (request_attributes[key].trim() !== '') {
+    }
 
-                        db_key_values[db_key] = value;
+    var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
+    this.parseRequestToDBKeys = function (requestAttributes) {
+        return convertKeysAndMapValues(requestAttributes, requestToDBKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
+    };
+    this.parseDBToResponseKeys = function (db_key_values) {
+        return convertKeysAndMapValues(db_key_values, dbToResponseKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
+    };
+    function convertKeysAndMapValues(keyValuePairJSON, keyToKeyMap, skipList) {
+        if (typeof keyValuePairJSON !== 'object' ||
+                keyValuePairJSON instanceof Date) {
+            return keyValuePairJSON;
+        } else {
+            if (keyValuePairJSON instanceof Array) {
+                var index;
+                for (index = 0; index < keyValuePairJSON.length; index++) {
+                    keyValuePairJSON[index] = convertKeysAndMapValues(keyValuePairJSON[index], keyToKeyMap, skipList);
+                }
+                return keyValuePairJSON;
+            } else {
+                var alteredKeyValuePairJSON = {}, key, value, changedKey;
+                for (key in keyValuePairJSON) {
+                    value = keyValuePairJSON[key];
+                    changedKey = keyToKeyMap[key];
+                    if (changedKey) {
+                        console.log(changedKey);
+                        if (skipList.indexOf(changedKey) === -1) {
+                            alteredKeyValuePairJSON[changedKey] = convertKeysAndMapValues(value,keyToKeyMap, skipList);
+                        } else {
+                            alteredKeyValuePairJSON[changedKey] = value;
+                        }
                     }
                 }
+                return alteredKeyValuePairJSON;
             }
         }
-        return db_key_values;
-    };
-    this.parseDBToResponseKeys = function(db_key_values) {
-        // console.log(db_key_values);
-        var response_key_values = {};
-        var dbToResponseKeys = self.reverseKeyValuePairs(self.requestToDBKeys);
-        // console.log(dbToResponseKeys);
-        for (var key in db_key_values) {
-            if (dbToResponseKeys[key.toString()] && db_key_values[key]) {
-                var db_key = dbToResponseKeys[key.toString()];
-                var value = db_key_values[key];
-                if (typeof value === 'object' && !value instanceof Date) {
-                    response_key_values[db_key] = self.parseDBToResponseKeys(value);
-                } else {
-                    response_key_values[db_key] = value;
-                }
-            }
-        }
-        return response_key_values;
-    };
-    this.addRegexOption = function(value, caseSensitive) {
+    }
+    this.addRegexOption = function (value, caseSensitive) {
         if (!caseSensitive) {
             // value = '^' + value + '$';
             return {
