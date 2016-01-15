@@ -12,18 +12,36 @@ app.controller('ForumController', ['$scope','ForumsService', function($scope, Fo
 .controller('ForumChatController', ['$scope','$routeParams','ForumsService', function($scope, $routeParams, ForumsService){
     var forumId = $routeParams.forumId;
     console.log(forumId);
+    $scope.newChat = {};
     $scope.isCommentorAuthor = function(chatItem) {
-        return chatItem.creator.id === $scope.forum.creator.id;
+        return  chatItem &&  chatItem.creator && chatItem.creator.id === $scope.forum.creator.id;
+    };
+    $scope.addChat = function(){
+        var options ={};
+        options.forumId = forumId;
+        options.content = $scope.newChat.content;
+        ForumsService.addChat(options)
+            .then(function(response){
+            console.log(response);
+            $scope.forumChats.push(options);
+        });
     };
     $scope.forum = {};
     $scope.forumChats = [];
     // make service call to get list of forum chats 
-    var options = {forumId : forumId};
+    var options = {id : forumId};
     ForumsService.allChats(options).then(
     function(response){
-        $scope.forum = response.data.forum;
-        $scope.forumChats = response.data.chats;
-    });    
+        if(response.data) {
+            $scope.forum = response.data;
+            $scope.forumChats = response.data.chats;
+        }
+    }); 
+    socket.on('new-chat', function (chat) {
+    console.log('choot');
+      console.log(chat);
+      // console.log(fn);
+  });
 }])
 .controller('NewForumController', ['$scope','$routeParams','ForumsService','BooksService','GoogleAPIService', function($scope, $routeParams, ForumsService, BooksService, GoogleAPIService){
     $scope.book = {};
@@ -58,7 +76,7 @@ app.controller('ForumController', ['$scope','ForumsService', function($scope, Fo
         console.log($item);
         console.log($model);
         console.log($label);
-    };        
+    };  
 }])
 /*
 

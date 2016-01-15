@@ -8,4 +8,7 @@ app.service('ForumsService', [ '$http', function($http){
     this.allChats = function(options){
         return $http.get('/bookworm/api/forums/chats/all', {params : options});
     };
+    this.addChat = function(options){
+        return $http.post('/bookworm/api/forums/chats/add', options);
+    };
 }])

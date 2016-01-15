@@ -26,21 +26,20 @@ app
         return user;
     }
 
-    var userToken;
+    var authenticatedUser;
     return {
         setUser : function(aUser){
           if(aUser.authSuccess) {
               $localStorage.token = aUser.token;  
-              userToken = aUser.token;
+              authenticatedUser = aUser;
           }
         },
         isLoggedIn : function(){
-          return(userToken)? userToken : false;
+          return(authenticatedUser)? authenticatedUser : false;
         },
-        getUser : function() {
-             
-            userToken = $localStorage.token;
-            return userToken;
+        getUser : function() {             
+            authenticatedUser.token = $localStorage.token;
+            return authenticatedUser;
         }
     };
   }]);

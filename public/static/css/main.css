@@ -331,7 +331,7 @@ a.btn:hover,
 .meta{
     height: 60px;
     margin-bottom: 17px;
-    margin-top: 10px;
+    margin-top: 25px;
     position: relative;
 }
 .avatar {
@@ -398,12 +398,22 @@ a.btn:hover,
    left: 0px; 
    right: initial;
 }
-.chat-content, .chat-content-mine {
+.chat-content, .chat-content-mine, .new-chat-content {
     background-color: #FFFFFF;
     border: 1px solid #DADADA;
     border-radius: 4px 4px 4px 4px;
     padding: 22px 25px 22px 25px;
     position: relative;
+}
+.new-chat-content:after {
+    background:     url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAARCAYAAABTnsXCAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAAAc5pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+QWRvYmUgRmlyZXdvcmtzIENTNjwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KAHiqRgAAAGxJREFUSA3Fz9ENwCAIBNB2GPbfB4axMcakaoyKcNzP8XePl5kTET1REZEynSERybvN82jIAKgaFGQKQEGWAG/INsALcgywhqgBVpBrwC3EDKCFmANOIW6AXYg7YAWBAWYQOKCHhAH+kHpr+wNEhfVL8uVeRgAAAABJRU5ErkJggg==") 50% 0px no-repeat;
+    content: "";
+    height: 17px;
+    right: 13px;
+    position: absolute;
+    bottom: -22px;
+    margin-bottom: 5px;
+    width: 33px;
 }
 .chat-content:before {
     background:     url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAARCAYAAABTnsXCAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABR0RVh0Q3JlYXRpb24gVGltZQAzLzkvMTQztGkvAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M26LyyjAAAAIdJREFUSIm90rkNwDAMQ1FlGO+/jzwMUwQOcviQRNu/J/AKipCpKpg9QM0vAAAwEApRAKUoJIz4AhhICNECRCFuxAgQgbgQVoAXYkZ4AR6ICREFWCFDBAuwQLqIWYARpImYDehBqohVgBbkh1gNqEFeiF2AL+RG7AY8IQDkUFWklOoP3VDOWU4aQSUqU7BUOQAAAABJRU5ErkJggg==") 50% 0px no-repeat;

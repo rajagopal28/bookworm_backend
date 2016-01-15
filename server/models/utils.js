@@ -13,6 +13,7 @@ function Utils() {
         'thumbnail': 'thumbnail_url',
         'bookName': 'book_name',
         'forumTitle': 'forum_title',
+        'forumId' : 'forum_id',
         'description': 'description',
         'username': 'username',
         'password': 'password',
@@ -29,7 +30,9 @@ function Utils() {
         'lendDate': 'created_lent_ts',
         'isAvailable': 'is_available',
         'exhangeOnly': 'exchange_only',
-        'referredBook': 'referred_book'
+        'referredBook': 'referred_book',
+        'chats' : 'chats',
+        'chatComment' : 'chat_comment'
     };
     this.reverseKeyValuePairs = function (key_value_pairs) {
         var value_key_pairs = {}, key, value;
@@ -51,6 +54,9 @@ function Utils() {
             var db_key = self.requestToDBKeys[key];
             if (self.requestToDBKeys[key]) {
                 if (value instanceof Array) {
+                    for(var index=0; index < value.length; index++) {
+                     value[index] = self.parseRequestToDBKeys(value);   
+                    }
                     db_key_values[db_key] = value;
                 }
                 else if (typeof value === 'object') {
@@ -74,7 +80,7 @@ function Utils() {
             if (dbToResponseKeys[key.toString()] && db_key_values[key]) {
                 var db_key = dbToResponseKeys[key.toString()];
                 var value = db_key_values[key];
-                if (typeof value === 'object') {
+                if (typeof value === 'object' && !value instanceof Date) {
                     response_key_values[db_key] = self.parseDBToResponseKeys(value);
                 } else {
                     response_key_values[db_key] = value;

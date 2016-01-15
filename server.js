@@ -13,6 +13,7 @@ var http = require("http")
     , utils = require('./server/models/utils')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
+    , forum = require('./server/models/forum')
 	, mongoose = require('mongoose')
 	, mongodb = require("mongodb")
     , BSON = mongodb.BSONPure
@@ -25,10 +26,12 @@ var http = require("http")
       path: '/socket.io'
     });
 //io.set('transports',['xhr-polling']);
-/* Models */
+/* Models */ 
 var mUtils = new utils.Utils();
 var Books = new book.Book(mongoose);
 var Users = new user.User(mongoose, bcrypt);
+var Forums = new forum.Forum(mongoose);
+var socket;
 console.log(mongoose.connection.readyState);
 if(mongoose.connection.readyState != mongoose.Connection.STATES.connected ) {
     mongoose.connect("mongodb://root@localhost:27017/admin");
@@ -116,30 +119,43 @@ app.get('/bookworm/api/books/rental/all',function(req,res) {
 app.get('/bookworm/api/forums/all',function(req,res) {
 	
     var inputParams = req.query;
+    console.log(inputParams);
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
-    if(searchQuery.title) {
-        searchQuery.title = mUtils.addRegexOption(searchQuery.title);
-    }
-		
-	var rent = db.collection('worm_forums');
-    console.log(JSON.stringify(searchQuery));
-	rent.find(searchQuery).toArray(function(err,items) {
+    searchQuery = Forums.buildSearchQuery(searchQuery);
+	Forums.Model.find(searchQuery)
+    .select('-chats')
+        .exec(function(err,items) {
 		if(err) {
 			res.send(err);
 		} else {
             var parsedItems = [];
             for(var index in items) {
                 var parsed = mUtils.parseDBToResponseKeys(items[index]);
-                if(parsed.id) {
-                    parsed.id = parsed.id.valueOf();
-                    console.log(parsed.valueOf());
-                }
                 parsedItems.push(parsed);
             }
             console.log(parsedItems);
 			res.send(parsedItems);
 		}
 	});
+    console.log(JSON.stringify(searchQuery));
+});
+app.get('/bookworm/api/forums/chats/all',function(req,res) {
+	
+    var inputParams = req.query;
+    console.log(inputParams);
+    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    searchQuery = Forums.buildSearchQuery(searchQuery);
+	Forums.Model.findOne(searchQuery)
+        .exec(function(err, forum) {
+		if(err) {
+			res.send(err);
+		} else {
+            var parsed = mUtils.parseDBToResponseKeys(forum);            
+            console.log(parsed);
+			res.send(parsed);
+		}
+	});
+    console.log(JSON.stringify(searchQuery));
 });
 app.post('/bookworm/api/users/check-unique',function(req,res) {
 	
@@ -201,19 +217,50 @@ app.post('/bookworm/api/forums/add',function(req,res) {
     console.log(forum_item);
     if(forum_item.forum_title)// check for not empty
     {
-        forum_item.created_ts = new Date().getTime();
-        forum_item.last_modified_ts = new Date().getTime();
-        var users = db.collection('worm_forums');
-        console.log(JSON.stringify(forum_item));
-        users.insert([forum_item],function(err,items) {
-                if(err) {
-                    res.send(err);
-                    console.error(JSON.stringify(err));
-                } else {
-                    res.send(items);
-                    console.log("Success insertion: " + JSON.stringify(items));
-                }
-            });
+        var forum = new Forums.Model(forum_item);
+        forum.save(function(error, new_forum) {
+            if(error) {
+                console.error(error);
+            }
+            console.log(new_forum);
+        });
+    } else {
+        res.send();
+    }
+	
+});
+
+app.post('/bookworm/api/forums/chats/add',function(req,res) {
+    console.log(req.body);
+    var chat_item = mUtils.parseRequestToDBKeys(req.body);
+    console.log(chat_item);
+    if(chat_item.forum_id)// check for not empty
+    {
+        var forum = Forums.Model
+        .findOne({_id : chat_item.forum_id})
+        .exec(function(error, forum_item){
+             delete chat_item.forum_id;
+             if(forum_item) {
+                 console.log(forum_item);
+                 forum_item.chats.push(chat_item);
+                 forum_item.save(function(error, new_forum) {
+                    if(error) {
+                        res.send(error);
+                    } else {
+                        if(socket) {
+                            var item = {};
+                            item.forum_id = forum_item._id;
+                            item.chat = chat_item;
+                            console.log('in socket');
+                            socket.emit('new-chat', item);
+                        }
+                        res.send(new_forum);
+                    }
+                    
+                });
+             }   
+        });
+        
     } else {
         res.send();
     }
@@ -245,10 +292,11 @@ function ensureAuthorized(req, res, next) {
         next();
     } else {
         res.sendStatus(403);
-    }
+    } 
 }
 // socket IO -----------------------------------------------------------------
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function (mSocket) {
+    socket = mSocket;
 console.log('new socket connection');
   socket.on('ferret', function (name, fn) {
     console.log('woot');

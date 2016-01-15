@@ -45,9 +45,11 @@ app.config(['$routeProvider', '$httpProvider',
     $httpProvider.interceptors.push(['$q', '$location', '$localStorage', function($q, $location, $localStorage) {
         return {
             'request': function (config) {
-                config.headers = config.headers || {};
-                if ($localStorage.token) {
-                    config.headers.Authorization = 'Bearer ' + $localStorage.token;
+                if(config && config.url && config.url.indexOf('/bookworm') !== -1) {
+                    config.headers = config.headers || {};
+                    if ($localStorage.token) {
+                        config.headers.Authorization = 'Bearer ' + $localStorage.token;
+                    }
                 }
                 return config;
             },
@@ -63,7 +65,7 @@ app.config(['$routeProvider', '$httpProvider',
 .run(['$rootScope', '$location', 'BookwormAuthProvider', function ($rootScope, $location, BookwormAuthProvider) {
         $rootScope.$on('$locationChangeStart', function (event, next, current) {
         // check only for authenticated pages
-        if(next && next.indexOf('/auth') !== -1) {
+        if(next && next.indexOf('/bookworm/auth') !== -1) {
             if (!BookwormAuthProvider.isLoggedIn()) {
                   console.log('DENY : Redirecting to Login');
                   event.preventDefault();

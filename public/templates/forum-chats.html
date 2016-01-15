@@ -11,28 +11,51 @@
     </div>
     <div class="panel panel-primary">
 <div class="panel-heading">
-  <h3 class="panel-title">Chats:{{discussion.title}}</h3></div>
+  <h3 class="panel-title">Chats:{{forum.forumTitle}}</h3>
+</div>
         <div>
             <div class="panel-body">
-                <div class="container" ng-repeat="chat in discussionChats">
+                <div class="well">
+                    {{forum.description}}
+                </div>
+                <div class="container" ng-repeat="chat in forumChats">
                     <div class="meta">
-                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg" class="avatar" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg" class="avatar" ng-class="{ 'chat-owner' : isCommentorAuthor(chat) }">
 
-                        <a href="/members/7390-brad-newman.htm" class="author" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">{{chat.creator.name}}</a>
+                        <a href="/members/7390-brad-newman.htm" class="author" ng-class="{ 'chat-owner' : isCommentorAuthor(chat) }">{{chat.creator.name}}wqewe</a>
 
-                        <a href="#comments_43710" class="date" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+                        <a href="#comments_43710" class="date" ng-class="{ 'chat-owner' : isCommentorAuthor(chat) }">
                             <time datetime="2013-11-08">Nov 8, 2013 at 8:16 PM</time>
                         </a>
 
-                        <div class="count" ng-class="isCommentorAuthor(chat) ? 'chat-owner' : ''">
+                        <div class="count" ng-class="{ 'chat-owner' : isCommentorAuthor(chat) }">
                             5 Comments
                         </div>
 
                     </div><!-- div meta -->
-                    <div ng-class="isCommentorAuthor(chat) ? 'chat-content-mine' : 'chat-content'">
+                    <div ng-class="{'chat-content-mine' : isCommentorAuthor(chat), 'chat-content' : !isCommentorAuthor(chat)}">
                         <p>Not sure/understanding why you want to go this direction. The HMTL is now controling which data is loaded. I still try to see HTML as presentation without (to much) logic, what to load. That's all inside js. Preloading sounds to me like against all the whole async idea?</p><p>If you put things inside  lazy controllers, the controller is always fired first,  the 2way binding scope magic will do its job if needed.</p><p>So the magic is the html controller call thatnmakes any controller prebind/load the JS.</p><p>As always thank for your greatcontributions, insides and doubts.</p>
                     </div><!-- div content-->
                 </div><!-- div container -->
+                <div class="container row-fluid">
+                    <div class="new-chat-content form-group"><textarea class="form-control" ng-model="newChat.chatContent"></textarea>
+                        <button class="btn btn-primary" ng-click="addChat()">Send <i class="glyphicon glyphicon-send"></i></button>
+                        
+                    </div>                    
+                    <div class="meta">
+                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg" class="avatar chat-owner">
+
+                        <a href="/members/7390-brad-newman.htm" class="author chat-owner">{{username}}xcvnbmbxf</a>
+
+                        <a href="#comments_43710" class="date chat-owner">
+                            <time datetime="2013-11-08">Nov 8, 2013 at 8:16 PM</time>
+                        </a>
+
+                        <div class="count chat-owner">
+                            5 Comments
+                        </div>
+                    </div>
+                </div>
             </div><!-- div container-->
         </div><!-- div panel body-->
     </div><!-- div panel -->
