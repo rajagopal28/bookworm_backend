@@ -35,7 +35,12 @@ function Utils() {
         'exchangeOnly': 'exchange_only',
         'referredBook': 'referred_book',
         'chats': 'chats',
-        'chatComment': 'chat_comment'
+        'chatComment': 'chat_comment',
+        'pageNumber' : 'page_number',
+        'itemsPerPage' : 'items_per_page',
+        'primarySort' : 'primary_sort',
+        'sortKey' : 'sort_key',
+        'sortOrder' : 'sort_order'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {
@@ -50,7 +55,21 @@ function Utils() {
         }
         return value_key_pairs;
     }
-
+    function parseIfJSONString(someString) {
+        try {
+            var o = JSON.parse(someString);
+            // Handle non-exception-throwing cases:
+            // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
+            // but... JSON.parse(null) returns 'null', and typeof null === "object",
+            // so we must check for that, too.
+            if (o && typeof o === "object" && o !== null) {
+                return o;
+            }
+        } catch (e) {
+            // do nothing
+        }
+        return null;
+    }
     var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
     this.parseRequestToDBKeys = function (requestAttributes) {
         return convertKeysAndMapValues(requestAttributes, requestToDBKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
@@ -59,6 +78,10 @@ function Utils() {
         return convertKeysAndMapValues(db_key_values, dbToResponseKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
     };
     function convertKeysAndMapValues(keyValuePairJSON, keyToKeyMap, skipList) {
+        var jsonCheck = parseIfJSONString(keyValuePairJSON);
+        if(jsonCheck) {
+            keyValuePairJSON = jsonCheck;
+        }
         if (typeof keyValuePairJSON !== 'object' ||
                 keyValuePairJSON instanceof Date) {
             return keyValuePairJSON;
@@ -75,7 +98,7 @@ function Utils() {
                     value = keyValuePairJSON[key];
                     changedKey = keyToKeyMap[key];
                     if (changedKey) {
-                        console.log(changedKey);
+                        // console.log(changedKey);
                         if (skipList.indexOf(changedKey) === -1) {
                             alteredKeyValuePairJSON[changedKey] = convertKeysAndMapValues(value,keyToKeyMap, skipList);
                         } else {
@@ -98,6 +121,25 @@ function Utils() {
         return {
             '$regex': value
         }
+    };
+    this.getPagingSortingData = function(params) {
+        var pagingSortingData = {};
+        if(params[requestToDBKeys.pageNumber] &&
+            params[requestToDBKeys.itemsPerPage]){
+            pagingSortingData.skipCount = params[requestToDBKeys.pageNumber]
+                * params[requestToDBKeys.itemsPerPage];
+        }
+        if(params[requestToDBKeys.primarySort] &&
+            params[requestToDBKeys.primarySort][requestToDBKeys.sortKey]) {
+            pagingSortingData.sortField = params[requestToDBKeys.primarySort][requestToDBKeys.sortKey];
+            if('desc' === params[requestToDBKeys.primarySort][requestToDBKeys.sortKey]) {
+                pagingSortingData.sortField = '-' + pagingSortingData.sortField;
+            }
+        }
+        delete params[requestToDBKeys.pageNumber];
+        delete params[requestToDBKeys.itemsPerPage];
+        delete params[requestToDBKeys.primarySort];
+        return pagingSortingData;
     };
 };
 module.exports.Utils = Utils;

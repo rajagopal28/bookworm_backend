@@ -6,7 +6,6 @@ var http = require("http")
     , fs = require('fs')
     , json = require('express-json')
     , methodOverride = require('method-override')
-    , cookieParser = require('cookie-parser')
     , session = require('express-session')
     , errorHandler = require('errorhandler')
     , bcrypt = require('bcrypt')
@@ -16,15 +15,14 @@ var http = require("http")
     , forum = require('./server/models/forum')
     , mongoose = require('mongoose')
     , mongodb = require("mongodb")
-    , BSON = mongodb.BSONPure
     , bodyParser = require('body-parser')
     , favicon = require('serve-favicon')
     , path = require('path')
     , socketServer = app.listen(8080)
     , io = require('socket.io')(socketServer, {
-    serveClient: true,
-    path: '/socket.io'
-});
+        serveClient: true,
+        path: '/socket.io'
+    });
 //io.set('transports',['xhr-polling']);
 /* Models */
 var mUtils = new utils.Utils();
@@ -43,14 +41,14 @@ db.once('open', function () {
 });
 
 // all environments
-accessLogStream = fs.createWriteStream(__dirname + '/public/logfile.txt', {flags: 'a'})
+accessLogStream = fs.createWriteStream(__dirname + '/public/logfile.txt', {flags: 'a'});
 app.set('port', process.env.PORT || 8080);
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 //app.use(express.favicon());
 app.use(favicon(__dirname + '/public/static/images/favicon.ico'));
-app.use(morgan('dev'))
+app.use(morgan('dev'));
 app.use(json());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 app.use(methodOverride('X-HTTP-Method-Override'));
@@ -66,7 +64,7 @@ app.use(session({
 }));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
     app.use(errorHandler());
 }
 // allow cross origin access
@@ -77,7 +75,6 @@ app.use(function (req, res, next) {
     next();
 });
 // routes ======================================================================
-
 // api ---------------------------------------------------------------------
 app.post('/bookworm/api/books/rental/add', function (req, res) {
     console.log("Renting books");
@@ -112,22 +109,35 @@ app.get('/bookworm/api/books/rental/all', function (req, res) {
     });
 });
 app.get('/bookworm/api/forums/all', function (req, res) {
-
     var inputParams = req.query;
-    console.log(inputParams);
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    console.log(searchQuery);
+    var pagingSorting = mUtils.getPagingSortingData(searchQuery);
     searchQuery = Forums.buildSearchQuery(searchQuery);
-    Forums.Model.find(searchQuery)
-        .select('-chats')
-        .exec(function (err, items) {
-            if (err) {
-                res.send(err);
-            } else {
-                var parsedItems = mUtils.parseDBToResponseKeys(items);
-                console.log(parsedItems);
-                res.send(parsedItems);
-            }
-        });
+    console.log('hi');
+    console.log(searchQuery);
+    Forums.Model.count(searchQuery, function(err, totalCount){
+        if (err) {
+            res.send(err);
+        } else {
+            Forums.Model.find(searchQuery)
+            .select('-chats')
+            .exec(function (err, items) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    console.log(items);
+                    var parsedItems = mUtils.parseDBToResponseKeys(items);
+                    console.log(parsedItems);
+                    res.send({
+                        items : parsedItems,
+                        totalItems : totalCount
+                    });
+                }
+            });
+        }
+
+    });
     console.log(JSON.stringify(searchQuery));
 });
 app.get('/bookworm/api/forums/chats/all', function (req, res) {

@@ -1,32 +1,40 @@
 // ForumController
-app.controller('ForumController', ['$scope', 'ForumsService', function ($scope, ForumsService) {
+app.controller('ForumController', ['$scope', 'ForumsService', 'Constants',
+    function ($scope, ForumsService, Constants) {
         $scope.status = {};
         $scope.forums = [];
+        $scope.pageSort = Constants.getDefaultPagingSortingData();
+        $scope.pageChange = function() {
+            var options = $scope.pageSort;
+            ForumsService.allForums(options)
+                .then(function (response) {
+                    $scope.forums = response.data.items;
+                    $scope.pageSort.totalItems = response.data.totalItems;
+                });
+        };
         // make service call to get list of forums
-        var options = {};
-        ForumsService.allForums(options).then(
-            function (response) {
-                $scope.forums = response.data;
-            });
+        $scope.isCreatorAuthor = function (forum) {
+            return ForumsService.isUserItemAuthor(forum);
+        };
+        $scope.pageChange();
     }])
-    .controller('ForumChatController', ['$scope', '$routeParams', 'ForumsService','BookwormAuthProvider',
-        function ($scope, $routeParams, ForumsService, BookwormAuthProvider) {
+    .controller('ForumChatController', ['$scope', '$routeParams', 'ForumsService', 'BookwormAuthProvider',
+    function ($scope, $routeParams, ForumsService, BookwormAuthProvider) {
         var forumId = $routeParams.forumId;
         console.log(forumId);
         $scope.newChat = {};
-        $scope.isCommentorAuthor = function (chatItem) {
-            return chatItem && chatItem.creator && chatItem.creator.id === $scope.forum.creator.id;
+        $scope.currentUser = BookwormAuthProvider.getUser();
+        $scope.isCommentatorAuthor = function (chatItem) {
+            return ForumsService.isUserItemAuthor(chatItem);
         };
         $scope.addChat = function () {
             var options = {};
             options.forumId = forumId;
             options.chatComment = $scope.newChat.chatComment;
-            var currentUser = BookwormAuthProvider.getUser();
-            options.author = {
-                authorName : currentUser.authorName,
-                username : currentUser.username,
-                thumbnailURL : currentUser.thumbnailURL
-            };
+            var authorInfo = ForumsService.getCurrentAuthorInfo();
+            if (authorInfo) {
+                options.author = authorInfo;
+            }
             ForumsService.addChat(options)
                 .then(function (response) {
                     console.log(response);
@@ -52,18 +60,17 @@ app.controller('ForumController', ['$scope', 'ForumsService', function ($scope, 
             }
         });
     }])
-    .controller('NewForumController', ['$scope', '$routeParams', 'ForumsService', 'BooksService', 'GoogleAPIService','BookwormAuthProvider',
+    .controller('NewForumController', ['$scope', '$routeParams', 'ForumsService', 'BooksService', 'GoogleAPIService', 'BookwormAuthProvider',
         function ($scope, $routeParams, ForumsService, BooksService, GoogleAPIService, BookwormAuthProvider) {
         $scope.book = {};
         $scope.forum = {};
-        $scope.addDicsussion = function () {
+        $scope.addForum = function () {
             $scope.forum.referredBook = $scope.book;
             var currentUser = BookwormAuthProvider.getUser();
-            $scope.forum.author = {
-                authorName : currentUser.authorName,
-                username : currentUser.username,
-                thumbnailURL : currentUser.thumbnailURL
-            };
+            var authorInfo = ForumsService.getCurrentAuthorInfo();
+            if (authorInfo) {
+                $scope.forum.author = authorInfo;
+            }
             console.log($scope.forum);
             ForumsService.addForum($scope.forum);
         };

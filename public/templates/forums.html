@@ -15,7 +15,6 @@
             </div>
         </div>
     </div>
-
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h3 class="panel-title">Forums by BookWorms</h3></div>
@@ -23,35 +22,36 @@
             <div class="panel-body">
                 <div class="well well-lg "><a type="button" href="#/bookworm/new-forum" class="btn btn-primary btn-lg">New
                     Discussion</a> Start your discussion now!
-
                 </div>
-
                 <uib-accordion close-others="true">
                     <uib-accordion-group is-open="status[forum.id].open" ng-repeat="forum in forums">
                         <uib-accordion-heading>
-                            {{ forum.forumTitle }} <i class="pull-right glyphicon"
-                                                      ng-class="{'glyphicon-chevron-down': status[forum.id].open, 'glyphicon-chevron-right': !status[forum.id].open}"></i>
+                            {{ forum.forumTitle }}
+                            <i class="pull-right glyphicon"
+                               ng-class="{'glyphicon-chevron-down': status[forum.id].open, 'glyphicon-chevron-right': !status[forum.id].open}"></i>
                         </uib-accordion-heading>
                         {{ forum.description }}
                         <a href="#/bookworm/forums/{{ forum.id }}">View talks</a>
                         <div class="meta">
-
                             <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg"
                                  class="avatar">
-
-                            <a href="/members/7390-brad-newman.htm" class="author owner">{{ forum.author.authorName }}sfd</a>
-
+                            <a href="/members/7390-brad-newman.htm" class="author" ng-class="{'owner' : isCreatorAuthor(forum)}">
+                                {{ forum.author.authorName }}
+                            </a>
                             <a href="#comments_43710" class="date">
                                 <time datetime="2013-11-08">{{forum.createdTS}}</time>
                             </a>
-
                             <div class="count">
-                                5 Comments
+                                Commented {{ $index+1 }}
                             </div>
-
                         </div>
                     </uib-accordion-group>
                 </uib-accordion>
+                <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
+                                ng-change="pageChanged()"
+                                num-pages="pageSort.maximumPages"
+                                class="pagination-sm"
+                                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
             </div><!-- div container-->
         </div><!-- div panel body-->
     </div><!-- div panel -->

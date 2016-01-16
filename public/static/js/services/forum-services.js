@@ -1,4 +1,4 @@
-app.service('ForumsService', ['$http', function ($http) {
+app.service('ForumsService', ['$http', 'BookwormAuthProvider', function ($http, BookwormAuthProvider) {
     this.addForum = function (options) {
         return $http.post('/bookworm/api/forums/add', options);
     };
@@ -10,5 +10,20 @@ app.service('ForumsService', ['$http', function ($http) {
     };
     this.addChat = function (options) {
         return $http.post('/bookworm/api/forums/chats/add', options);
+    };
+    this.isUserItemAuthor = function(item){
+      var currentUser = BookwormAuthProvider.getUser();
+      return item.author && item.author.username === currentUser.username;
+    };
+    this.getCurrentAuthorInfo = function(){
+        var currentUser = BookwormAuthProvider.getUser();
+        if(currentUser) {
+            return {
+                authorName : currentUser.authorName,
+                username : currentUser.username,
+                thumbnailURL : currentUser.thumbnailURL
+            };
+        }
+        return null;
     };
 }]);

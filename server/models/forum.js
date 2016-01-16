@@ -33,7 +33,7 @@ function Forum(mongoose) {
     this.Model = mongoose.model('Forum', forumSchema);
     this.buildSearchQuery = function (searchQuery) {
         if (searchQuery.title) {
-            searchQuery.title = mUtils.addRegexOption(searchQuery.title);
+            searchQuery.title = self.addRegexOption(searchQuery.title);
         }
         return searchQuery;
     };
