@@ -518,3 +518,9 @@ a.btn:hover,
     top: -10px;
     width: 33px;
 }
+
+.center {
+  text-align : center;
+  float:none;
+  margin:0 auto;
+}

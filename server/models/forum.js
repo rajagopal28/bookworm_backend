@@ -17,7 +17,9 @@ function Forum(mongoose) {
         referred_book :{
             book_name : String,
             isbn : String,
-            google_id : String
+            google_id : String,
+            thumbnail_url : String,
+            description : String
         },
         description: String,
         author: {

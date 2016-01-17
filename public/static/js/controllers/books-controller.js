@@ -1,6 +1,7 @@
-app.controller('BorrowBooksController', ['$scope', '$http', 'BooksService', 'GoogleAPIService', function ($scope, $http, BooksService, GoogleAPIService) {
+app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksService', 'GoogleAPIService',
+    function ($scope, $http, Constants, BooksService, GoogleAPIService) {
         $scope.search = {};
-
+        $scope.pageSort = Constants.getDefaultPagingSortingData();
         $scope.getLocations = function (queryText) {
             console.log(queryText);
             return GoogleAPIService.getAddresses({'address': queryText})
@@ -13,34 +14,33 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'BooksService', 'Goo
         };
         $scope.genres = BooksService.availableGenres();
         $scope.search.sortAscending = true;
-        $scope.search.availableOnly = true;
+        $scope.search.isAvailable = true;
         $scope.genres = ['Drama', 'Mystery'];
         $scope.search.genres = $scope.genres;
-        $scope.changeSorting = function (value) {
-            $scope.search.sortAscending = !value;
-        };
-        $scope.loadItems = function (query) {
 
-        };
-        $scope.loadListsView = function () {
-            $scope.search.genres = [];
-            for (var index in $scope.genres) {
-                var text = $scope.genres[index].text ? $scope.genres[index].text : $scope.genres[index];
-                $scope.search.genres.push(text);
-
-            }
-
-            console.log($scope.search);
-            BooksService.rentalBooks($scope.search).then(function (response) {
-                console.log(response.data);
-                $scope.availableBooks = response.data;
-            });
+       $scope.pageChanged = function() {
+        var options = $scope.pageSort;
+        $scope.search.genres = [];
+        for (var index in $scope.genres) {
+            var text = $scope.genres[index].text ? $scope.genres[index].text : $scope.genres[index];
+            $scope.search.genres.push(text);
+        }
+        var sortOrder = $scope.search.sortAscending ? Constants.SORT_ORDER_ASC : Constants.SORT_ORDER_DESC;
+        $scope.pageSort.primarySort = {'lendDate' : sortOrder};
+        $scope.search = $.extend($scope.search, $scope.pageSort);
+        console.log($scope.search);
+        BooksService.rentalBooks($scope.search)
+           .then(function (response) {
+              console.log(response.data);
+               $scope.availableBooks = response.data.items;
+               $scope.pageSort.totalItems = response.data.totalItems;
+           });
         };
         console.log($scope.availableBooks);
         $scope.searchBooks = function () {
-            $scope.loadListsView();
+            $scope.pageChanged();
         };
-        $scope.loadListsView();
+        $scope.pageChanged();
     }])
     .controller('LendBooksController', ['$scope', '$http', 'BooksService', 'GoogleAPIService', function ($scope, $http, BooksService, GoogleAPIService) {
         $scope.book = {};
@@ -117,4 +117,4 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'BooksService', 'Goo
                     }
                 });
         };
-    }])
+    }]);

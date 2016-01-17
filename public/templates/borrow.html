@@ -82,9 +82,9 @@
                             <label class="control-label col-xs-3">Available only</label>
                             <div class="input-group col-xs-8">
                                 <div class="btn-group">
-                                    <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="true"
+                                    <label class="btn btn-primary" ng-model="search.isAvailable" uib-btn-radio="true"
                                            uncheckable>Yes</label>
-                                    <label class="btn btn-primary" ng-model="search.availableOnly" uib-btn-radio="false"
+                                    <label class="btn btn-primary" ng-model="search.isAvailable" uib-btn-radio="false"
                                            uncheckable>No</label></div>
                             </div><!-- /input-group -->
                         </div><!-- row -->
@@ -108,7 +108,14 @@
                         {{ book.description }}
                     </div>
                 </div>
-            </div>
+                <div class="center">
+                    <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
+                                max-size="pageSort.maximumPages" items-per-page="pageSort.itemsPerPage" rotate="true"
+                                ng-change="pageChanged()"
+                                class="pagination-sm"
+                                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
+                </div><!-- div center -->
+            </div><!-- Right column -->
         </div><!-- /.row -->
     </div>
 </div>

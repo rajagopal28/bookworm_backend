@@ -31,16 +31,13 @@ function Utils() {
         'commentsCount': 'comments_count',
         'lendDate': 'created_lent_ts',
         'isAvailable': 'is_available',
-        'availableOnly': 'is_available',
         'exchangeOnly': 'exchange_only',
         'referredBook': 'referred_book',
         'chats': 'chats',
         'chatComment': 'chat_comment',
         'pageNumber' : 'page_number',
         'itemsPerPage' : 'items_per_page',
-        'primarySort' : 'primary_sort',
-        'sortKey' : 'sort_key',
-        'sortOrder' : 'sort_order'
+        'primarySort' : 'primary_sort'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {
@@ -126,14 +123,20 @@ function Utils() {
         var pagingSortingData = {};
         if(params[requestToDBKeys.pageNumber] &&
             params[requestToDBKeys.itemsPerPage]){
-            pagingSortingData.skipCount = params[requestToDBKeys.pageNumber]
+            // skip all till previous page
+            pagingSortingData.skipCount = (params[requestToDBKeys.pageNumber] -  1)
                 * params[requestToDBKeys.itemsPerPage];
+            pagingSortingData.itemsPerPage = params[requestToDBKeys.itemsPerPage]
         }
-        if(params[requestToDBKeys.primarySort] &&
-            params[requestToDBKeys.primarySort][requestToDBKeys.sortKey]) {
-            pagingSortingData.sortField = params[requestToDBKeys.primarySort][requestToDBKeys.sortKey];
-            if('desc' === params[requestToDBKeys.primarySort][requestToDBKeys.sortKey]) {
-                pagingSortingData.sortField = '-' + pagingSortingData.sortField;
+        if(params[requestToDBKeys.primarySort]) {
+            var sort = params[requestToDBKeys.primarySort];
+            for(var key in sort) {
+                if(sort.hasOwnProperty(key)){
+                    pagingSortingData.sortField = key;
+                    if('desc' === sort[key]){
+                        pagingSortingData.sortField = '-' + key;
+                    }
+                }
             }
         }
         delete params[requestToDBKeys.pageNumber];

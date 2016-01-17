@@ -89,7 +89,7 @@
             <div class="form-group">
                 <div class="col-xs-offset-2 col-xs-5">
                     <button type="submit" class="btn btn-primary" ng-click="signup()"
-                            ng-disabled="!registrationForm.$valid">Register
+                            ng-disabled="!registrationForm.$valid && !user.isUsernameAvailable">Register
                     </button>
                     <button class="btn btn-primary" ng-click="pingServer()">Register</button>
                 </div>

@@ -13,7 +13,7 @@ app.service('ForumsService', ['$http', 'BookwormAuthProvider', function ($http, 
     };
     this.isUserItemAuthor = function(item){
       var currentUser = BookwormAuthProvider.getUser();
-      return item.author && item.author.username === currentUser.username;
+      return currentUser && item.author && item.author.username === currentUser.username;
     };
     this.getCurrentAuthorInfo = function(){
         var currentUser = BookwormAuthProvider.getUser();

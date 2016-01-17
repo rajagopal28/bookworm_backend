@@ -17,10 +17,16 @@
             <div class="panel-body">
                 <div class="well">
                     {{ forum.description }}
-                    <div ng-if="forum.referredBook">
-                        Referred Book : {{ forum.referredBook.bookName }}
-                        <img src="{{ forum.referredBook.thumbnailURL }}" alt="No Image"/>
+                    <div class="media"  ng-if="forum.referredBook">
+                      <div class="media-left">
+                        <a href="#">
+                          <img class="media-object" src="{{ forum.referredBook.thumbnailURL }}" alt="No Image"">
+                        </a>
+                      </div>
+                      <div class="media-body">
+                        <h4 class="media-heading">Referred Book:{{ forum.referredBook.bookName }}</h4>
                         Description: {{ forum.referredBook.description }}
+                      </div>
                     </div>
                 </div>
                 <div class="container" ng-repeat="chat in forumChats">
@@ -44,7 +50,7 @@
                         <p>{{ chat.chatComment }}</p>
                     </div><!-- div content-->
                 </div><!-- div container -->
-                <div class="container row-fluid">
+                <div class="container row-fluid" ng-if="isLoggedIn()">
                     <div class="new-chat-content form-group">
                         <textarea class="form-control" ng-model="newChat.chatComment"></textarea>
                         <button class="btn btn-primary" ng-click="addChat()">Send

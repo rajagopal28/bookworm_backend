@@ -39,7 +39,10 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
                     $localStorage.user = JSON.stringify(aUser);
                     authenticatedUser = aUser;
                 } else {
+                    // reset all auth related token
                     authenticatedUser = null;
+                    $localStorage.user = null;
+                    $localStorage.token = null;
                 }
             },
             isLoggedIn: function () {
