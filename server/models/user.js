@@ -66,6 +66,12 @@ function User(mongoose, bcrypt) {
         }
         return searchQuery;
     };
+    this.buildSearchQuery = function(searchQuery){
+        if(searchQuery.password) {
+            delete searchQuery.password;
+        }
+        return searchQuery;
+    };
     this.authenticateUser = function (user, cb) {
         self.Model.findOne({
             $or: [

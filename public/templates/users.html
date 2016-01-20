@@ -20,6 +20,28 @@
     </div>
     <div class="container">
         <div class="row">
+             <div class="col-lg-6">
+                <div class="media" ng-repeat="user in users">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" src="{{ user.thumbnailURL }}" alt="{{ user.firstName }}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading"><a ng-href="#/bookworm/users/{{ user.id }}">{{ user.firstName }} {{ user.lastName }}</a></h4>
+                        <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
+                            <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
+                        {{ book.email }}
+                    </div>
+                </div>
+                <div class="center">
+                    <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
+                                max-size="pageSort.maximumPages" items-per-page="pageSort.itemsPerPage" rotate="true"
+                                ng-change="pageChanged()"
+                                class="pagination-sm"
+                                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
+                </div><!-- div center -->
+            </div><!-- Left column -->
             <div class="col-lg-5">
                 <div class="panel panel-primary">
                     <div class="panel-heading"><span class="glyphicon glyphicon-filter" aria-hidden="true">&nbsp;</span>Filter
@@ -94,28 +116,6 @@
                     </div><!-- panel footer -->
                 </div><!-- panel -->
             </div><!-- /.col-lg-6 -->
-            <div class="col-lg-6">
-                <div class="media" ng-repeat="book in availableBooks">
-                    <div class="media-left">
-                        <a href="#">
-                            <img class="media-object" src="{{ book.thumbnailURL }}" alt="{{ book.bookName }}">
-                        </a>
-                    </div>
-                    <div class="media-body">
-                        <h4 class="media-heading"><a ng-href="#/bookworm/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
-                        <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
-                            <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
-                        {{ book.description }}
-                    </div>
-                </div>
-                <div class="center">
-                    <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
-                                max-size="pageSort.maximumPages" items-per-page="pageSort.itemsPerPage" rotate="true"
-                                ng-change="pageChanged()"
-                                class="pagination-sm"
-                                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
-                </div><!-- div center -->
-            </div><!-- Right column -->
         </div><!-- /.row -->
     </div>
 </div>

@@ -8,12 +8,13 @@ app.controller('HomeController', ['$scope', 'UsersService', 'BookwormAuthProvide
         $scope.isLoggedIn = function () {
             return BookwormAuthProvider.isLoggedIn();
         };
-        var user = BookwormAuthProvider.getUser();
-        if (user && user.authorName) {
-            $scope.userName = user.authorName;
-        }
+        $scope.getUserName = function() {
+          var user = BookwormAuthProvider.getUser();
+            if (user && user.authorName) {
+                return user.authorName;
+            }
+        };
         $scope.logout = function () {
             UsersService.logout();
-            $scope.userName = '';
         };
 }]);

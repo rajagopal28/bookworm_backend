@@ -1,0 +1,58 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Book details</h3></div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-6">
+                <form class="form-horizontal" name="lendForm">
+                    <div class="form-group">
+                        <label for="isbn" class="control-label col-xs-2">ISBN</label>
+                        <div class="col-xs-10">
+                            {{ book.isbn }}
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookName" class="control-label col-xs-2">Book name</label>
+                        <div class="col-xs-10">
+                            {{ book.bookName }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="authorName" class="control-label col-xs-2">Author name</label>
+                        <div class="col-xs-10">
+                            {{ book.authorName }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="control-label col-xs-2">Description</label>
+                        <div class="col-xs-10">
+                            {{ book.description }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="genres" class="control-label col-xs-2">Genres</label>
+                        <div class="col-xs-10">
+                            <tags-input ng-model="book.genres"
+                                        tooltip-trigger="focus" tooltip-placement="top"
+                                        ng-disabled="true">
+                            </tags-input>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-2 col-xs-10">
+                            <button type="submit" class="btn btn-primary" ng-click="borrowBook()">
+                                Request to Borrow
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-5">
+                <a href="#" class="thumbnail">
+                    <img src="{{ book.thumbnailURL }}" alt="No Image">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

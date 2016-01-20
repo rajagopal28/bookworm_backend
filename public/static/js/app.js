@@ -18,6 +18,10 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/borrow.html',
                     controller: 'BorrowBooksController'
                 })
+                .when('/bookworm/borrow/:bookId', {
+                    templateUrl: 'templates/view-lent.html',
+                    controller: 'ViewBookxController'
+                })
                 .when('/bookworm/lend', {
                     templateUrl: 'templates/lend.html',
                     controller: 'LendBooksController'

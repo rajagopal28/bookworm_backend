@@ -228,6 +228,38 @@ app.post('/bookworm/api/users/register',
         }
 });
 
+app.get('/bookworm/api/users/all',
+    function (req, res) {
+        var searchQuery = mUtils.parseRequestToDBKeys(req.query);
+        searchQuery = Users.buildSearchQuery(searchQuery);
+        var pagingSorting = mUtils.getPagingSortingData(searchQuery);
+        console.log(searchQuery);
+        Users.Model.count(searchQuery, function(err, totalCount){
+            if(err){
+                res.send(err);
+            } else {
+                Users.Model
+                    .find(searchQuery)
+                    .select('-password')
+                    .skip(pagingSorting.skipCount)
+                    .limit(pagingSorting.itemsPerPage)
+                    .sort(pagingSorting.sortField)
+                    .exec(function (err, items) {
+                        if (err) {
+                            res.send(err);
+                            console.error(JSON.stringify(err));
+                        } else {
+                            var parsedItems = mUtils.parseDBToResponseKeys(items);
+                            res.json({
+                                'totalItems' : totalCount,
+                                'items' : parsedItems
+                            });
+                        }
+                    });
+            }
+        });
+});
+
 app.post('/bookworm/api/forums/add',ensureAuthorized,
     function (req, res) {
         console.log(req.body);
