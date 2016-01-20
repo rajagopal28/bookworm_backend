@@ -14,13 +14,21 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/register.html',
                     controller: 'UserRegistrationController'
                 })
+                .when('/bookworm/users', {
+                    templateUrl: 'templates/users.html',
+                    controller: 'UsersController'
+                })
+                .when('/bookworm/users/:username', {
+                    templateUrl: 'templates/users.html',
+                    controller: 'UserDetailsController'
+                })
                 .when('/bookworm/borrow', {
                     templateUrl: 'templates/borrow.html',
                     controller: 'BorrowBooksController'
                 })
                 .when('/bookworm/borrow/:bookId', {
                     templateUrl: 'templates/view-lent.html',
-                    controller: 'ViewBookxController'
+                    controller: 'ViewBookController'
                 })
                 .when('/bookworm/lend', {
                     templateUrl: 'templates/lend.html',

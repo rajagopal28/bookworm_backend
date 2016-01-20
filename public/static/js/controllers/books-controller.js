@@ -46,7 +46,6 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
     function ($scope, $http, $routeParams, Constants, BooksService) {
         $scope.book = {};
         var bookId = $routeParams.bookId;
-        console.log(bookId);
         BooksService.rentalBooks({id:bookId})
             .then(function(response){
                 if(response.data && response.data.items){
@@ -115,6 +114,14 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             $scope.lendBook = function () {
                 console.log($scope.book);
                 $scope.book.genres = [];
+                var currentUser = BookwormAuthProvider.getUser();
+                if(currentUser) {
+                    $scope.book.contributor = {
+                        authorName : currentUser.authorName,
+                        username : currentUser.username,
+                        thumbnailURL : currentUser.thumbnailURL
+                    };
+                }
                 for (var index = 0; index < $scope.book.genresList.length; index++) {
                     var item = $scope.book.genresList[index];
                     $scope.book.genres.push(item.text);

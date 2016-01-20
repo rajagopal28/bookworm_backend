@@ -37,7 +37,8 @@ function Utils() {
         'chatComment': 'chat_comment',
         'pageNumber' : 'page_number',
         'itemsPerPage' : 'items_per_page',
-        'primarySort' : 'primary_sort'
+        'primarySort' : 'primary_sort',
+        'contributor' : 'contributor'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

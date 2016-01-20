@@ -12,7 +12,12 @@ function Book(mongoose) {
         created_lent_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now},
         is_available: Boolean,
-        exchange_only: Boolean
+        exchange_only: Boolean,
+        contributor: {
+            author_name: String,
+            username: String,
+            thumbnail_url: String
+        }
     };
     var bookSchema = mongoose.Schema(bookSchemaDefinition);
     this.Model = mongoose.model('Book', bookSchema);

@@ -107,7 +107,18 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
     }])
     .controller('UsersController', ['$scope','Constants',  'UsersService',
         function ($scope, Constants, UsersService) {
-            var options = Constants.getDefaultPagingSortingData;
+            var options = Constants.getDefaultPagingSortingData();
+            $scope.users = [];
+            UsersService.getUsers()
+                .then(function(response){
+                    if(response.data && response.data.items){
+                        $scope.users = response.data.items;
+                    }
+                });
+    }])
+    .controller('UserDetailsController', ['$scope','Constants',  'UsersService',
+        function ($scope, Constants, UsersService) {
+            var options = Constants.getDefaultPagingSortingData();
             $scope.users = [];
             UsersService.getUsers()
                 .then(function(response){
