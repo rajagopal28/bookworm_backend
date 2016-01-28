@@ -1,4 +1,6 @@
 var http = require("http")
+    , https = require("https")
+    , querystring = require("querystring")
     , server = http.Server(app)
     , express = require("express")
     , app = express()
@@ -41,7 +43,7 @@ db.once('open', function () {
 });
 
 // all environments
-accessLogStream = fs.createWriteStream(__dirname + '/public/logfile.txt', {flags: 'a'});
+accessLogStream = fs.createWriteStream(__dirname + '/server/logfile.txt', {flags: 'a'});
 app.set('port', process.env.PORT || 8080);
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
@@ -88,9 +90,25 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
             var new_rental_book = new Books.Model(item);
             new_rental_book.save(function (error, new_rental_book) {
                 if (error) {
-                    console.error(error);
+                    res.send(error);
                 }
-                console.log(new_rental_book);
+                res.send(new_rental_book);
+            });
+        }
+});
+
+app.post('/bookworm/api/books/rental/update',ensureAuthorized,
+    function (req, res) {
+        var inputParams = req.body;
+        console.log(inputParams);
+        var item = mUtils.parseRequestToDBKeys(inputParams);
+        if (item._id) {
+            Books.Model.update({_id : item._id}, { $set : item }, {upsert : true},
+                function (error, saved_rental_book) {
+                if (error) {
+                    res.send(error);
+                }
+                res.send(saved_rental_book);
             });
         }
 });
@@ -317,6 +335,16 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
         }
 });
 
+app.get('/bookworm/api/config', function (req, res) {
+    fs.readFile(__dirname + '/server/config.json', 'utf8', function (err,data) {
+      if (err) {
+        res.send(err);
+      } else {
+        res.json(JSON.parse(data));
+      }
+    });
+});
+
 app.get('/test/test', ensureAuthorized, function (req, res) {
     var rent = db.collection('rent_books');
     rent.find({}).toArray(function (err, items) {
@@ -329,6 +357,7 @@ app.get('/test/test', ensureAuthorized, function (req, res) {
 });
 
 app.get('/test/test1', function (req, res) {
+
     Books.Model.find().exec(function (err, items) {
         if (err) {
             res.send(err);

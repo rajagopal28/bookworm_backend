@@ -109,21 +109,22 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
         function ($scope, Constants, UsersService) {
             var options = Constants.getDefaultPagingSortingData();
             $scope.users = [];
-            UsersService.getUsers()
+            UsersService.getUsers(options)
                 .then(function(response){
                     if(response.data && response.data.items){
                         $scope.users = response.data.items;
                     }
                 });
     }])
-    .controller('UserDetailsController', ['$scope','Constants',  'UsersService',
-        function ($scope, Constants, UsersService) {
+    .controller('UserDetailsController', ['$scope','$routeParams','Constants',  'UsersService',
+        function ($scope, $routeParams, Constants, UsersService) {
             var options = Constants.getDefaultPagingSortingData();
-            $scope.users = [];
-            UsersService.getUsers()
+            $scope.user = {};
+            options.username = $routeParams.username;
+            UsersService.getUsers(options)
                 .then(function(response){
                     if(response.data && response.data.items){
-                        $scope.users = response.data.items;
+                        $scope.user = response.data.items[0];
                     }
                 });
     }]);

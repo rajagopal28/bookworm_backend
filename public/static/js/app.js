@@ -19,7 +19,7 @@ app.config(['$routeProvider', '$httpProvider',
                     controller: 'UsersController'
                 })
                 .when('/bookworm/users/:username', {
-                    templateUrl: 'templates/users.html',
+                    templateUrl: 'templates/view-user.html',
                     controller: 'UserDetailsController'
                 })
                 .when('/bookworm/borrow', {
@@ -32,7 +32,11 @@ app.config(['$routeProvider', '$httpProvider',
                 })
                 .when('/bookworm/lend', {
                     templateUrl: 'templates/lend.html',
-                    controller: 'LendBooksController'
+                    controller: 'LendBookController'
+                })
+                .when('/bookworm/edit-book/:bookId', {
+                    templateUrl: 'templates/lend.html',
+                    controller: 'LendBookController'
                 })
                 .when('/bookworm/forums', {
                     templateUrl: 'templates/forums.html',

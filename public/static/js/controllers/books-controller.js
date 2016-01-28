@@ -42,8 +42,8 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
         };
         $scope.pageChanged();
     }])
-    .controller('ViewBookController', ['$scope', '$http','$routeParams', 'Constants', 'BooksService',
-    function ($scope, $http, $routeParams, Constants, BooksService) {
+    .controller('ViewBookController', ['$scope', '$http','$routeParams', 'Constants', 'BooksService','BookwormAuthProvider',
+    function ($scope, $http, $routeParams, Constants, BooksService, BookwormAuthProvider) {
         $scope.book = {};
         var bookId = $routeParams.bookId;
         BooksService.rentalBooks({id:bookId})
@@ -53,13 +53,60 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                     $scope.book.authorName = $scope.book.authorName.join(', ');
                 }
             });
+        var loggedUser = BookwormAuthProvider.getUser();
+        $scope.isUserContributor = function() {
+            return loggedUser && $scope.book
+                    && $scope.book.contributor
+                    && $scope.book.contributor.username === loggedUser.username;
+        };
+        $scope.isLoggedIn = function() {
+          return BookwormAuthProvider.isLoggedIn();
+        };
     }])
-    .controller('LendBooksController', ['$scope', '$http', 'BooksService', 'GoogleAPIService',
-        function ($scope, $http, BooksService, GoogleAPIService) {
+    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
+        function ($scope, $routeParams, $http, BooksService, BookwormAuthProvider, GoogleAPIService) {
             $scope.book = {};
             $scope.status = {
                 success: false,
                 error: false
+            };
+            var currentUser = BookwormAuthProvider.getUser();
+            var contributor = {};
+            if(currentUser) {
+                contributor = {
+                    authorName : currentUser.authorName,
+                    username : currentUser.username,
+                    thumbnailURL : currentUser.thumbnailURL
+                };
+            }
+            var bookId = $routeParams.bookId;
+            if(bookId) {
+                BooksService.rentalBooks({id:bookId})
+                    .then(function(response){
+                        if(response.data && response.data.items){
+                            $scope.book = response.data.items[0];
+                            $scope.book.genresList = $scope.book.genres;
+                            $scope.book.authorName = $scope.book.authorName.join(', ');
+                            $scope.book.contributor = contributor;
+                            console.log($scope.book);
+                        }
+                    });
+            }
+            $scope.isEditMode = function() {
+              return bookId && bookId.trim() !== '';
+            };
+            $scope.editBook = function() {
+              BooksService.editBook($scope.book)
+                    .then(function (response) {
+                        console.log(response);
+                        if (response.status === 200) {
+                            $scope.status.success = true;
+                            $scope.status.error = false;
+                        } else {
+                            $scope.status.error = true;
+                            $scope.status.success = false;
+                        }
+                    });
             };
             $scope.loadBookDetails = function (searchText) {
                 var isbn = $scope.book.isbn;
@@ -114,18 +161,11 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             $scope.lendBook = function () {
                 console.log($scope.book);
                 $scope.book.genres = [];
-                var currentUser = BookwormAuthProvider.getUser();
-                if(currentUser) {
-                    $scope.book.contributor = {
-                        authorName : currentUser.authorName,
-                        username : currentUser.username,
-                        thumbnailURL : currentUser.thumbnailURL
-                    };
-                }
                 for (var index = 0; index < $scope.book.genresList.length; index++) {
                     var item = $scope.book.genresList[index];
                     $scope.book.genres.push(item.text);
                 }
+                $scope.book.contributor = contributor;
                 BooksService.lendBook($scope.book)
                     .then(function (response) {
                         console.log(response);

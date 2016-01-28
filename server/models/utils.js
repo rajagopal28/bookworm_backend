@@ -38,7 +38,8 @@ function Utils() {
         'pageNumber' : 'page_number',
         'itemsPerPage' : 'items_per_page',
         'primarySort' : 'primary_sort',
-        'contributor' : 'contributor'
+        'contributor' : 'contributor',
+        'contributions' : 'contributions'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

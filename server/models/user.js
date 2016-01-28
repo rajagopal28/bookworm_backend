@@ -11,6 +11,7 @@ function User(mongoose, bcrypt) {
         gender: String,
         email: String,
         thumbnail_url: String,
+        contributions: {type: Number, default: 0},
         token: String,
         created_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now}
