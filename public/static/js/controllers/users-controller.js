@@ -1,5 +1,7 @@
-app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersService', function ($scope, $uibModal, UsersService) {
+app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibModal', 'Constants', 'UsersService', 'BookwormAuthProvider',
+    function ($scope, $routeParams, $uibModal, Constants, UsersService, BookwormAuthProvider) {
         $scope.user = {};
+        var userId = $routeParams.userId;
         $scope.user.gender = "male";
         $scope.$on('date-set', function (event, args) {
             console.log(args);
@@ -30,6 +32,34 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
             console.log(options);
             var modalInstance = $uibModal.open(options);
         };
+        $scope.isEditMode = function() {
+            return userId && userId.trim() !== '';
+        };
+        if($scope.isEditMode()){
+            var options = Constants.getDefaultPagingSortingData();
+            options.id = userId;
+            UsersService.getUsers(options)
+                .then(function(response){
+                    if(response.data && response.data.items) {
+                        $scope.user = response.data.items[0];
+                    }
+                });
+        }
+        $scope.isUserContributor = function() {
+          return BookwormAuthProvider.isCurrentUser($scope.user);
+        };
+        $scope.update = function () {
+            console.log($scope.user);
+            UsersService.updateProfile($scope.user)
+                .then(function (response) {
+                    $scope.status.success = true;
+                    $scope.status.error = false;
+                }, function (error) {
+                    $scope.status.error = true;
+                    $scope.status.success = false;
+                });
+
+        };
         $scope.signup = function () {
             console.log($scope.user);
             UsersService.registerUser($scope.user)
@@ -42,6 +72,7 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
                 });
 
         };
+
         $scope.checkUsername = function () {
             UsersService.usernameUnique($scope.user)
                 .then(function (response) {
@@ -69,7 +100,8 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
             $scope.status.warn = false;
         };
     }])
-    .controller('UserLoginController', ['$scope', '$location', '$uibModal', 'UsersService', function ($scope, $location, $uibModal, UsersService) {
+    .controller('UserLoginController', ['$scope', '$location', '$uibModal', 'UsersService',
+        function ($scope, $location, $uibModal, UsersService) {
         $scope.user = {};
         $scope.errorMessage = DEFAULT_ERROR_MESSAGE;
         $scope.status = {error: false};
@@ -94,7 +126,7 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
         };
         $scope.showLogin = function () {
             var modalInstance = $uibModal.open({
-                animation: $scope.animationsEnabled,
+                animation: true,
                 templateUrl: '../../../templates/login-modal.html',
                 controller: 'ModalInstanceCtrl',
                 size: 'l',
@@ -116,10 +148,16 @@ app.controller('UserRegistrationController', ['$scope', '$uibModal', 'UsersServi
                     }
                 });
     }])
-    .controller('UserDetailsController', ['$scope','$routeParams','Constants',  'UsersService',
-        function ($scope, $routeParams, Constants, UsersService) {
+    .controller('UserDetailsController', ['$scope','$routeParams','Constants',  'UsersService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
             var options = Constants.getDefaultPagingSortingData();
             $scope.user = {};
+            $scope.isUserContributor = function(){
+                return BookwormAuthProvider.isCurrentUser($scope.user);
+            };
+            $scope.isLoggedIn = function() {
+              return BookwormAuthProvider.isLoggedIn();
+            };
             options.username = $routeParams.username;
             UsersService.getUsers(options)
                 .then(function(response){

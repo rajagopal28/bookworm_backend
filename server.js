@@ -245,6 +245,28 @@ app.post('/bookworm/api/users/register',
             res.send();
         }
 });
+app.post('/bookworm/api/users/update', ensureAuthorized,
+    function (req, res) {
+        var personal_info = mUtils.parseRequestToDBKeys(req.body);
+        var token = req.token
+        if (personal_info._id && token)// check for not empty
+        {
+            Users.Model.update({_id: personal_info._id , token : token},
+                {$set : personal_info},
+                { upsert : true},
+                function (err, items) {
+                    if (err) {
+                        res.send(err);
+                        console.error(JSON.stringify(err));
+                    } else {
+                        res.send(items);
+                        console.log("Success insertion: " + JSON.stringify(items));
+                    }
+            });
+        } else {
+            res.send();
+        }
+});
 
 app.get('/bookworm/api/users/all',
     function (req, res) {
@@ -259,6 +281,7 @@ app.get('/bookworm/api/users/all',
                 Users.Model
                     .find(searchQuery)
                     .select('-password')
+                    .select('-token')
                     .skip(pagingSorting.skipCount)
                     .limit(pagingSorting.itemsPerPage)
                     .sort(pagingSorting.sortField)

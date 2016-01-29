@@ -18,7 +18,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         };
         // make service call to get list of forums
         $scope.isCreatorAuthor = function (forum) {
-            return ForumsService.isUserItemAuthor(forum);
+            return BookwormAuthProvider.isCurrentUser(forum.author);
         };
         $scope.pageChanged();
     }])
@@ -29,7 +29,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         $scope.newChat = {};
         $scope.currentUser = BookwormAuthProvider.getUser();
         $scope.isCommentatorAuthor = function (chatItem) {
-            return ForumsService.isUserItemAuthor(chatItem);
+            return BookwormAuthProvider.isCurrentUser(chatItem.author);
         };
         $scope.isLoggedIn = function () {
           return BookwormAuthProvider.isLoggedIn();

@@ -55,10 +55,10 @@
                     </div>
                     <div class="form-group" ng-if="isLoggedIn()">
                         <div class="col-xs-offset-2 col-xs-10">
-                            <button type="submit" ng-if="isUserContributor()" class="btn btn-primary" ng-click="borrowBook()">
+                            <button type="submit" ng-if="!isUserContributor()" class="btn btn-primary" ng-click="borrowBook()">
                                 Request to Borrow
                             </button>
-                            <a type="submit" ng-if="!isUserContributor()" class="btn btn-primary" ng-href="#/bookworm/edit-book/{{ book.id }}">
+                            <a type="submit" ng-if="isUserContributor()" class="btn btn-primary" ng-href="#/bookworm/edit-book/{{ book.id }}">
                                 Edit
                             </a>
                         </div>

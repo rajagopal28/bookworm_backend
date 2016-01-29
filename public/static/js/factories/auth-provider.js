@@ -30,22 +30,30 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
             }
             return user;
         }
-
+        function resetUsetToken() {
+            authenticatedUser = null;
+            $localStorage.user = null;
+            $localStorage.token = null;
+        }
+        function setUserFromToken(aUser) {
+            $localStorage.token = aUser.token;
+            $localStorage.user = JSON.stringify(aUser);
+            authenticatedUser = aUser;
+        }
         var authenticatedUser;
         return {
             setUser: function (aUser) {
                 if (aUser.authSuccess) {
-                    $localStorage.token = aUser.token;
-                    $localStorage.user = JSON.stringify(aUser);
-                    authenticatedUser = aUser;
+                   setUserFromToken(aUser);
                 } else {
                     // reset all auth related token
-                    authenticatedUser = null;
-                    $localStorage.user = null;
-                    $localStorage.token = null;
+                    resetUsetToken();
                 }
             },
             isLoggedIn: function () {
+                if(!authenticatedUser) {
+                    authenticatedUser = getUserFromToken();
+                }
                 return (authenticatedUser) ? authenticatedUser.authSuccess : false;
             },
             getUser: function () {
@@ -53,6 +61,10 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
                     authenticatedUser = getUserFromToken();
                 }
                 return authenticatedUser;
+            },
+            isCurrentUser : function(contributor) {
+                return authenticatedUser && contributor
+                    && contributor.username === authenticatedUser.username;
             }
         };
     }]);

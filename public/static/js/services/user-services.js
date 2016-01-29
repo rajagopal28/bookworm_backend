@@ -3,6 +3,9 @@ app.service('UsersService', ['$http', '$localStorage', 'BookwormAuthProvider',
         this.registerUser = function (user) {
             return $http.post('/bookworm/api/users/register', user, {timeout: 1000});
         };
+        this.updateProfile = function (user) {
+            return $http.post('/bookworm/api/users/update', user, {timeout: 1000});
+        };
         this.loginUser = function (user) {
             var promise = $http.post('/bookworm/api/users/login-auth', user, {timeout: 1000});
             promise.then(function (response) {

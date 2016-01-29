@@ -53,11 +53,9 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                     $scope.book.authorName = $scope.book.authorName.join(', ');
                 }
             });
-        var loggedUser = BookwormAuthProvider.getUser();
         $scope.isUserContributor = function() {
-            return loggedUser && $scope.book
-                    && $scope.book.contributor
-                    && $scope.book.contributor.username === loggedUser.username;
+            return $scope.book
+                    && BookwormAuthProvider.isCurrentUser($scope.book.contributor);
         };
         $scope.isLoggedIn = function() {
           return BookwormAuthProvider.isLoggedIn();

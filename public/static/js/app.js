@@ -22,6 +22,10 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/view-user.html',
                     controller: 'UserDetailsController'
                 })
+                .when('/bookworm/update-profile/:userId', {
+                    templateUrl: 'templates/update-profile.html',
+                    controller: 'UserRegistrationController'
+                })
                 .when('/bookworm/borrow', {
                     templateUrl: 'templates/borrow.html',
                     controller: 'BorrowBooksController'
