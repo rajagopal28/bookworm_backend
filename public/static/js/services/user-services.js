@@ -26,4 +26,14 @@ app.service('UsersService', ['$http', '$localStorage', 'BookwormAuthProvider',
         this.getUsers = function(options){
           return $http.get('/bookworm/api/users/all', {params : options}, {timeout: 1000});
         };
+        this.postImage = function(file){
+           var fd = new FormData();
+           fd.append('file', file);
+           return $http.post('/test/test4', fd, {
+              transformRequest: angular.identity,
+              headers: {
+                'Content-Type': undefined
+              }
+           });
+        };
 }]);

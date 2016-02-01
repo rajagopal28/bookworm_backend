@@ -1,5 +1,22 @@
 {
-  "someKey" : "SomeValue",
-  "someKey1" : "SomeValue1",
-  "someKey2" : "SomeValue2"
-}
+  "serverConfig": {
+    "smartFileAPI": {
+      "host": "rajagopal28.smartfile.com",
+      "username": "rajagopal28",
+      "password": "password",
+      "loginAuthPath": "/ftp/login/",
+      "docUploadPath": "/api/2/path/data/ProfilePics/",
+      "authenticationTimeStamp" : 0,
+      "expirationTimeStamp" : 0
+      }
+    },
+    "clientConfig": {
+      "imagesDirectory": "https://file.ac/JzawZwyM0U8/",
+      "smartFileAuthHeaders": {
+        "csrftoken": "",
+        "sessionid": "",
+        "X-CSRFToken": "",
+        "Accept-Encoding": "gzip, deflate"
+      }
+    }
+  }

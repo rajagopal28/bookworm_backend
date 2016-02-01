@@ -87,12 +87,16 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     }
                 });
         };
+        $scope.myFile = null;
         $scope.pingServer = function () {
             // TIP: io() with no args does auto-discovery
             socket.emit('ferret', {cricket: 'tobi', alt: 'Jiminy', context: 'Bazinga'}, function (data) {
                 console.log(data); // data will be 'woot'
             });
 
+            var file = $scope.myFile;
+            console.log(file);
+            UsersService.postImage(file);
         };
         $scope.dismissAlert = function () {
             $scope.status.success = false;
