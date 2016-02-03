@@ -1,10 +1,11 @@
-var http = require("http")
-    , https = require("https")
-    , querystring = require("querystring")
+var http = require('http')
+    , https = require('https')
+    , querystring = require('querystring')
     , server = http.Server(app)
-    , express = require("express")
+    , express = require('express')
     , app = express()
     , morgan = require('morgan')
+    , logUtil = require('util')
     , fs = require('fs')
     , path = require('path')
     , json = require('express-json')
@@ -19,7 +20,7 @@ var http = require("http")
     , user = require('./server/models/user')
     , forum = require('./server/models/forum')
     , mongoose = require('mongoose')
-    , mongodb = require("mongodb")
+    , mongodb = require('mongodb')
     , bodyParser = require('body-parser')
     , favicon = require('serve-favicon')
     , socketServer = app.listen(8080)
@@ -33,10 +34,11 @@ var mUtils = new utils.Utils();
 var Books = new book.Book(mongoose);
 var Users = new user.User(mongoose, bcrypt);
 var Forums = new forum.Forum(mongoose);
+var serverConfigJSON;
 var socket;
 console.log(mongoose.connection.readyState);
 if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
-    mongoose.connect("mongodb://root@localhost:27017/admin");
+    mongoose.connect('mongodb://root@localhost:27017/admin');
 }
 var db = mongoose.connection;
 
@@ -52,7 +54,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 //app.use(express.favicon());
 app.use(favicon(__dirname + '/public/static/images/favicon.ico'));
-app.use(morgan('dev'));
+app.use(morgan('combined', {stream: accessLogStream}));
+//app.use(morgan('common', { skip: function(req, res) { return false; }, stream: __dirname + '/server/logfile.txt' }));
 app.use(json());
 app.use(multipart());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
@@ -83,7 +86,7 @@ app.use(function (req, res, next) {
 // api ---------------------------------------------------------------------
 app.post('/bookworm/api/books/rental/add',ensureAuthorized,
     function (req, res) {
-        console.log("Renting books");
+        console.log('Renting books');
         var inputParams = req.body;
         console.log(inputParams);
         var item = mUtils.parseRequestToDBKeys(inputParams);
@@ -147,54 +150,80 @@ app.get('/bookworm/api/books/rental/all', function (req, res) {
         }
     });
 });
-app.get('/bookworm/api/forums/all', function (req, res) {
-    var inputParams = req.query;
-    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
-    var pagingSorting = mUtils.getPagingSortingData(searchQuery);
-    searchQuery = Forums.buildSearchQuery(searchQuery);
-    Forums.Model.count(searchQuery, function(err, totalCount){
-        if (err) {
-            res.send(err);
-        } else {
-            Forums.Model.find(searchQuery)
-            .select('-chats')
-                .skip(pagingSorting.skipCount)
-                .limit(pagingSorting.itemsPerPage)
-                .sort(pagingSorting.sortField)
-                .exec(function (err, items) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        console.log(items);
-                        var parsedItems = mUtils.parseDBToResponseKeys(items);
-                        console.log(parsedItems);
-                        res.json({
-                            items : parsedItems,
-                            totalItems : totalCount
-                        });
-                    }
-                });
-        }
 
-    });
-    console.log(JSON.stringify(searchQuery));
-});
-app.get('/bookworm/api/forums/chats/all',
+app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
     function (req, res) {
-        var inputParams = req.query;
-        var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
-        searchQuery = Forums.buildSearchQuery(searchQuery);
-        Forums.Model.findOne(searchQuery)
-            .exec(function (err, forum) {
-                if (err) {
-                    res.send(err);
+    // read config parameter
+    var configJSON = serverConfigJSON;
+    // console.log(configJSON);
+    var now = mUtils.resetTimeToGMT(new Date()).getTime();
+    if(!configJSON
+        || !configJSON.cloudConfig
+        || !configJSON.cloudConfig.expirationTimeStamp) {
+        // I do not have a valid config in server session so read from file
+        readConfigToSession(res, function(configJSON){
+            // console.log(configJSON);
+            if(configJSON &&
+                configJSON.cloudConfig ){
+                // I have read configuration now
+                if(now > 1 * configJSON.cloudConfig.expirationTimeStamp) {
+                    // if login auth expired login and then upload
+                    loginToCloudEnvironment(configJSON.cloudConfig, function (addedTokenInfo) {
+                        configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
+                        configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
+                        configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
+                        console.log(logUtil.inspect( 'after logging in'));
+                        console.log(logUtil.inspect(now));
+                        console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+                        uploadFileToCloud(req, configJSON, function (response) {
+                            res.send(response);
+                        });
+                        // write the newly created config tokens
+                        writeConfigToFile(configJSON);
+                    });
                 } else {
-                    var parsed = mUtils.parseDBToResponseKeys(forum);
-                    console.log(parsed);
-                    res.send(parsed);
+                    console.log(logUtil.inspect( 'not logging in'));
+                    console.log(logUtil.inspect(now));
+                    console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+                    // here the auth token is still valid so just upload
+                    uploadFileToCloud(req, configJSON, function(response) {
+                        res.send(response);
+                    });
                 }
+            }
+
+        });
+    }
+    if(configJSON && configJSON.cloudConfig
+        && configJSON.cloudConfig.expirationTimeStamp ) {
+        // if I have config but the token has expired
+        if(now > 1 * configJSON.cloudConfig.expirationTimeStamp) {
+            // if login auth expired login and then upload
+            loginToCloudEnvironment( configJSON.cloudConfig, function (addedTokenInfo) {
+                configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
+                configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
+                configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
+                console.log( 'kk - after logging in');
+                console.log(logUtil.inspect(now));
+                console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+                uploadFileToCloud(req, configJSON, function (response) {
+                    res.send(response);
+                });
+                // write the newly created config tokens
+                writeConfigToFile(configJSON);
             });
+        } else {
+            console.log( 'kk - not logging in');
+            console.log(logUtil.inspect(now));
+            console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+            // here the auth token is still valid so just upload
+            uploadFileToCloud(req,  configJSON, function(response) {
+                res.send(response);
+            });
+        }
+    }
 });
+
 app.post('/bookworm/api/users/check-unique',
     function (req, res) {
         var inputParams = req.body;
@@ -241,7 +270,7 @@ app.post('/bookworm/api/users/register',
                     console.error(JSON.stringify(err));
                 } else {
                     res.send(items);
-                    console.log("Success insertion: " + JSON.stringify(items));
+                    console.log('Success insertion: ' + JSON.stringify(items));
                 }
             });
         } else {
@@ -263,7 +292,7 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
                         console.error(JSON.stringify(err));
                     } else {
                         res.send(items);
-                        console.log("Success insertion: " + JSON.stringify(items));
+                        console.log('Success insertion: ' + JSON.stringify(items));
                     }
             });
         } else {
@@ -361,14 +390,59 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
         }
 });
 
+app.get('/bookworm/api/forums/all', function (req, res) {
+    var inputParams = req.query;
+    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    var pagingSorting = mUtils.getPagingSortingData(searchQuery);
+    searchQuery = Forums.buildSearchQuery(searchQuery);
+    Forums.Model.count(searchQuery, function(err, totalCount){
+        if (err) {
+            res.send(err);
+        } else {
+            Forums.Model.find(searchQuery)
+            .select('-chats')
+                .skip(pagingSorting.skipCount)
+                .limit(pagingSorting.itemsPerPage)
+                .sort(pagingSorting.sortField)
+                .exec(function (err, items) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        console.log(items);
+                        var parsedItems = mUtils.parseDBToResponseKeys(items);
+                        console.log(parsedItems);
+                        res.json({
+                            items : parsedItems,
+                            totalItems : totalCount
+                        });
+                    }
+                });
+        }
+
+    });
+    console.log(JSON.stringify(searchQuery));
+});
+
+app.get('/bookworm/api/forums/chats/all',
+    function (req, res) {
+        var inputParams = req.query;
+        var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+        searchQuery = Forums.buildSearchQuery(searchQuery);
+        Forums.Model.findOne(searchQuery)
+            .exec(function (err, forum) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    var parsed = mUtils.parseDBToResponseKeys(forum);
+                    console.log(parsed);
+                    res.send(parsed);
+                }
+            });
+});
+
 app.get('/bookworm/api/config', function (req, res) {
-    fs.readFile(__dirname + '/server/config.json', 'utf8', function (err,data) {
-      if (err) {
-        res.send(err);
-      } else {
-          var configJSON = JSON.parse(data);
-        res.json(configJSON["clientConfig"]);
-      }
+    readConfigToSession(res, function(configJSON) {
+         res.json(configJSON['clientConfig']);
     });
 });
 
@@ -384,7 +458,6 @@ app.get('/test/test', ensureAuthorized, function (req, res) {
 });
 
 app.get('/test/test1', function (req, res) {
-
     Books.Model.find().exec(function (err, items) {
         if (err) {
             res.send(err);
@@ -399,165 +472,15 @@ app.get('/test/test1', function (req, res) {
     });
 });
 
-
-
-app.get('/test/test2', function (req, res) {
-    var data = querystring.stringify({
-        login : 'rajagopal28',
-        password : 'password'
-    });
-    // path: '/api/2/path/info/?format=json',
-    var options = {
-      host: 'rajagopal28.smartfile.com',
-      port: 443,
-      path: '/ftp/login/',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(data)
-      }
-    };
-    var apiResponse = {};
-    var buff = '';
-    var config = {};
-    var apiRequest = https.request(options, function(apiRes) {
-        console.log('STATUS: ' + apiRes.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
-        config.headers = apiRes.headers;
-        apiRes.setEncoding('utf8');
-        apiRes.on('data', function (chunk) {
-          buff+= chunk;
-        });
-        apiRes.on('end', function() {
-            console.log(buff);
-            res.send(buff);
-        });
-        apiResponse = apiRes;
-    });
-    apiRequest.write(data);
-    apiRequest.end();
-    // res.json([{ request : apiRequest},{ response : apiResponse}]);
-});
-
-app.get('/test/test3', function (req, res) {
-    var options = {
-        host: 'rajagopal28.smartfile.com',
-        port: 443,
-         path: '/api/2/path/info/ProfilePics/bay_max.gif?format=json',
-        headers : {
-            cookie : '_ga=GA1.2.1883368505.1453891337; ' +
-            'optimizelyEndUserId=oeu1453891338904r0.5625616400502622; ' +
-            'optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D;' +
-            ' optimizelyBuckets=%7B%7D;' +
-            ' __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1;' +
-            ' __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362;' +
-            ' hubspotutk=368dbee3677a5c15a485ecf50bc702dd;' +
-            ' _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D;' +
-            ' PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/;' +
-            ' csrftoken=YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc;' +
-            ' sessionid=62115b93ff478de68ab87c8c647be902;' +
-            ' _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.;' +
-            ' _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL'
-        },
-        method : 'GET'
-    };
-    /*"set-cookie": ["csrftoken=Ocy9ttyYW7EiLNp69rq4Ei8BRP7qTM8E; expires=Wed, 25-Jan-2017 16:22:51 GMT; Max-Age=31449600; Path=/",
-                "sessionid=4330f0e1b17aab0201539be42fcdfb72; expires=Wed, 27-Jan-2016 16:42:50 GMT; Max-Age=1199; Path=/"] */
-    var apiReq = https.request(options, function(apiRes){
-        console.log('STATUS: ' + apiRes.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
-        apiRes.setEncoding('utf8');
-        var buff= '';
-        apiRes.on('data', function (chunk) {
-          buff+= chunk;
-        });
-        apiRes.on('end', function() {
-            console.log(buff);
-            res.send(buff);
-        });
-    });
-    apiReq.end();
-});
-
-app.post('/test/test4', function (req, res) {
-    var tempPath = req.files.file.path,
-        targetPath = './public/' + req.files.file.name ;
-    if (path.extname(req.files.file.name).toLowerCase() === '.png') {
-        fs.rename(tempPath, targetPath, function(err) {
-            if (err) throw err;
-            // res.send("Upload completed!");
-            if (err) {
-                console.log('Error!');
-              } else {
-                var someForm = new formData();
-                someForm.append('file', fs.createReadStream(targetPath));
-                var fileHeader = someForm.getHeaders();
-                someForm.getLength(function(err,length){
-                    fileHeader['content-length'] = length;
-
-                    console.log(fileHeader);
-                    fileHeader.cookie = '_ga=GA1.2.1883368505.1453891337; ' +
-                            'optimizelyEndUserId=oeu1453891338904r0.5625616400502622; ' +
-                            'optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D;' +
-                            ' optimizelyBuckets=%7B%7D;' +
-                            ' __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1;' +
-                            ' __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362;' +
-                            ' hubspotutk=368dbee3677a5c15a485ecf50bc702dd;' +
-                            ' _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D;' +
-                            ' PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/;' +
-                            ' csrftoken=YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc;' +
-                            ' sessionid=62115b93ff478de68ab87c8c647be902;' +
-                            ' _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.;' +
-                            ' _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL';
-                    fileHeader.referer = "https://rajagopal28.smartfile.com/";
-                    fileHeader.origin = "http://www.smartfile.com/developer";
-                    fileHeader["X-CSRFToken"] = "YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc";
-                    fileHeader["Accept-Encoding"] =  "gzip, deflate";
-                      var options = {
-                        host: 'rajagopal28.smartfile.com',
-                        port: 443,
-                         path: '/api/2/path/data/ProfilePics/',
-                        headers : fileHeader,
-                        method : 'POST'
-                    };
-
-                    /*"set-cookie": ["csrftoken=Ocy9ttyYW7EiLNp69rq4Ei8BRP7qTM8E; expires=Wed, 25-Jan-2017 16:22:51 GMT; Max-Age=31449600; Path=/",
-                                "sessionid=4330f0e1b17aab0201539be42fcdfb72; expires=Wed, 27-Jan-2016 16:42:50 GMT; Max-Age=1199; Path=/"]*/
-                    var apiReq = https.request(options, function(apiRes){
-                        console.log('STATUS: ' + apiRes.statusCode);
-                        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
-                        apiRes.setEncoding('utf8');
-                        var buff= '';
-                        apiRes.on('data', function (chunk) {
-                          buff+= chunk;
-                        });
-                        apiRes.on('end', function() {
-                            // console.log(buff);
-                            fs.unlink(targetPath);
-                            res.send(buff);
-                        });
-                    });
-                    someForm.pipe(apiReq);
-                    apiReq.on('error', function (error) {
-                        console.log(error);
-                    });
-                });
-              }
-        });
-    }
-
-});
-
-
 // application -------------------------------------------------------------
 app.get('*', function (req, res) {
     res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;
-    var bearerHeader = req.headers["authorization"];
+    var bearerHeader = req.headers['authorization'];
     if (typeof bearerHeader !== 'undefined') {
-        var bearer = bearerHeader.split(" ");
+        var bearer = bearerHeader.split(' ');
         bearerToken = bearer[1];// because bearer[0] === 'Bearer'
         Users.Model
             .count({token: bearerToken},
@@ -571,6 +494,132 @@ function ensureAuthorized(req, res, next) {
                 });
     } else {
         res.sendStatus(403);
+    }
+}
+function writeConfigToFile(newConfig){
+    fs.writeFile(__dirname + '/server/config.json', JSON.stringify(newConfig), function(err) {
+        console.log(err);
+    });
+}
+function readConfigToSession(res, callback) {
+    fs.readFile(__dirname + '/server/config.json', 'utf8', function (err,data) {
+      if (err) {
+        res.send(err);
+      } else {
+        var configJSON = JSON.parse(data);
+        if(configJSON) {
+            serverConfigJSON = configJSON;
+            callback(configJSON);
+        }
+      }
+    });
+}
+function loginToCloudEnvironment(cloudConfig, callback){
+    var data = querystring.stringify({
+            login : cloudConfig.username,
+            password : cloudConfig.password
+        });
+        var options = {
+          host: cloudConfig.host,
+          port: 443,
+          path: cloudConfig.loginAuthPath,
+          method: 'POST',
+          headers: {
+            'Content-Type': mUtils.constants.FORM_TYPE_URL_ENCODED,
+            'Content-Length': Buffer.byteLength(data)
+          }
+        };
+        var apiResponse = {};
+        var buff = '';
+        var config = {};
+        var apiRequest = https.request(options, function(apiRes) {
+            var setCookie = apiRes.headers['set-cookie'];
+            for(var index=0; index< setCookie.length; index++) {
+                var cookieItem = setCookie[index];
+                var cookieSeperatorString = 'expires=';
+                var segments = cookieItem.split(';');
+                if(cookieItem.indexOf('csrftoken=') != -1) {
+                    var temp = segments[0].trim();
+                    var startIndex = temp.indexOf('csrftoken=') + 'csrftoken='.length;
+                    config.csrftoken = temp.substring(startIndex);
+                }
+                if(cookieItem.indexOf('sessionid=') != -1) {
+                    var temp = segments[0].trim();
+                    var startIndex = temp.indexOf('sessionid=') + 'sessionid='.length;
+                    config.sessionid = temp.substring(startIndex);
+                    temp = segments[1].trim();
+                    var endIndex = temp.indexOf(cookieSeperatorString);
+                    config.expirationTimestamp = temp.substring(endIndex + cookieSeperatorString.length).trim();
+                }
+            }
+            apiRes.setEncoding('utf8');
+            apiRes.on('data', function (chunk) {
+              buff+= chunk;
+            });
+            apiRes.on('end', function() {
+                //console.log(buff);
+                callback(config);
+            });
+            apiResponse = apiRes;
+        });
+        apiRequest.write(data);
+        apiRequest.end();
+}
+function uploadFileToCloud(req, serverConfig, callback) {
+    var cloudConfig = serverConfig.cloudConfig;
+    var ACCEPTED_FILE_PATHS = serverConfig.acceptedImageFormats;
+    var tempPath = req.files.file.path,
+        targetPath = './public/' + req.files.file.name ;
+    var fileExtension = path.extname(req.files.file.name).toLowerCase();
+    if (ACCEPTED_FILE_PATHS
+        && fileExtension
+        && ACCEPTED_FILE_PATHS.indexOf(fileExtension) !== -1) {
+        fs.rename(tempPath, targetPath, function(err) {
+            if (err) {
+                console.log('Error!');
+                console.log(err);
+              } else {
+                var someForm = new formData();
+                someForm.append('file', fs.createReadStream(targetPath));
+                var fileHeader = someForm.getHeaders();
+                someForm.getLength(function(err,length){
+                    fileHeader['content-length'] = length;
+                    fileHeader.cookie = cloudConfig.cookieString
+                        + ' csrftoken='+ cloudConfig.csrftoken +';'
+                        + ' sessionid='+ cloudConfig.sessionid ;
+                    fileHeader.referer = cloudConfig.referer;
+                    fileHeader.origin = cloudConfig.origin;
+                    fileHeader[mUtils.constants.HEADER_X_CSRF_TOKEN] = cloudConfig.csrftoken;
+                    fileHeader[mUtils.constants.HEADER_ACCEPT_ENCODING] =  mUtils.constants.DEFAULT_ACCEPT_HEADER_FOR_UPLOAD;
+                    console.log(fileHeader);
+                    var options = {
+                        host: cloudConfig.host,
+                        port: cloudConfig.port,
+                        path: cloudConfig.docUploadPath,
+                        headers: fileHeader,
+                        method: 'POST'
+                    };
+                    var apiReq = https.request(options, function(apiRes){
+                        console.log('STATUS: ' + apiRes.statusCode); 
+                        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
+                        apiRes.setEncoding('utf8');
+                        var buff= '';
+                        apiRes.on('data', function (chunk) {
+                          buff+= chunk;
+                        });
+                        apiRes.on('end', function() {
+                            // console.log(buff);
+                            fs.unlink(targetPath);
+                            callback(buff);
+                        });
+                    });
+                    someForm.pipe(apiReq);
+                    apiReq.on('error', function (error) {
+                        console.log(error);
+                    });
+                });
+              }
+        });
     }
 }
 // socket IO -----------------------------------------------------------------

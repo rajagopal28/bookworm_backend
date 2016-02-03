@@ -1,6 +1,12 @@
 function Utils() {
     'use strict';
     var self = this;
+    this.constants = {
+        FORM_TYPE_URL_ENCODED :'application/x-www-form-urlencoded',
+        HEADER_X_CSRF_TOKEN : 'X-CSRFToken',
+        HEADER_ACCEPT_ENCODING: 'Accept-Encoding',
+        DEFAULT_ACCEPT_HEADER_FOR_UPLOAD: 'gzip, deflate'
+    };
     var requestToDBKeys = {
         'id': '_id',
         'firstName': 'first_name',
@@ -145,6 +151,33 @@ function Utils() {
         delete params[requestToDBKeys.itemsPerPage];
         delete params[requestToDBKeys.primarySort];
         return pagingSortingData;
+    };
+    this.getDateFromCookieString = function(dateStringFromCookie) {
+        if(dateStringFromCookie) {
+            var seperatorSpace = ' ';
+        // cookie date format  'Wed, 27-Jan-2016 16:42:50 GMT'
+        var startIndex,endIndex, temp;
+        temp = dateStringFromCookie.split(' ');
+        // now I have all the strings in array
+        endIndex = temp[0].indexOf(',');
+        var dayOfWeek = temp[0].substring(0, endIndex);// temp[0] = 'Wed,'
+        var stringDate = temp[1];// temp[1] = 27-Jan-2016
+        var stringTime = temp[2];// temp[2] = '16:42:50'
+        var timeZone = temp[3];// temp[3] = 'GMT '
+
+        temp = stringDate.split('-');
+        var newDateString = dayOfWeek + seperatorSpace
+                            + temp[1] + seperatorSpace // Jan
+                            + temp[0] + seperatorSpace // 27
+                            + temp[2] + seperatorSpace // 2016
+                            + stringTime + seperatorSpace
+                            + timeZone;
+        return newDateString;
+        // javascript date format 'Wed Jan 27 2016 16:42:508 GMT+0530 (IST)'
+        }
+    };
+    this.resetTimeToGMT = function(dateObj) {
+        return new Date(dateObj.getTime() + (dateObj.getTimezoneOffset() * 60 * 1000));
     };
 };
 module.exports.Utils = Utils;

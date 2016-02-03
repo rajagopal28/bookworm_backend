@@ -29,7 +29,7 @@ app.service('UsersService', ['$http', '$localStorage', 'BookwormAuthProvider',
         this.postImage = function(file){
            var fd = new FormData();
            fd.append('file', file);
-           return $http.post('/test/test4', fd, {
+           return $http.post('/bookworm/api/user/profile-upload', fd, {
               transformRequest: angular.identity,
               headers: {
                 'Content-Type': undefined

@@ -1,0 +1,32 @@
+{
+  "acceptedImageFormats": [
+    ".jpg",
+    ".gif",
+    ".png",
+    ".jpeg",
+    ".bmp"
+  ],
+  "cloudConfig": {
+    "host": "rajagopal28.smartfile.com",
+    "username": "rajagopal28",
+    "password": "password",
+    "port": 443,
+    "loginAuthPath": "/ftp/login/",
+    "docUploadPath": "/api/2/path/data/ProfilePics/",
+    "cookieString": "_ga=GA1.2.1883368505.1453891337; optimizelyEndUserId=oeu1453891338904r0.5625616400502622; optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D; optimizelyBuckets=%7B%7D; __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1; __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362; hubspotutk=368dbee3677a5c15a485ecf50bc702dd; _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D; PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/; _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.; _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL;",
+    "referer" : "https://rajagopal28.smartfile.com/",
+    "origin" : "http://www.smartfile.com/developer",
+    "expirationTimeStamp": 1454508491000,
+    "csrftoken": "XJwabiBsFlsFEBf1nwDgASqwoV35Xhn9",
+    "sessionid": "7bd6aba2bdb79191e7ca9484e5580a3e"
+  },
+  "clientConfig": {
+    "imagesDirectory": "https://file.ac/JzawZwyM0U8/",
+    "smartFileAuthHeaders": {
+      "csrftoken": "",
+      "sessionid": "",
+      "X-CSRFToken": "",
+      "Accept-Encoding": "gzip, deflate"
+    }
+  }
+}

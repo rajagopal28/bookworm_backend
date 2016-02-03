@@ -198,6 +198,151 @@ app.get('/test/test', function (req, res) {
     });
 });
 
+app.get('/test/test3', function (req, res) {
+    var options = {
+        host: 'rajagopal28.smartfile.com',
+        port: 443,
+         path: '/api/2/path/info/ProfilePics/bay_max.gif?format=json',
+        headers : {
+            cookie : '_ga=GA1.2.1883368505.1453891337; ' +
+            'optimizelyEndUserId=oeu1453891338904r0.5625616400502622; ' +
+            'optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D;' +
+            ' optimizelyBuckets=%7B%7D;' +
+            ' __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1;' +
+            ' __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362;' +
+            ' hubspotutk=368dbee3677a5c15a485ecf50bc702dd;' +
+            ' _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D;' +
+            ' PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/;' +
+            ' csrftoken=YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc;' +
+            ' sessionid=62115b93ff478de68ab87c8c647be902;' +
+            ' _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.;' +
+            ' _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL'
+        },
+        method : 'GET'
+    };
+    /*"set-cookie": ["csrftoken=Ocy9ttyYW7EiLNp69rq4Ei8BRP7qTM8E; expires=Wed, 25-Jan-2017 16:22:51 GMT; Max-Age=31449600; Path=/",
+                "sessionid=4330f0e1b17aab0201539be42fcdfb72; expires=Wed, 27-Jan-2016 16:42:50 GMT; Max-Age=1199; Path=/"] */
+    var apiReq = https.request(options, function(apiRes){
+        console.log('STATUS: ' + apiRes.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
+        apiRes.setEncoding('utf8');
+        var buff= '';
+        apiRes.on('data', function (chunk) {
+          buff+= chunk;
+        });
+        apiRes.on('end', function() {
+            console.log(buff);
+            res.send(buff);
+        });
+    });
+    apiReq.end();
+});
+
+app.post('/test/test4', function (req, res) {
+    var tempPath = req.files.file.path,
+        targetPath = './public/' + req.files.file.name ;
+    if (path.extname(req.files.file.name).toLowerCase() === '.png') {
+        fs.rename(tempPath, targetPath, function(err) {
+            if (err) throw err;
+            // res.send("Upload completed!");
+            if (err) {
+                console.log('Error!');
+              } else {
+                var someForm = new formData();
+                someForm.append('file', fs.createReadStream(targetPath));
+                var fileHeader = someForm.getHeaders();
+                someForm.getLength(function(err,length){
+                    fileHeader['content-length'] = length;
+
+                    console.log(fileHeader);
+                    fileHeader.cookie = '_ga=GA1.2.1883368505.1453891337; ' +
+                            'optimizelyEndUserId=oeu1453891338904r0.5625616400502622; ' +
+                            'optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D;' +
+                            ' optimizelyBuckets=%7B%7D;' +
+                            ' __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1;' +
+                            ' __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362;' +
+                            ' hubspotutk=368dbee3677a5c15a485ecf50bc702dd;' +
+                            ' _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D;' +
+                            ' PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/;' +
+                            ' csrftoken=YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc;' +
+                            ' sessionid=62115b93ff478de68ab87c8c647be902;' +
+                            ' _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.;' +
+                            ' _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL';
+                    fileHeader.referer = "https://rajagopal28.smartfile.com/";
+                    fileHeader.origin = "http://www.smartfile.com/developer";
+                    fileHeader["X-CSRFToken"] = "YXru14hrxgM0SAeo9QA8FDhv4zoEn7bc";
+                    fileHeader["Accept-Encoding"] =  "gzip, deflate";
+                      var options = {
+                        host: 'rajagopal28.smartfile.com',
+                        port: 443,
+                         path: '/api/2/path/data/ProfilePics/',
+                        headers : fileHeader,
+                        method : 'POST'
+                    };
+
+                    /*"set-cookie": ["csrftoken=Ocy9ttyYW7EiLNp69rq4Ei8BRP7qTM8E; expires=Wed, 25-Jan-2017 16:22:51 GMT; Max-Age=31449600; Path=/",
+                                "sessionid=4330f0e1b17aab0201539be42fcdfb72; expires=Wed, 27-Jan-2016 16:42:50 GMT; Max-Age=1199; Path=/"]*/
+                    var apiReq = https.request(options, function(apiRes){
+                        console.log('STATUS: ' + apiRes.statusCode);
+                        console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
+                        apiRes.setEncoding('utf8');
+                        var buff= '';
+                        apiRes.on('data', function (chunk) {
+                          buff+= chunk;
+                        });
+                        apiRes.on('end', function() {
+                            // console.log(buff);
+                            fs.unlink(targetPath);
+                            res.send(buff);
+                        });
+                    });
+                    someForm.pipe(apiReq);
+                    apiReq.on('error', function (error) {
+                        console.log(error);
+                    });
+                });
+              }
+        });
+    }
+
+});
+
+app.post('/test/test2', function (req, res) {
+    var configJSON = serverConfigJSON;
+    var now = mUtils.resetTimeToGMT(new Date()).getTime();
+    if(!configJSON || !configJSON.cloudConfig || !configJSON.cloudConfig.authExpiration) {
+        // I do not have a valid config in server session so read from file
+        readConfigToSession(res, function(configJSON){
+            console.log('inside file read');
+            if(configJSON &&
+                configJSON.cloudConfig){
+                // I have a read configuration now
+                if(now > (1 * configJSON.cloudConfig.expirationTimeStamp)) {
+                    console.log('token expired');
+                    // if login auth expired login and then upload
+                    loginToCloudEnvironment(configJSON.cloudConfig, function (addedTokenInfo) {
+                        configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
+                        configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
+                         console.log(addedTokenInfo);
+                        configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
+                        console.log(configJSON.cloudConfig.expirationTimeStamp);
+                         //console.log(configJSON);
+                        console.log(now);
+                       /*
+                       uploadFileToCloud(req, configJSON, function (response) {
+                            res.send(response);
+                        });
+                        // write the newly created config tokens
+                         writeConfigToFile(configJSON);
+                         */
+                    });
+                }
+            }
+        });
+    }
+
+});
+
 // defaut HTTP handlers
 /*
  http.createServer(function(request, response) {
