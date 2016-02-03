@@ -478,8 +478,8 @@ app.get('*', function (req, res) {
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;
-    var bearerHeader = req.headers['authorization'];
-    if (typeof bearerHeader !== 'undefined') {
+    var bearerHeader = req.headers[mUtils.constants.REQ_HEADER_AUTHORIZATION];
+    if (bearerHeader) {
         var bearer = bearerHeader.split(' ');
         bearerToken = bearer[1];// because bearer[0] === 'Bearer'
         Users.Model
@@ -502,17 +502,19 @@ function writeConfigToFile(newConfig){
     });
 }
 function readConfigToSession(res, callback) {
-    fs.readFile(__dirname + '/server/config.json', 'utf8', function (err,data) {
-      if (err) {
-        res.send(err);
-      } else {
-        var configJSON = JSON.parse(data);
-        if(configJSON) {
-            serverConfigJSON = configJSON;
-            callback(configJSON);
-        }
-      }
-    });
+    fs.readFile(__dirname + '/server/config.json'
+        , mUtils.constants.FORMAT_UTF_8
+        , function (err,data) {
+          if (err) {
+            res.send(err);
+          } else {
+            var configJSON = JSON.parse(data);
+            if(configJSON) {
+                serverConfigJSON = configJSON;
+                callback(configJSON);
+            }
+          }
+        });
 }
 function loginToCloudEnvironment(cloudConfig, callback){
     var data = querystring.stringify({
@@ -521,9 +523,9 @@ function loginToCloudEnvironment(cloudConfig, callback){
         });
         var options = {
           host: cloudConfig.host,
-          port: 443,
+          port: cloudConfig.port,
           path: cloudConfig.loginAuthPath,
-          method: 'POST',
+          method: mUtils.constants.METHOD_POST,
           headers: {
             'Content-Type': mUtils.constants.FORM_TYPE_URL_ENCODED,
             'Content-Length': Buffer.byteLength(data)
@@ -538,21 +540,23 @@ function loginToCloudEnvironment(cloudConfig, callback){
                 var cookieItem = setCookie[index];
                 var cookieSeperatorString = 'expires=';
                 var segments = cookieItem.split(';');
-                if(cookieItem.indexOf('csrftoken=') != -1) {
+                if (cookieItem.indexOf(mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX) != -1) {
                     var temp = segments[0].trim();
-                    var startIndex = temp.indexOf('csrftoken=') + 'csrftoken='.length;
+                    var startIndex = temp.indexOf(mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX)
+                                        + mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX.length;
                     config.csrftoken = temp.substring(startIndex);
                 }
-                if(cookieItem.indexOf('sessionid=') != -1) {
-                    var temp = segments[0].trim();
-                    var startIndex = temp.indexOf('sessionid=') + 'sessionid='.length;
+                if(cookieItem.indexOf(mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX) != -1) {
+                    temp = segments[0].trim();
+                    var startIndex = temp.indexOf(mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX)
+                                        + mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX.length;
                     config.sessionid = temp.substring(startIndex);
                     temp = segments[1].trim();
                     var endIndex = temp.indexOf(cookieSeperatorString);
                     config.expirationTimestamp = temp.substring(endIndex + cookieSeperatorString.length).trim();
                 }
             }
-            apiRes.setEncoding('utf8');
+            apiRes.setEncoding(mUtils.constants.FORMAT_UTF_8);
             apiRes.on('data', function (chunk) {
               buff+= chunk;
             });
@@ -585,8 +589,12 @@ function uploadFileToCloud(req, serverConfig, callback) {
                 someForm.getLength(function(err,length){
                     fileHeader['content-length'] = length;
                     fileHeader.cookie = cloudConfig.cookieString
-                        + ' csrftoken='+ cloudConfig.csrftoken +';'
-                        + ' sessionid='+ cloudConfig.sessionid ;
+                        + ' '
+                        + mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX
+                        + cloudConfig.csrftoken +';'
+                        + ' '
+                        + mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX
+                        + cloudConfig.sessionid ;
                     fileHeader.referer = cloudConfig.referer;
                     fileHeader.origin = cloudConfig.origin;
                     fileHeader[mUtils.constants.HEADER_X_CSRF_TOKEN] = cloudConfig.csrftoken;
@@ -597,12 +605,12 @@ function uploadFileToCloud(req, serverConfig, callback) {
                         port: cloudConfig.port,
                         path: cloudConfig.docUploadPath,
                         headers: fileHeader,
-                        method: 'POST'
+                        method: mUtils.constants.METHOD_POST
                     };
                     var apiReq = https.request(options, function(apiRes){
-                        console.log('STATUS: ' + apiRes.statusCode); 
+                        console.log('STATUS: ' + apiRes.statusCode);
                         console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
-                        apiRes.setEncoding('utf8');
+                        apiRes.setEncoding(mUtils.constants.FORMAT_UTF_8);
                         var buff= '';
                         apiRes.on('data', function (chunk) {
                           buff+= chunk;

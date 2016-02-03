@@ -5,7 +5,12 @@ function Utils() {
         FORM_TYPE_URL_ENCODED :'application/x-www-form-urlencoded',
         HEADER_X_CSRF_TOKEN : 'X-CSRFToken',
         HEADER_ACCEPT_ENCODING: 'Accept-Encoding',
-        DEFAULT_ACCEPT_HEADER_FOR_UPLOAD: 'gzip, deflate'
+        DEFAULT_ACCEPT_HEADER_FOR_UPLOAD: 'gzip, deflate',
+        METHOD_POST : 'POST',
+        FORMAT_UTF_8: 'utf8',
+        COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX : 'csrftoken=',
+        COOKIE_VAR_STRING_SESSION_ID_PREFIX : 'sessioid=',
+        REQ_HEADER_AUTHORIZATION : 'authorization'
     };
     var requestToDBKeys = {
         'id': '_id',
