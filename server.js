@@ -1,42 +1,42 @@
-var http = require('http')
-    , https = require('https')
-    , querystring = require('querystring')
-    , server = http.Server(app)
+var mongoose = require('mongoose')
+    , mongodb = require('mongodb')
     , express = require('express')
     , app = express()
     , morgan = require('morgan')
     , logUtil = require('util')
     , fs = require('fs')
     , path = require('path')
-    , json = require('express-json')
+    , https = require('https')
+    , querystring = require('querystring')
     , multipart = require('connect-multiparty')
     , formData = require('form-data')
-    , methodOverride = require('method-override')
-    , session = require('express-session')
-    , errorHandler = require('errorhandler')
     , bcrypt = require('bcrypt')
     , utils = require('./server/models/utils')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
     , forum = require('./server/models/forum')
-    , mongoose = require('mongoose')
-    , mongodb = require('mongodb')
     , bodyParser = require('body-parser')
     , favicon = require('serve-favicon')
     , socketServer = app.listen(8080)
     , io = require('socket.io')(socketServer, {
         serveClient: true,
         path: '/socket.io'
-    });
+    })
+    , methodOverride = require('method-override');
 //io.set('transports',['xhr-polling']);
 /* Models */
 var mUtils = new utils.Utils();
 var Books = new book.Book(mongoose);
 var Users = new user.User(mongoose, bcrypt);
 var Forums = new forum.Forum(mongoose);
+
+/*** Global Variables*/
 var serverConfigJSON;
 var socket;
+/*** Constants ***/
+var constants = mUtils.constants;
 console.log(mongoose.connection.readyState);
+
 if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
     mongoose.connect('mongodb://root@localhost:27017/admin');
 }
@@ -47,16 +47,13 @@ db.once('open', function () {
 });
 
 // all environments
-accessLogStream = fs.createWriteStream(__dirname + '/server/logfile.txt', {flags: 'a'});
+accessLogStream = fs.createWriteStream(__dirname + constants.LOG_FILE_RELATIVE_PATH, {flags: 'a'});
 app.set('port', process.env.PORT || 8080);
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-//app.use(express.favicon());
 app.use(favicon(__dirname + '/public/static/images/favicon.ico'));
 app.use(morgan('combined', {stream: accessLogStream}));
-//app.use(morgan('common', { skip: function(req, res) { return false; }, stream: __dirname + '/server/logfile.txt' }));
-app.use(json());
 app.use(multipart());
 app.use(bodyParser.json({type: 'application/vnd.api+json'}));
 app.use(methodOverride('X-HTTP-Method-Override'));
@@ -64,17 +61,6 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(bodyParser.urlencoded({extended: false}));
 // parse application/json
 app.use(bodyParser.json());
-app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {secure: true}
-}));
-
-// development only
-if ('development' === app.get('env')) {
-    app.use(errorHandler());
-}
 // allow cross origin access
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -234,8 +220,7 @@ app.post('/bookworm/api/users/check-unique',
                     if (err) {
                         res.send(err);
                     } else {
-                        var isUsernameAvailable =
-                            items.length === 0;
+                        var isUsernameAvailable = items.length === 0;
                         res.send({isUsernameAvailable: isUsernameAvailable});
                     }
                 });
@@ -376,7 +361,7 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
                                     item.forumId = forum_item._id;
                                     item.chat = mUtils.parseDBToResponseKeys(chat_item);
                                     console.log('in socket');
-                                    socket.emit('new-chat', item);
+                                    socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);
                                 }
                                 res.json(new_forum);
                             }
@@ -478,7 +463,7 @@ app.get('*', function (req, res) {
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;
-    var bearerHeader = req.headers[mUtils.constants.REQ_HEADER_AUTHORIZATION];
+    var bearerHeader = req.headers[constants.REQ_HEADER_AUTHORIZATION];
     if (bearerHeader) {
         var bearer = bearerHeader.split(' ');
         bearerToken = bearer[1];// because bearer[0] === 'Bearer'
@@ -497,13 +482,13 @@ function ensureAuthorized(req, res, next) {
     }
 }
 function writeConfigToFile(newConfig){
-    fs.writeFile(__dirname + '/server/config.json', JSON.stringify(newConfig), function(err) {
+    fs.writeFile(__dirname + constants.CONFIG_FILE_RELATIVE_PATH, JSON.stringify(newConfig), function(err) {
         console.log(err);
     });
 }
 function readConfigToSession(res, callback) {
-    fs.readFile(__dirname + '/server/config.json'
-        , mUtils.constants.FORMAT_UTF_8
+    fs.readFile(__dirname + constants.CONFIG_FILE_RELATIVE_PATH
+        , constants.FORMAT_UTF_8
         , function (err,data) {
           if (err) {
             res.send(err);
@@ -525,9 +510,9 @@ function loginToCloudEnvironment(cloudConfig, callback){
           host: cloudConfig.host,
           port: cloudConfig.port,
           path: cloudConfig.loginAuthPath,
-          method: mUtils.constants.METHOD_POST,
+          method: constants.METHOD_POST,
           headers: {
-            'Content-Type': mUtils.constants.FORM_TYPE_URL_ENCODED,
+            'Content-Type': constants.FORM_TYPE_URL_ENCODED,
             'Content-Length': Buffer.byteLength(data)
           }
         };
@@ -535,108 +520,114 @@ function loginToCloudEnvironment(cloudConfig, callback){
         var buff = '';
         var config = {};
         var apiRequest = https.request(options, function(apiRes) {
-            var setCookie = apiRes.headers['set-cookie'];
+            var setCookie = apiRes.headers[constants.HEADER_SET_COOKIE];
             for(var index=0; index< setCookie.length; index++) {
                 var cookieItem = setCookie[index];
-                var cookieSeperatorString = 'expires=';
                 var segments = cookieItem.split(';');
-                if (cookieItem.indexOf(mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX) != -1) {
+                if (cookieItem.indexOf(constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX) != -1) {
                     var temp = segments[0].trim();
-                    var startIndex = temp.indexOf(mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX)
-                                        + mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX.length;
+                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX)
+                                        + constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX.length;
                     config.csrftoken = temp.substring(startIndex);
                 }
-                if(cookieItem.indexOf(mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX) != -1) {
+                if(cookieItem.indexOf(constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX) != -1) {
                     temp = segments[0].trim();
-                    var startIndex = temp.indexOf(mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX)
-                                        + mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX.length;
+                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX)
+                                        + constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX.length;
                     config.sessionid = temp.substring(startIndex);
                     temp = segments[1].trim();
-                    var endIndex = temp.indexOf(cookieSeperatorString);
-                    config.expirationTimestamp = temp.substring(endIndex + cookieSeperatorString.length).trim();
+                    var endIndex = temp.indexOf(constants.COOKIE_VAR_STRING_EXPIRES_PREFIX);
+                    config.expirationTimestamp = temp.substring(endIndex + constants.COOKIE_VAR_STRING_EXPIRES_PREFIX.length).trim();
                 }
             }
-            apiRes.setEncoding(mUtils.constants.FORMAT_UTF_8);
-            apiRes.on('data', function (chunk) {
-              buff+= chunk;
-            });
-            apiRes.on('end', function() {
-                //console.log(buff);
-                callback(config);
-            });
+            apiRes.setEncoding(constants.FORMAT_UTF_8);
+            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_DATA
+                , function (chunk) {
+                  buff+= chunk;
+                });
+            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_END
+                , function() {
+                    //console.log(buff);
+                    callback(config);
+                });
+
             apiResponse = apiRes;
         });
+        apiRequest.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
+                    , function (error) {
+                        console.error(error);
+                    });
         apiRequest.write(data);
         apiRequest.end();
 }
 function uploadFileToCloud(req, serverConfig, callback) {
     var cloudConfig = serverConfig.cloudConfig;
     var ACCEPTED_FILE_PATHS = serverConfig.acceptedImageFormats;
-    var tempPath = req.files.file.path,
-        targetPath = './public/' + req.files.file.name ;
     var fileExtension = path.extname(req.files.file.name).toLowerCase();
+    var tempPath = req.files.file.path,
+        targetPath = constants.TEMP_FILE_PATH
+                        + req.token
+                        + fileExtension;
     if (ACCEPTED_FILE_PATHS
         && fileExtension
         && ACCEPTED_FILE_PATHS.indexOf(fileExtension) !== -1) {
         fs.rename(tempPath, targetPath, function(err) {
             if (err) {
                 console.log('Error!');
-                console.log(err);
+                console.error(err);
               } else {
                 var someForm = new formData();
-                someForm.append('file', fs.createReadStream(targetPath));
+                someForm.append(constants.REQUEST_PARAM_CLOUD_FILE_NAME, fs.createReadStream(targetPath));
                 var fileHeader = someForm.getHeaders();
                 someForm.getLength(function(err,length){
-                    fileHeader['content-length'] = length;
+                    fileHeader[constants.HEADER_CONTENT_LENGTH] = length;
                     fileHeader.cookie = cloudConfig.cookieString
                         + ' '
-                        + mUtils.constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX
+                        + constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX
                         + cloudConfig.csrftoken +';'
                         + ' '
-                        + mUtils.constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX
+                        + constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX
                         + cloudConfig.sessionid ;
                     fileHeader.referer = cloudConfig.referer;
                     fileHeader.origin = cloudConfig.origin;
-                    fileHeader[mUtils.constants.HEADER_X_CSRF_TOKEN] = cloudConfig.csrftoken;
-                    fileHeader[mUtils.constants.HEADER_ACCEPT_ENCODING] =  mUtils.constants.DEFAULT_ACCEPT_HEADER_FOR_UPLOAD;
+                    fileHeader[constants.HEADER_X_CSRF_TOKEN] = cloudConfig.csrftoken;
+                    fileHeader[constants.HEADER_ACCEPT_ENCODING] =  constants.DEFAULT_ACCEPT_HEADER_FOR_UPLOAD;
                     console.log(fileHeader);
                     var options = {
                         host: cloudConfig.host,
                         port: cloudConfig.port,
                         path: cloudConfig.docUploadPath,
                         headers: fileHeader,
-                        method: mUtils.constants.METHOD_POST
+                        method: constants.METHOD_POST
                     };
                     var apiReq = https.request(options, function(apiRes){
                         console.log('STATUS: ' + apiRes.statusCode);
                         console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
-                        apiRes.setEncoding(mUtils.constants.FORMAT_UTF_8);
+                        apiRes.setEncoding(constants.FORMAT_UTF_8);
                         var buff= '';
-                        apiRes.on('data', function (chunk) {
-                          buff+= chunk;
-                        });
-                        apiRes.on('end', function() {
-                            // console.log(buff);
-                            fs.unlink(targetPath);
-                            callback(buff);
-                        });
+                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_DATA
+                            , function (chunk) {
+                              buff+= chunk;
+                            });
+                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_END
+                            , function() {
+                                // console.log(buff);
+                                fs.unlink(targetPath);
+                                callback(buff);
+                            });
                     });
                     someForm.pipe(apiReq);
-                    apiReq.on('error', function (error) {
-                        console.log(error);
-                    });
+                    apiReq.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
+                        , function (error) {
+                            console.error(error);
+                        });
                 });
               }
         });
     }
 }
 // socket IO -----------------------------------------------------------------
-io.sockets.on('connection', function (mSocket) {
+io.sockets.on(constants.SOCKET_EVENT_CONNECTION, function (mSocket) {
     socket = mSocket;
     console.log('new socket connection');
-    socket.on('ferret', function (name, fn) {
-        console.log('woot');
-        console.log(name);
-        // console.log(fn);
-    });
 });

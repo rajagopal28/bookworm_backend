@@ -342,7 +342,16 @@ app.post('/test/test2', function (req, res) {
     }
 
 });
-
+// socket IO -----------------------------------------------------------------
+io.sockets.on('connection', function (mSocket) {
+    socket = mSocket;
+    console.log('new socket connection');
+    socket.on('ferret', function (name, fn) {
+        console.log('woot');
+        console.log(name);
+        // console.log(fn);
+    });
+});
 // defaut HTTP handlers
 /*
  http.createServer(function(request, response) {

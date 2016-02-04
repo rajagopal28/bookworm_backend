@@ -5,12 +5,24 @@ function Utils() {
         FORM_TYPE_URL_ENCODED :'application/x-www-form-urlencoded',
         HEADER_X_CSRF_TOKEN : 'X-CSRFToken',
         HEADER_ACCEPT_ENCODING: 'Accept-Encoding',
+        HEADER_CONTENT_LENGTH : 'content-length',
+        HEADER_SET_COOKIE : 'set-cookie',
         DEFAULT_ACCEPT_HEADER_FOR_UPLOAD: 'gzip, deflate',
         METHOD_POST : 'POST',
         FORMAT_UTF_8: 'utf8',
         COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX : 'csrftoken=',
         COOKIE_VAR_STRING_SESSION_ID_PREFIX : 'sessioid=',
-        REQ_HEADER_AUTHORIZATION : 'authorization'
+        COOKIE_VAR_STRING_EXPIRES_PREFIX : 'expires=',
+        REQUEST_PARAM_CLOUD_FILE_NAME : 'file',
+        REQ_HEADER_AUTHORIZATION : 'authorization',
+        LOG_FILE_RELATIVE_PATH : '/server/logfile.txt',
+        CONFIG_FILE_RELATIVE_PATH : '/server/config.json',
+        TEMP_FILE_PATH : './public/static/images/',
+        SOCKET_EVENT_CONNECTION : 'connection',
+        SOCKET_EVENT_NEW_CHAT: 'new-chat',
+        HTTP_REQUEST_EVENT_NAME_DATA : 'data',
+        HTTP_REQUEST_EVENT_NAME_END : 'end',
+        HTTP_REQUEST_EVENT_NAME_ERROR : 'error'
     };
     var requestToDBKeys = {
         'id': '_id',
@@ -183,6 +195,11 @@ function Utils() {
     };
     this.resetTimeToGMT = function(dateObj) {
         return new Date(dateObj.getTime() + (dateObj.getTimezoneOffset() * 60 * 1000));
+    };
+    this.formatWithArguments = function(string, replacements) {
+        return string.replace(/\{(\d+)\}/g, function() {
+            return replacements[arguments[1]];
+        });
     };
 };
 module.exports.Utils = Utils;

@@ -90,22 +90,22 @@ a.btn {
 }
 
 .github {
-    background-image: url(../images/github-edc899c60c7b3afd0c458e648197f578.svg);
+    background-image: url(../images/github.svg);
     background-position: center center
 }
 
 .linkedin {
-    background-image: url(../images/linkedin-be22eb82414f9f637debbe2d64c301cb.svg);
-    background-position: center center
-}
-
-.tumblr {
-    background-image: url(../images/tumblr.svg);
+    background-image: url(../images/linkedin.svg);
     background-position: center center
 }
 
 .twitter {
-    background-image: url(../images/twitter-8c095eaee58362a46d56e3f07b50b23b.svg);
+    background-image: url(../images/twitter.svg);
+    background-position: center center
+}
+/*
+.tumblr {
+    background-image: url(../images/tumblr.svg);
     background-position: center center
 }
 
@@ -117,15 +117,15 @@ a.btn {
 .vimeo {
     background-image: url(../images/vimeo.svg);
     background-position: center center
-}
+} */
 
 .instagram {
-    background-image: url(../images/instagram-057a090ac0e0184c68efc07e412eec3b.svg);
+    background-image: url(../images/instagram.svg);
     background-position: center center
 }
 
 .facebook {
-    background-image: url(../images/facebook-70848fad6bf158b9a52e47d9bc956b8a.svg);
+    background-image: url(../images/facebook.svg);
     background-position: center center
 }
 
@@ -135,7 +135,7 @@ a.btn {
 }
 
 .gplus {
-    background-image: url(../images/gplus-b3a33145641e08e048cd10ed0ece59ce.svg);
+    background-image: url(../images/gplus.svg);
     background-position: center center
 }
 
