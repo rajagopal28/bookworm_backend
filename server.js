@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
     , mongodb = require('mongodb')
     , express = require('express')
     , app = express()
+    , bcrypt = require('bcrypt')
     , morgan = require('morgan')
     , logUtil = require('util')
     , fs = require('fs')
@@ -10,13 +11,15 @@ var mongoose = require('mongoose')
     , querystring = require('querystring')
     , multipart = require('connect-multiparty')
     , formData = require('form-data')
-    , bcrypt = require('bcrypt')
-    , utils = require('./server/models/utils')
+    , bodyParser = require('body-parser')
+    , favicon = require('serve-favicon')
+    , nodemailer = require('nodemailer')
+    , smtpTransport = require('nodemailer-smtp-transport')
+    , utils = require('./server/utils/common-util')
+    , mailer = require('./server/utils/mailer-util')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
     , forum = require('./server/models/forum')
-    , bodyParser = require('body-parser')
-    , favicon = require('serve-favicon')
     , socketServer = app.listen(8080)
     , io = require('socket.io')(socketServer, {
         serveClient: true,
@@ -26,16 +29,21 @@ var mongoose = require('mongoose')
 //io.set('transports',['xhr-polling']);
 /* Models */
 var mUtils = new utils.Utils();
+var Mailer = new mailer.Mailer(nodemailer, smtpTransport,  mUtils);
 var Books = new book.Book(mongoose);
 var Users = new user.User(mongoose, bcrypt);
 var Forums = new forum.Forum(mongoose);
-
 /*** Global Variables*/
 var serverConfigJSON;
 var socket;
 /*** Constants ***/
 var constants = mUtils.constants;
 console.log(mongoose.connection.readyState);
+
+
+readConfigToSession(null, function(configFile) {
+    Mailer.setSMTPConfig(configFile['smtpConfig']);
+});
 
 if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
     mongoose.connect('mongodb://root@localhost:27017/admin');
@@ -256,6 +264,7 @@ app.post('/bookworm/api/users/register',
                 } else {
                     res.send(items);
                     console.log('Success insertion: ' + JSON.stringify(items));
+                    Mailer.sendRegistrationConfirmation(new_user);// send email for confirmation
                 }
             });
         } else {
@@ -490,7 +499,7 @@ function readConfigToSession(res, callback) {
     fs.readFile(__dirname + constants.CONFIG_FILE_RELATIVE_PATH
         , constants.FORMAT_UTF_8
         , function (err,data) {
-          if (err) {
+          if (err && res) {
             res.send(err);
           } else {
             var configJSON = JSON.parse(data);
