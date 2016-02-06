@@ -1,5 +1,5 @@
-app.service('UsersService', ['$http', '$localStorage', 'BookwormAuthProvider',
-    function ($http, $localStorage, BookwormAuthProvider) {
+app.service('UsersService', ['$http', '$localStorage', 'Constants', 'BookwormAuthProvider',
+    function ($http, $localStorage, Constants, BookwormAuthProvider) {
         this.registerUser = function (user) {
             return $http.post('/bookworm/api/users/register', user, {timeout: 1000});
         };
@@ -27,13 +27,20 @@ app.service('UsersService', ['$http', '$localStorage', 'BookwormAuthProvider',
           return $http.get('/bookworm/api/users/all', {params : options}, {timeout: 1000});
         };
         this.postImage = function(file){
-           var fd = new FormData();
-           fd.append('file', file);
-           return $http.post('/bookworm/api/user/profile-upload', fd, {
-              transformRequest: angular.identity,
-              headers: {
-                'Content-Type': undefined
-              }
-           });
+            var user = BookwormAuthProvider.getUser();
+
+            if(user && user.username && file) {
+                var username = user.username;
+                var fd = new FormData();
+                fd.append(Constants.PARAM_USER_NAME, username);
+                fd.append(Constants.PARAM_USER_IMAGE_FILE_NAME, file);
+                return $http.post('/bookworm/api/user/profile-upload', fd, {
+                  transformRequest: angular.identity,
+                  headers: {
+                    'Content-Type': undefined
+                  }
+                });
+            }
+
         };
 }]);

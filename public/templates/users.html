@@ -23,11 +23,15 @@
 
         <div class="row">
              <div class="col-lg-10">
+                <div class="alert alert-info alert-dismissible" role="alert" ng-if="!users.length">
+                    <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Info:</span></strong> No information to display
+                </div>
                 <div class="media" ng-repeat="user in users">
                     <div class="media-left">
-                        <a href="#">
-                            <img class="media-object" src="{{ user.thumbnailURL }}" alt="{{ user.firstName }}">
-                        </a>
+                        <div class="user-thumbnail">
+                            <img class="media-object thumbnail" src="{{ user.thumbnailURL }}" alt="{{ user.firstName }}">
+                        </div>
                     </div>
                     <div class="media-body">
                         <h4 class="media-heading"><a ng-href="#/bookworm/users/{{ user.username }}">{{ user.firstName }} {{ user.lastName }}</a></h4>
@@ -36,7 +40,7 @@
                         <h4 class="media-heading">{{ user.gender }}</h4>
                     </div>
                 </div>
-                <div class="center">
+                <div class="center"  ng-if="pageSort.totalItems > 0">
                     <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
                                 max-size="pageSort.maximumPages" items-per-page="pageSort.itemsPerPage" rotate="true"
                                 ng-change="pageChanged()"

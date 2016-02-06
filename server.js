@@ -43,11 +43,23 @@ console.log(mongoose.connection.readyState);
 
 readConfigToSession(null, function(configFile) {
     Mailer.setSMTPConfig(configFile['smtpConfig']);
+    if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
+        var mongoConfig = configFile['mongoConfig'];
+        if(mongoConfig) {
+            var connectionString = mongoConfig.connectionPrefix
+                                    + mongoConfig.user
+                                    + '@'
+                                    + mongoConfig.host
+                                    + ':'
+                                    + mongoConfig.port
+                                    + '/'
+                                    + mongoConfig.database;
+            mongoose.connect(connectionString);
+        }
+    }
 });
 
-if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
-    mongoose.connect('mongodb://root@localhost:27017/admin');
-}
+
 var db = mongoose.connection;
 
 db.once('open', function () {
@@ -163,17 +175,30 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                 if(now > 1 * configJSON.cloudConfig.expirationTimeStamp) {
                     // if login auth expired login and then upload
                     loginToCloudEnvironment(configJSON.cloudConfig, function (addedTokenInfo) {
-                        configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
-                        configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
-                        configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
-                        console.log(logUtil.inspect( 'after logging in'));
-                        console.log(logUtil.inspect(now));
-                        console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
-                        uploadFileToCloud(req, configJSON, function (response) {
-                            res.send(response);
-                        });
-                        // write the newly created config tokens
-                        writeConfigToFile(configJSON);
+                        if(addedTokenInfo) {
+                            configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
+                            configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
+                            configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
+                            console.log(logUtil.inspect( 'after logging in'));
+                            console.log(logUtil.inspect(now));
+                            console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+                            uploadFileToCloud(req, configJSON, function (response) {
+                                if(response && response.fileName) {
+                                    console.log(response);
+                                    res.json({success : true,
+                                        fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
+                                    });
+                                } else {
+                                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
+                                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                                }
+                            });
+                            // write the newly created config tokens
+                            writeConfigToFile(configJSON);
+                        } else {
+                            console.log(constants.ERROR_CLOUD_LOGIN_FAILED);
+                            res.json({success: false, error : constants.ERROR_CLOUD_LOGIN_FAILED});
+                        }
                     });
                 } else {
                     console.log(logUtil.inspect( 'not logging in'));
@@ -181,7 +206,15 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                     console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
                     // here the auth token is still valid so just upload
                     uploadFileToCloud(req, configJSON, function(response) {
-                        res.send(response);
+                        if(response && response.fileName) {
+                            console.log(response);
+                            res.json({success : true,
+                                fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
+                            });
+                        } else {
+                            console.log(constants.ERROR_FILE_UPLOAD_FAILED);
+                            res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                        }
                     });
                 }
             }
@@ -194,17 +227,30 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
         if(now > 1 * configJSON.cloudConfig.expirationTimeStamp) {
             // if login auth expired login and then upload
             loginToCloudEnvironment( configJSON.cloudConfig, function (addedTokenInfo) {
-                configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
-                configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
-                configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
-                console.log( 'kk - after logging in');
-                console.log(logUtil.inspect(now));
-                console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
-                uploadFileToCloud(req, configJSON, function (response) {
-                    res.send(response);
-                });
-                // write the newly created config tokens
-                writeConfigToFile(configJSON);
+                if(addedTokenInfo){
+                    configJSON.cloudConfig.csrftoken = addedTokenInfo.csrftoken;
+                    configJSON.cloudConfig.sessionid = addedTokenInfo.sessionid;
+                    configJSON.cloudConfig.expirationTimeStamp = new Date(addedTokenInfo.expirationTimestamp).getTime();
+                    console.log( 'kk - after logging in');
+                    console.log(logUtil.inspect(now));
+                    console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
+                    uploadFileToCloud(req, configJSON, function (response) {
+                        if(response && response.fileName) {
+                            console.log(response);
+                            res.json({success : true,
+                                fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
+                            });
+                        } else {
+                            console.log(constants.ERROR_FILE_UPLOAD_FAILED);
+                            res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                        }
+                    });
+                    // write the newly created config tokens
+                    writeConfigToFile(configJSON);
+                } else {
+                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
+                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                }
             });
         } else {
             console.log( 'kk - not logging in');
@@ -212,7 +258,15 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
             console.log(logUtil.inspect(configJSON.cloudConfig.expirationTimeStamp));
             // here the auth token is still valid so just upload
             uploadFileToCloud(req,  configJSON, function(response) {
-                res.send(response);
+               if(response && response.fileName) {
+                    console.log(response);
+                    res.json({success : true,
+                        fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
+                    });
+                } else {
+                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
+                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                }
             });
         }
     }
@@ -223,6 +277,7 @@ app.post('/bookworm/api/users/check-unique',
         var inputParams = req.body;
         var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
         if (searchQuery.username) {
+            searchQuery = {username : searchQuery.username};
             Users.Model.find(searchQuery)
                 .exec(function (err, items) {
                     if (err) {
@@ -525,7 +580,6 @@ function loginToCloudEnvironment(cloudConfig, callback){
             'Content-Length': Buffer.byteLength(data)
           }
         };
-        var apiResponse = {};
         var buff = '';
         var config = {};
         var apiRequest = https.request(options, function(apiRes) {
@@ -559,12 +613,11 @@ function loginToCloudEnvironment(cloudConfig, callback){
                     //console.log(buff);
                     callback(config);
                 });
-
-            apiResponse = apiRes;
         });
         apiRequest.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
                     , function (error) {
                         console.error(error);
+                        callback(null);
                     });
         apiRequest.write(data);
         apiRequest.end();
@@ -572,10 +625,11 @@ function loginToCloudEnvironment(cloudConfig, callback){
 function uploadFileToCloud(req, serverConfig, callback) {
     var cloudConfig = serverConfig.cloudConfig;
     var ACCEPTED_FILE_PATHS = serverConfig.acceptedImageFormats;
+    var cloudFileName = req.body.username;
     var fileExtension = path.extname(req.files.file.name).toLowerCase();
     var tempPath = req.files.file.path,
         targetPath = constants.TEMP_FILE_PATH
-                        + req.token
+                        + cloudFileName
                         + fileExtension;
     if (ACCEPTED_FILE_PATHS
         && fileExtension
@@ -622,13 +676,14 @@ function uploadFileToCloud(req, serverConfig, callback) {
                             , function() {
                                 // console.log(buff);
                                 fs.unlink(targetPath);
-                                callback(buff);
+                                callback({fileName : cloudFileName + fileExtension, apiResponseString :buff});
                             });
                     });
                     someForm.pipe(apiReq);
                     apiReq.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
                         , function (error) {
                             console.error(error);
+                            callback(null);
                         });
                 });
               }

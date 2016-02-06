@@ -22,7 +22,9 @@ function Utils() {
         SOCKET_EVENT_NEW_CHAT: 'new-chat',
         HTTP_REQUEST_EVENT_NAME_DATA : 'data',
         HTTP_REQUEST_EVENT_NAME_END : 'end',
-        HTTP_REQUEST_EVENT_NAME_ERROR : 'error'
+        HTTP_REQUEST_EVENT_NAME_ERROR : 'error',
+        ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
+        ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!'
     };
     var requestToDBKeys = {
         'id': '_id',

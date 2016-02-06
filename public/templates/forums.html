@@ -47,7 +47,7 @@
                         </div>
                     </uib-accordion-group>
                 </uib-accordion>
-                <div class="center">
+                <div class="center" ng-if="pageSort.totalItems > 0">
                     <uib-pagination boundary-links="true" total-items="pageSort.totalItems" ng-model="pageSort.pageNumber"
                                 max-size="pageSort.maximumPages" items-per-page="pageSort.itemsPerPage" rotate="true"
                                 ng-change="pageChanged()"

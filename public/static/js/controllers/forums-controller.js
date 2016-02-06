@@ -8,7 +8,12 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
             var options = $scope.pageSort;
             ForumsService.allForums(options)
                 .then(function (response) {
+                    $scope.status = {};
                     $scope.forums = response.data.items;
+                    if($scope.forums && $scope.forums.length) {
+                        $scope.status[$scope.forums[0].id] = {open :true};
+                        // always open first one
+                    }
                     $scope.pageSort.totalItems = response.data.totalItems;
                     console.log($scope.pageSort);
                 });

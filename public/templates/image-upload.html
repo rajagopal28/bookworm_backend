@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="cancel()"><span
+            aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">Image upload</h4>
+</div>
+<div class="modal-body">
+    <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                aria-hidden="true">&times;</span></button>
+        <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>Error!</strong> {{ errorMessage }}
+    </div>
+    <div class="row">
+      <div class="col-sm-6 col-md-4">
+        <div class="thumbnail">
+          <img src="{{ user.thumbnailURL }}" alt="{{ user.firstName }}">
+        </div>
+      </div>
+      <div class="col-sm-6 col-md-8">
+        <div class="caption">
+            <h3>Upload a photo</h3>
+            <p>You can upload a JPG, PNG or GIF file(File size limit 5MB)</p>
+            <input class="btn btn-default" type = "file" name="file" file-model="profileThumbnail"/>
+            <p><button ng-click="uploadImage()" class="btn btn-primary">Upload</button></p>
+        </div>
+      </div>
+    </div>
+</div>

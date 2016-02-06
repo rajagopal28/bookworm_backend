@@ -6,6 +6,13 @@
     ".jpeg",
     ".bmp"
   ],
+  "mongoConfig" : {
+    "connectionPrefix" : "mongodb://",
+    "host" : "localhost",
+    "port" : "27017",
+    "user" : "wormer",
+    "database" : "book_worm"
+  },
   "smtpConfig": {
     "protocol": "SMTP",
     "host": "smtp.gmail.com",
@@ -26,10 +33,14 @@
     "origin": "http://www.smartfile.com/developer",
     "expirationTimeStamp": 1454519126000,
     "csrftoken": "L4eWqte3RlGWKFWsG937vp9taNR3kexW",
-    "sessionid": "4746a1f6bd7d2c11c53096a79c3160f4"
+    "sessionid": "4746a1f6bd7d2c11c53096a79c3160f4",
+    "uploadedImagesDirectory": "https://file.ac/JzawZwyM0U8/"
   },
   "clientConfig": {
     "imagesDirectory": "https://file.ac/JzawZwyM0U8/",
+    "noMaleImageURL" : "../static/images/no-image-male.jpg",
+    "noFemaleImageURL" : "../static/images/no-image-female.jpg",
+    "noImageURL" : "../static/images/no-image-female.jpg",
     "smartFileAuthHeaders": {
       "csrftoken": "",
       "sessionid": "",

@@ -161,7 +161,12 @@ a.btn:hover,
     color: #fff;
     transition: background-color .5s
 }
-
+.dropdown .dropdown-toggle img.profile-image {
+    height: 60px;
+}
+.navbar-nav-padding {
+    padding-top: 15px;
+}
 .home .jumbotron {
     background: url(../images/magic_book.jpg) center center;
     background-size: cover;
@@ -241,14 +246,9 @@ a.btn:hover,
     width: 10px
 }
 
-.thumbnail {
-    border: 0;
-    border-radius: 0;
+.user-thumbnail img {
     max-height: 240px;
-    padding: 0;
-    overflow: hidden
 }
-
 .about .thumbnail {
     max-height: 400px
 }

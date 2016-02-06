@@ -22,11 +22,11 @@
             ISBN or Book name to fill in details.
         </div>
         <div class="row">
-            <div class="col-xs-6">
+            <div class="col-xs-8">
                 <form class="form-horizontal" name="lendForm">
                     <div class="form-group">
                         <label for="isbn" class="control-label col-xs-2">ISBN</label>
-                        <div class="col-xs-10">
+                        <div class="col-xs-8">
                             <input ng-model="book.isbn" type="text" class="form-control" name="isbn"
                                    placeholder="12345678" ng-required="true" uib-tooltip="Enter a 13or10 digit ISBN no."
                                    ng-blur="loadBookDetails()" tooltip-trigger="focus" tooltip-placement="top">
@@ -35,7 +35,7 @@
                     </div>
                     <div class="form-group">
                         <label for="bookName" class="control-label col-xs-2">Book name</label>
-                        <div class="col-xs-10">
+                        <div class="col-xs-8">
                             <input ng-model="book.bookName" type="text" class="form-control" name="bookName"
                                    placeholder="Song of Ice and Fire" ng-required="true"
                                    typeahead-loading="loadingBooks"
@@ -46,21 +46,21 @@
                     </div>
                     <div class="form-group">
                         <label for="authorName" class="control-label col-xs-2">Author name</label>
-                        <div class="col-xs-10">
+                        <div class="col-xs-8">
                             <input type="text" ng-model="book.authorName" class="form-control" name="authorName"
                                    placeholder="R.R.Martin" ng-required="true">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="description" class="control-label col-xs-2">Description</label>
-                        <div class="col-xs-10">
+                        <div class="col-xs-8">
                             <textarea class="form-control" rows="5" ng-model="book.description"
                                       name="comment"></textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="genres" class="control-label col-xs-2">Genres</label>
-                        <div class="col-xs-10">
+                        <div class="col-xs-8">
                             <tags-input ng-model="book.genresList" uib-tooltip="Add genres for better search results"
                                         tooltip-trigger="focus" tooltip-placement="top"
                                         placeholder="Add genres for better search">
@@ -69,12 +69,12 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <div class="col-xs-offset-2 col-xs-10" ng-if="!isEditMode()">
+                        <div class="col-xs-offset-2 col-xs-8" ng-if="!isEditMode()">
                             <button type="submit" class="btn btn-primary" ng-click="lendBook()"
                                     ng-disabled="!lendForm.$valid">Lend
                             </button>
                         </div>
-                        <div class="col-xs-offset-2 col-xs-10" ng-if="isEditMode()">
+                        <div class="col-xs-offset-2 col-xs-8" ng-if="isEditMode()">
                             <button type="submit" class="btn btn-primary" ng-click="editBook()"
                                     ng-disabled="!lendForm.$valid">Update
                             </button>
@@ -82,10 +82,10 @@
                     </div>
                 </form>
             </div>
-            <div class="col-lg-5">
-                <a href="#" class="thumbnail">
-                    <img src="{{ book.thumbnailURL }}" alt="No Image">
-                </a>
+            <div class="col-md-3">
+                <div href="#">
+                    <img class="thumbnail" src="{{ book.thumbnailURL }}" alt="No Image">
+                </div>
             </div>
         </div>
     </div>

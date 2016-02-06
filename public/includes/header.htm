@@ -1,11 +1,11 @@
 <div class="header" ng-controller="HomeController">
     <div class="navbar navbar-primary">
         <div class="container-fluid">
-            <div class="navbar-header">
+            <div class="navbar-header navbar-nav-padding">
                 <a class="navbar-brand" href="#">BookWorm</a>
             </div>
             <div>
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav navbar-nav-padding">
                     <li class="active"><a href="#">Home</a></li>
                     <li>
                         <a href="https://portfolio-rails-2633.herokuapp.com/portfolio">Portfolio</a>
@@ -24,8 +24,16 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" ng-if="isLoggedIn()">
-                    <li class="navbar-text">Welcome {{ getUserName() }}</li>
-                    <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown">
+                           Welcome {{ getDisplayName() }}<img src="{{ getThumbnail() }}" class="profile-image img-circle">
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a ng-href="#/bookworm/users/{{ getUserName() }}"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
+                            <li class="divider"></li>
+                            <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" ng-if="!isLoggedIn()">
                     <li><a href="#/bookworm/login"><span class="glyphicon glyphicon-user"></span> SignIn</a></li>

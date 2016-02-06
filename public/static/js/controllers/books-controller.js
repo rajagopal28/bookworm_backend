@@ -49,6 +49,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
         BooksService.rentalBooks({id:bookId})
             .then(function(response){
                 if(response.data && response.data.items){
+                    $scope.bookDataAvailable =  response.data.items.length > 0;
                     $scope.book = response.data.items[0];
                     $scope.book.authorName = $scope.book.authorName.join(', ');
                 }
@@ -61,13 +62,22 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
           return BookwormAuthProvider.isLoggedIn();
         };
     }])
-    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
-        function ($scope, $routeParams, $http, BooksService, BookwormAuthProvider, GoogleAPIService) {
+    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'ConfigService', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
+        function ($scope, $routeParams, $http, ConfigService, BooksService, BookwormAuthProvider, GoogleAPIService) {
             $scope.book = {};
             $scope.status = {
                 success: false,
                 error: false
             };
+            var noImageURL;
+            ConfigService.getConfig()
+                .then(function(response){
+                    if(response.data && response.data) {
+                        noImageURL = response.data.noImageURL;
+                        $scope.book.thumbnailURL = noImageURL;
+                    }
+                });
+
             var currentUser = BookwormAuthProvider.getUser();
             var contributor = {};
             if(currentUser) {
@@ -158,6 +168,9 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             };
             $scope.lendBook = function () {
                 console.log($scope.book);
+                if(!$scope.book.thumbnailURL) {
+                    $scope.book.thumbnailURL = noImageURL;
+                }
                 $scope.book.genres = [];
                 for (var index = 0; index < $scope.book.genresList.length; index++) {
                     var item = $scope.book.genresList[index];
