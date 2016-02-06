@@ -6,6 +6,18 @@
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>No information available</strong>
         </div>
+        <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Done:</span>Sucess!</strong> Your request has been sent to the user. You'll receive a direct email response.
+        </div>
+        <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
+        </div>
         <div ng-if="bookDataAvailable" class="row">
             <div class="col-xs-6">
                 <div class="form-horizontal">

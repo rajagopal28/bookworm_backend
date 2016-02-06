@@ -45,6 +45,10 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
     .controller('ViewBookController', ['$scope', '$http','$routeParams', 'Constants', 'BooksService','BookwormAuthProvider',
     function ($scope, $http, $routeParams, Constants, BooksService, BookwormAuthProvider) {
         $scope.book = {};
+        $scope.status = {
+            success: false,
+            error: false
+        };
         var bookId = $routeParams.bookId;
         BooksService.rentalBooks({id:bookId})
             .then(function(response){
@@ -57,6 +61,31 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
         $scope.isUserContributor = function() {
             return $scope.book
                     && BookwormAuthProvider.isCurrentUser($scope.book.contributor);
+        };
+        $scope.borrowBook = function() {
+            var options = $scope.book;
+            console.log('Requesting to borrow book');
+            var currentUser = BookwormAuthProvider.getUser();
+            if(options && currentUser && currentUser.username){
+               options.borrowerName = currentUser.username;
+               console.log(options);
+               BooksService
+                .requestBook(options)
+                .then(function(response) {
+                    console.log(response);
+                    if (response.data.success) {
+                        $scope.status.success = true;
+                        $scope.status.error = false;
+                    } else {
+                        $scope.status.error = true;
+                        $scope.status.success = false;
+                    }
+                });
+            }
+        };
+        $scope.dismissAlert = function() {
+            $scope.status.success = false;
+            $scope.status.error = false;
         };
         $scope.isLoggedIn = function() {
           return BookwormAuthProvider.isLoggedIn();
@@ -180,9 +209,10 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                 BooksService.lendBook($scope.book)
                     .then(function (response) {
                         console.log(response);
-                        if (response.status === 200) {
+                        if (response.data.success) {
                             $scope.status.success = true;
                             $scope.status.error = false;
+                            $scope.book = null;
                         } else {
                             $scope.status.error = true;
                             $scope.status.success = false;

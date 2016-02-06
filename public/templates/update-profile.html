@@ -2,7 +2,7 @@
     <div class="panel-heading">
         <h3 class="panel-title">Update Profiles</h3></div>
     <div class="panel-body">
-        <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success" dismiss-on-timeout="">
+        <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
                     aria-hidden="true">&times;</span></button>
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
@@ -70,7 +70,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-xs-offset-2 col-xs-8">
-                            <button type="submit" class="btn btn-primary" ng-click="update()"
+                            <button type="submit" class="btn btn-primary" ng-if="isLoggedIn()" ng-click="update()"
                                     ng-disabled="!updateForm.$valid">Update
                             </button>
                         </div>

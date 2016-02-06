@@ -125,6 +125,32 @@ app.post('/bookworm/api/books/rental/update',ensureAuthorized,
         }
 });
 
+app.post('/bookworm/api/books/rental/request',ensureAuthorized,
+    function (req, res) {
+        var inputParams = req.body;
+        var item = mUtils.parseRequestToDBKeys(inputParams);
+        if (item.borrower_name && item.contributor) {
+            var search_users = Users.searchUsersWithUserNameQuery([item.borrower_name, item.contributor.username]);
+            if(search_users){
+                Users.Model
+                .find(search_users)
+                .select('-token')
+                .select('-password')
+                .exec(function(err, items){
+                    if(err) {
+                        res.json({success : false, error : constants.DEFAULT_ERROR_MSG});
+                    } else {
+                        if(items && items.length === 2) {
+                            Mailer.sendBookRequestEmail(items, item);
+                            res.json({success : true});
+                        }
+                    }
+                });
+            }
+        }
+});
+
+
 app.get('/bookworm/api/books/rental/all', function (req, res) {
     var inputParams = req.query;
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);

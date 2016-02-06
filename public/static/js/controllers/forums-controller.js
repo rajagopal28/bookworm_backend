@@ -77,6 +77,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         function ($scope, $routeParams, ForumsService, BooksService, GoogleAPIService, BookwormAuthProvider) {
             $scope.book = {};
             $scope.forum = {};
+            $scope.status = {success : false, error: false};
             $scope.isLoggedIn = function () {
               return BookwormAuthProvider.isLoggedIn();
             };
@@ -87,7 +88,21 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                     $scope.forum.author = authorInfo;
                 }
                 console.log($scope.forum);
-                ForumsService.addForum($scope.forum);
+                ForumsService
+                    .addForum($scope.forum)
+                    .then(function(response) {
+                        if (response && response.data) {
+                            if (response.data.success) {
+                                $scope.status.success = true;
+                                $scope.status.error = false;
+                                $scope.book = {};
+                                $scope.forum = {};
+                            } else {
+                                $scope.status.error = true;
+                                $scope.status.success = false;
+                            }
+                        }
+                    });
             };
             $scope.loadBookDetails = function (searchText) {
                 console.log("searchText=" + searchText);
@@ -108,6 +123,10 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                             }
                         });
                 }
+            };
+            $scope.dismissAlert = function() {
+                $scope.status.success = false;
+                $scope.status.error = false;
             };
             $scope.onBookSelect = function ($item, $model, $label) {
                 $scope.book = $item;

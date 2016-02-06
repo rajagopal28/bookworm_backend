@@ -23,6 +23,10 @@
                 <div class="well well-lg" ng-if="isLoggedIn()"><a type="button" href="#/bookworm/new-forum" class="btn btn-primary btn-lg">New
                     Discussion</a> Start your discussion now!
                 </div>
+                <div class="alert alert-info alert-dismissible" role="alert" ng-if="!forums.length">
+                    <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Info:</span></strong> No information to display
+                </div>
                 <uib-accordion close-others="true">
                     <uib-accordion-group is-open="status[forum.id].open" ng-repeat="forum in forums">
                         <uib-accordion-heading>

@@ -24,6 +24,7 @@ function Utils() {
         HTTP_REQUEST_EVENT_NAME_END : 'end',
         HTTP_REQUEST_EVENT_NAME_ERROR : 'error',
         ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
+        DEFAULT_ERROR_MSG : 'Sorry!! Something went wrong! Try after sometime!',
         ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!'
     };
     var requestToDBKeys = {
@@ -64,7 +65,8 @@ function Utils() {
         'itemsPerPage' : 'items_per_page',
         'primarySort' : 'primary_sort',
         'contributor' : 'contributor',
-        'contributions' : 'contributions'
+        'contributions' : 'contributions',
+        'borrowerName' : 'borrower_name'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

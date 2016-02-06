@@ -4,8 +4,15 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     var smtpTransport;
     var fromEmail;
     var templates = {
-        REGISTRATION_SUCCESS_MAIL_CONTENT :'<p>Dear {0} </p>'
-                                            + '<p>Your Bookworm registration is successful</p>'
+        REGISTRATION_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Registration Successful',
+                                                html: '<h3>Dear {0} </h3><p>Your Bookworm registration is successful</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'Your Bookworm registration is successful'},
+        REQUEST_BOOK_MAIL_CONTENT : { subject: '[BookWorm] New borrow request for your book',
+                                                html: '<h3>Dear {0} </h3><p> A user named {1}, has requested to borrow your book item {2} posted on {3}. Kindly respond to the user with an email directly. Email address : <a href="mailto:{4}">{4}</a></p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'New borrow request on your book item'},
+        PROFILE_UPDATE_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Profile update Successful',
+                                                html: '<h3>Dear {0} </h3><p>Your Bookworm profile has been successfully updated</p>',
+                                                plain : 'Your Bookworm registration is successful'}
     };
     this.setSMTPConfig = function(smtpConfig) {
         if(smtpConfig) {
@@ -25,13 +32,44 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     this.sendRegistrationConfirmation = function(user_info) {
         console.log('registration email sending');
         console.log(user_info);
-      var emailContentHTML = mUtils.formatWithArguments(templates.REGISTRATION_SUCCESS_MAIL_CONTENT, [user_info.first_name + ' ' + user_info.last_name]);
+        var template = templates.REGISTRATION_SUCCESS_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [user_info.getFullName()]);
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address
             to: user_info.email, // list of receivers
-            subject: '[BookWorm] Registration Successful', // Subject line,
-            text : 'Registration successful!!',
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+         sendEmail(mailOptions);
+    };
+    this.sendBookRequestEmail = function(users_list, book_info) {
+        console.log('book request email sending');
+        var requester, owner;
+        if(users_list[0].username === book_info.borrower_name) {
+            requester = users_list[0];
+            owner = users_list[1];
+        } else {
+            requester = users_list[1];
+            owner = users_list[0];
+        }
+        var template = templates.REQUEST_BOOK_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [owner.getFullName(),
+                                            requester.getFullName(),
+                                            book_info.book_name,
+                                            book_info.created_lent_ts,
+                                            requester.email]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: owner.email, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
             html: emailContentHTML // html body
         };
         sendEmail(mailOptions);

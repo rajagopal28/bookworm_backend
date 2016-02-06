@@ -8,6 +8,9 @@ app.service('BooksService', ['$http', function ($http) {
     this.editBook = function (options) {
         return $http.post('/bookworm/api/books/rental/update', options, {timeout: 1000});
     };
+    this.requestBook = function (options) {
+        return $http.post('/bookworm/api/books/rental/request', options, {timeout: 1000});
+    };
     this.parseGBookToBook = function (gBook) {
         var item = {};
         item.description = gBook.volumeInfo.description;

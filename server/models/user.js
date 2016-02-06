@@ -73,6 +73,16 @@ function User(mongoose, bcrypt) {
         }
         return searchQuery;
     };
+    this.searchUsersWithUserNameQuery = function(usersList) {
+        var searchQuery = {username : {$in : []}};
+        if(usersList && usersList.length){
+            for(var index=0; index < usersList.length; index++){
+                searchQuery.username.$in.push(usersList[index]);
+            }
+            return searchQuery;
+        }
+        return null;
+    };
     this.authenticateUser = function (user, cb) {
         self.Model.findOne({
             $or: [
