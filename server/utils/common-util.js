@@ -24,6 +24,7 @@ function Utils() {
         HTTP_REQUEST_EVENT_NAME_END : 'end',
         HTTP_REQUEST_EVENT_NAME_ERROR : 'error',
         ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
+        ERROR_MISSING_FIELDS : 'Missing one or more required fields',
         DEFAULT_ERROR_MSG : 'Sorry!! Something went wrong! Try after sometime!',
         ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!'
     };

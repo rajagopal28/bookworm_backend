@@ -8,11 +8,14 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 html: '<h3>Dear {0} </h3><p>Your Bookworm registration is successful</p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'Your Bookworm registration is successful'},
         REQUEST_BOOK_MAIL_CONTENT : { subject: '[BookWorm] New borrow request for your book',
-                                                html: '<h3>Dear {0} </h3><p> A user named {1}, has requested to borrow your book item {2} posted on {3}. Kindly respond to the user with an email directly. Email address : <a href="mailto:{4}">{4}</a></p><p> Thanks, BookWorm Team.</p>',
+                                                html: '<h3>Dear {0} </h3><p> A user named {1}, has requested to borrow your book item <strong>{2}</strong> posted on {3}. Kindly respond to the user with an email directly. Email address : <a href="mailto:{4}">{4}</a></p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'New borrow request on your book item'},
         PROFILE_UPDATE_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Profile update Successful',
-                                                html: '<h3>Dear {0} </h3><p>Your Bookworm profile has been successfully updated</p>',
-                                                plain : 'Your Bookworm registration is successful'}
+                                                html: '<h3>Dear {0} </h3><p>Your Bookworm profile has been successfully updated</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'Profile update successful'},
+        LEND_BOOK_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Book details added Successfully',
+                                                html: '<h3>Dear {0} </h3><p>Your Book <strong>{1}</strong> has been added to the available books list. Thank you for your valuable contribution. Kep contributing.</p><p> Regards, BookWorm Team.</p>',
+                                                plain : 'New book lending successful'}
     };
     this.setSMTPConfig = function(smtpConfig) {
         if(smtpConfig) {
@@ -33,6 +36,40 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         console.log('registration email sending');
         console.log(user_info);
         var template = templates.REGISTRATION_SUCCESS_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [user_info.getFullName()]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: user_info.email, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+         sendEmail(mailOptions);
+    };
+    this.sendProfileUpdateConfirmation = function(user_info) {
+        console.log('update profile email sending');
+        console.log(user_info);
+        var template = templates.PROFILE_UPDATE_SUCCESS_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [user_info.getFullName()]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: user_info.email, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+         sendEmail(mailOptions);
+    };
+    this.sendNewBookLendingConfirmation = function(book_item, user_info) {
+        console.log('new book lending confirmation sending');
+        console.log(book_item);
+        var template = templates.LEND_BOOK_SUCCESS_MAIL_CONTENT;
         var emailContentHTML = mUtils.formatWithArguments(
                                         template.html,
                                         [user_info.getFullName()]);

@@ -102,9 +102,25 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
             var new_rental_book = new Books.Model(item);
             new_rental_book.save(function (error, new_rental_book) {
                 if (error) {
-                    res.send(error);
+                    res.json(error);
+                } else {
+                    res.json({success : true, item :new_rental_book});
+                    // send email to thank contribution
+                    if(new_rental_book.contributor && new_rental_book.contributor.username) {
+                        Users.Model
+                            .find({username : new_rental_book.contributor.username})
+                            .select('-password')
+                            .select('-token')
+                            .exec(function(err,items){
+                                if(err){
+                                    console.error(err);
+                                } else if(items.length){
+                                    Mailer.sendNewBookLendingConfirmation(new_rental_book, items[0]);
+                                    console.log(' thanks email sent');
+                                }
+                            });
+                    }
                 }
-                res.send(new_rental_book);
             });
         }
 });
@@ -119,8 +135,10 @@ app.post('/bookworm/api/books/rental/update',ensureAuthorized,
                 function (error, saved_rental_book) {
                 if (error) {
                     res.send(error);
+                } else {
+                    res.json({success : true, item : saved_rental_book});
                 }
-                res.send(saved_rental_book);
+
             });
         }
 });
@@ -138,7 +156,7 @@ app.post('/bookworm/api/books/rental/request',ensureAuthorized,
                 .select('-password')
                 .exec(function(err, items){
                     if(err) {
-                        res.json({success : false, error : constants.DEFAULT_ERROR_MSG});
+                        res.send({success : false, error : constants.DEFAULT_ERROR_MSG});
                     } else {
                         if(items && items.length === 2) {
                             Mailer.sendBookRequestEmail(items, item);
@@ -310,7 +328,7 @@ app.post('/bookworm/api/users/check-unique',
                         res.send(err);
                     } else {
                         var isUsernameAvailable = items.length === 0;
-                        res.send({isUsernameAvailable: isUsernameAvailable});
+                        res.json({isUsernameAvailable: isUsernameAvailable});
                     }
                 });
         }
@@ -326,7 +344,7 @@ app.post('/bookworm/api/users/login-auth',
                 } else {
                     console.log(response);
                     response = mUtils.parseDBToResponseKeys(response);
-                    res.send(response);
+                    res.json(response);
                 }
             });
         }
@@ -343,13 +361,13 @@ app.post('/bookworm/api/users/register',
                     res.send(err);
                     console.error(JSON.stringify(err));
                 } else {
-                    res.send(items);
+                    res.json({success : true, item : items});
                     console.log('Success insertion: ' + JSON.stringify(items));
                     Mailer.sendRegistrationConfirmation(new_user);// send email for confirmation
                 }
             });
         } else {
-            res.send();
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/update', ensureAuthorized,
@@ -366,12 +384,13 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
                         res.send(err);
                         console.error(JSON.stringify(err));
                     } else {
-                        res.send(items);
+                        res.json({success : true, item : items});
                         console.log('Success insertion: ' + JSON.stringify(items));
+                        Mailer.sendProfileUpdateConfirmation(personal_info);
                     }
             });
         } else {
-            res.send();
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
@@ -423,7 +442,7 @@ app.post('/bookworm/api/forums/add',ensureAuthorized,
                 res.json(new_forum);
             });
         } else {
-            res.send({error : 'Invalid form data'});
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
@@ -461,7 +480,7 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
                 });
 
         } else {
-            res.send();
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
