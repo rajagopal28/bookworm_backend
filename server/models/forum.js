@@ -32,6 +32,11 @@ function Forum(mongoose) {
         last_modified_ts: {type: Date, default: Date.now}
     };
     var forumSchema = mongoose.Schema(forumSchemaDefinition);
+    forumSchema.pre('update', function(next){
+        var forum = this;
+        forum.last_modified_ts = Date.now();
+        next();
+    });
     this.Model = mongoose.model('Forum', forumSchema);
     this.buildSearchQuery = function (searchQuery) {
         if (searchQuery.title) {

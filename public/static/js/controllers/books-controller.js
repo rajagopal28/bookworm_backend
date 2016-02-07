@@ -212,7 +212,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                         if (response.data.success) {
                             $scope.status.success = true;
                             $scope.status.error = false;
-                            $scope.book = null;
+                            $scope.book = {};
                         } else {
                             $scope.status.error = true;
                             $scope.status.success = false;

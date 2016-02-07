@@ -33,6 +33,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         console.log(forumId);
         $scope.newChat = {};
         $scope.currentUser = BookwormAuthProvider.getUser();
+        $scope.isUserForumOwner = function() {
+            return $scope.forum && BookwormAuthProvider.isCurrentUser($scope.forum.author);
+        };
         $scope.isCommentatorAuthor = function (chatItem) {
             return BookwormAuthProvider.isCurrentUser(chatItem.author);
         };
@@ -41,18 +44,21 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         };
         var pageSort = Constants.getDefaultPagingSortingData();
         $scope.addChat = function () {
-            var options = $.extend({}, pageSort);
-            options.forumId = forumId;
-            options.chatComment = $scope.newChat.chatComment;
-            var authorInfo = ForumsService.getCurrentAuthorInfo();
-            if (authorInfo) {
-                options.author = authorInfo;
+            if($scope.newChat.chatComment && $scope.newChat.chatComment.trim() !== '') {
+                var options = $.extend({}, pageSort);
+                options.forumId = forumId;
+                options.chatComment = $scope.newChat.chatComment;
+                var authorInfo = ForumsService.getCurrentAuthorInfo();
+                if (authorInfo) {
+                    options.author = authorInfo;
+                }
+                ForumsService.addChat(options)
+                    .then(function (response) {
+                        console.log(response);
+                        //$scope.forumChats.push(options);
+                        $scope.newChat.chatComment = '';
+                    });
             }
-            ForumsService.addChat(options)
-                .then(function (response) {
-                    console.log(response);
-                    //$scope.forumChats.push(options);
-                });
         };
         $scope.forum = {};
         $scope.forumChats = [];
@@ -73,13 +79,51 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
             }
         });
     }])
-    .controller('NewForumController', ['$scope', '$routeParams', 'ForumsService', 'BooksService', 'GoogleAPIService', 'BookwormAuthProvider',
-        function ($scope, $routeParams, ForumsService, BooksService, GoogleAPIService, BookwormAuthProvider) {
+    .controller('NewForumController', ['$scope', '$routeParams', 'Constants', 'ForumsService', 'BooksService', 'GoogleAPIService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, Constants, ForumsService, BooksService, GoogleAPIService, BookwormAuthProvider) {
             $scope.book = {};
             $scope.forum = {};
+            var forumId = $routeParams.forumId;
             $scope.status = {success : false, error: false};
             $scope.isLoggedIn = function () {
               return BookwormAuthProvider.isLoggedIn();
+            };
+            if(forumId) {
+                var options = Constants.getDefaultPagingSortingData();
+                options.id = forumId;
+                ForumsService
+                    .allForums(options)
+                    .then(function(response){
+                        if(response.data && response.data.items){
+                            $scope.forum = response.data.items[0];
+                            if($scope.forum && $scope.forum.referredBook) {
+                                $scope.book = $scope.forum.referredBook;
+                            }
+                        }
+                    });
+            }
+            $scope.isEditMode = function() {
+                return forumId && forumId.trim() !== '';
+            };
+            $scope.updateForum = function() {
+                $scope.forum.referredBook = $scope.book;
+                var authorInfo = ForumsService.getCurrentAuthorInfo();
+                if (authorInfo) {
+                    $scope.forum.author = authorInfo;
+                }
+                ForumsService
+                    .updateForum($scope.forum)
+                    .then(function(response) {
+                        if (response && response.data) {
+                            if (response.data.success) {
+                                $scope.status.success = true;
+                                $scope.status.error = false;
+                            } else {
+                                $scope.status.error = true;
+                                $scope.status.success = false;
+                            }
+                        }
+                    });
             };
             $scope.addForum = function () {
                 $scope.forum.referredBook = $scope.book;

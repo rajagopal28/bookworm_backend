@@ -99,17 +99,19 @@
                     <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                         <span class="sr-only">Info:</span></strong> No information for the current filter criteria. Try changing the filter data.
                 </div>
-                <div class="media" ng-repeat="book in availableBooks">
-                    <div class="media-left">
-                        <div class="media-object">
-                            <img class="thumbnail" src="{{ book.thumbnailURL }}" alt="{{ book.bookName }}">
+                <div class="container-fluid">
+                    <div class="media" ng-repeat="book in availableBooks">
+                        <div class="media-left">
+                            <div class="media-object">
+                                <img class="thumbnail" src="{{ book.thumbnailURL }}" alt="{{ book.bookName }}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="media-body">
-                        <h4 class="media-heading"><a ng-href="#/bookworm/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
-                        <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
-                            <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
-                        {{ book.description }}
+                        <div class="media-body">
+                            <h4 class="media-heading"><a ng-href="#/bookworm/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
+                            <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
+                                <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
+                            {{ book.description }}
+                        </div>
                     </div>
                 </div>
                 <div class="center" ng-if="pageSort.totalItems > 0">

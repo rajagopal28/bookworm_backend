@@ -18,7 +18,7 @@
 
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title">Create new forum</h3></div>
+            <h3 class="panel-title">Forum details</h3></div>
         <div>
             <div class="panel-body">
                 <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
@@ -59,9 +59,11 @@
                             <input type="hidden" ng-model="book.bookName" value="{{ book.title }}"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" ng-if="isLoggedIn()">
                         <div class="col-xs-offset-2 col-xs-5">
-                            <button type="submit" class="btn btn-primary" ng-click="addForum()">Start Discussion
+                            <button type="submit" ng-if="!isEditMode()" class="btn btn-primary" ng-click="addForum()">Start Discussion
+                            </button>
+                             <button type="submit" ng-if="isEditMode()" class="btn btn-primary" ng-click="updateForum()">Edit Discussion
                             </button>
                         </div>
                     </div>

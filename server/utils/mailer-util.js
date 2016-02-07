@@ -55,7 +55,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         var template = templates.PROFILE_UPDATE_SUCCESS_MAIL_CONTENT;
         var emailContentHTML = mUtils.formatWithArguments(
                                         template.html,
-                                        [user_info.getFullName()]);
+                                        [user_info.first_name + ' ' + user_info.last_name]);
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address

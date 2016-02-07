@@ -17,28 +17,48 @@ function User(mongoose, bcrypt) {
         last_modified_ts: {type: Date, default: Date.now}
     };
     var userSchema = mongoose.Schema(userSchemaDefinition);
+    userSchema.pre('update', function(next){
+        var user = this;
+        console.log('updating user');
+        user.last_modified_ts = new Date();
+        console.log(user.last_modified_ts);
+        next();
+    });
     userSchema.pre('save', function (next) {
         var user = this;
-        // only hash the password if it has been modified (or is new)
-        if (!user.isModified('password')) return next();
-
-        // generate a salt
+        user.last_modified_ts = new Date();
+          // generate a salt
+        var isPasswordChanged = user.isModified('password');
+        var isUsernameChanged = user.isModified('username');
+        if(!(isPasswordChanged || isUsernameChanged)) {
+            // go to next as we do not need any deferred hashing call
+            next();
+        }
         bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
             if (err) return next(err);
             // hash the password along with our new salt
-            bcrypt.hash(user.username, salt, function (err, hash) {
-                if (err) return next(err);
-                // override the cleartext password with the hashed one
-                user.token = hash;
-                next();
-            });
-            bcrypt.hash(user.password, salt, function (err, hash) {
-                if (err) return next(err);
+        // only hash the password if it has been modified (or is new)
+            if (isPasswordChanged){
+                 bcrypt.hash(user.password, salt, function (err, hash) {
+                    if (err) return next(err);
 
-                // override the cleartext password with the hashed one
-                user.password = hash;
-                next();
-            });
+                    // override the cleartext password with the hashed one
+                    user.password = hash;
+                     if(!isUsernameChanged) {
+                         next();
+                     }
+                     // wait till the next hash async call execution to call next()
+                });
+            }
+            if(isUsernameChanged) {
+                bcrypt.hash(user.username, salt, function (err, hash) {
+                    if (err) return next(err);
+                    // override the cleartext password with the hashed one
+                    user.token = hash;
+                    next();
+                });
+            }
+
         });
     });
     userSchema.methods.getFullName = function () {

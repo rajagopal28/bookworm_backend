@@ -16,11 +16,12 @@
         <div>
             <div class="panel-body">
                 <div class="well">
-                    {{ forum.description }}
+                    <p>{{ forum.description }}</p>
+                    <a href="#/bookworm/forums/" ng-if="isUserForumOwner()" class="btn btn-primary">Edit</a>
                     <div class="media"  ng-if="forum.referredBook">
                       <div class="media-left">
-                        <a href="#">
-                          <img class="media-object" src="{{ forum.referredBook.thumbnailURL }}" alt="No Image"">
+                        <a class="media-object" href="#">
+                          <img class="thumbnail" src="{{ forum.referredBook.thumbnailURL }}" alt="No Image">
                         </a>
                       </div>
                       <div class="media-body">
@@ -52,10 +53,14 @@
                 </div><!-- div container -->
                 <div class="container row-fluid" ng-if="isLoggedIn()">
                     <div class="new-chat-content form-group">
-                        <textarea class="form-control" ng-model="newChat.chatComment"></textarea>
-                        <button class="btn btn-primary" ng-click="addChat()">Send
-                            <i class="glyphicon glyphicon-send"></i>
-                        </button>
+                       <div class="new-chat-text-container">
+                           <textarea class="form-control" ng-model="newChat.chatComment"></textarea>
+                       </div>
+                       <div class="new-chat-button-container text-right">
+                            <button class="btn btn-primary" ng-click="addChat()">Send
+                                <i class="glyphicon glyphicon-send"></i>
+                            </button>
+                       </div>
                     </div>
                     <div class="meta">
                         <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg"

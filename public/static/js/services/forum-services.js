@@ -2,6 +2,9 @@ app.service('ForumsService', ['$http', 'BookwormAuthProvider', function ($http, 
     this.addForum = function (options) {
         return $http.post('/bookworm/api/forums/add', options);
     };
+    this.updateForum = function (options) {
+        return $http.post('/bookworm/api/forums/update', options);
+    };
     this.allForums = function (options) {
         return $http.get('/bookworm/api/forums/all', {params: options});
     };

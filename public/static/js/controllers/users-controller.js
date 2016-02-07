@@ -74,6 +74,9 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
         $scope.isUserContributor = function() {
           return BookwormAuthProvider.isCurrentUser($scope.user);
         };
+        $scope.isLoggedIn = function() {
+          return BookwormAuthProvider.isLoggedIn();
+        };
         $scope.update = function () {
             console.log($scope.user);
             UsersService.updateProfile($scope.user)
@@ -92,7 +95,7 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 .then(function (response) {
                     $scope.status.success = true;
                     $scope.status.error = false;
-                    $scope.user = null;
+                    $scope.user = {};
                 }, function (error) {
                     $scope.status.error = true;
                     $scope.status.success = false;

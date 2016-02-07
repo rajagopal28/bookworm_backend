@@ -106,17 +106,23 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
                 } else {
                     res.json({success : true, item :new_rental_book});
                     // send email to thank contribution
-                    if(new_rental_book.contributor && new_rental_book.contributor.username) {
+                    if(new_rental_book.contributor
+                        && new_rental_book.contributor.username
+                        && req.token) {
                         Users.Model
-                            .find({username : new_rental_book.contributor.username})
+                            .findOneAndUpdate(
+                                {username : new_rental_book.contributor.username, token : req.token},
+                                { $inc : { contributions : 1}})
                             .select('-password')
                             .select('-token')
-                            .exec(function(err,items){
+                            .exec(
+                                function(err,item){
+                                    console.log(item);
                                 if(err){
                                     console.error(err);
-                                } else if(items.length){
-                                    Mailer.sendNewBookLendingConfirmation(new_rental_book, items[0]);
-                                    console.log(' thanks email sent');
+                                } else if(item){
+                                    Mailer.sendNewBookLendingConfirmation(new_rental_book, item);
+                                    console.log('thanks email sent');
                                 }
                             });
                     }
@@ -130,8 +136,10 @@ app.post('/bookworm/api/books/rental/update',ensureAuthorized,
         var inputParams = req.body;
         console.log(inputParams);
         var item = mUtils.parseRequestToDBKeys(inputParams);
-        if (item._id) {
-            Books.Model.update({_id : item._id}, { $set : item }, {upsert : true},
+        if (item._id && req.token) {
+            Books.Model.update(
+                {_id : item._id, token : req.token},
+                { $set : item }, {upsert : false},
                 function (error, saved_rental_book) {
                 if (error) {
                     res.send(error);
@@ -356,14 +364,14 @@ app.post('/bookworm/api/users/register',
         if (personal_info.first_name)// check for not empty
         {
             var new_user = new Users.Model(personal_info);
-            new_user.save(function (err, items) {
+            new_user.save(function (err, item) {
                 if (err) {
                     res.send(err);
                     console.error(JSON.stringify(err));
                 } else {
-                    res.json({success : true, item : items});
-                    console.log('Success insertion: ' + JSON.stringify(items));
-                    Mailer.sendRegistrationConfirmation(new_user);// send email for confirmation
+                    res.json({success : true, item : item});
+                    console.log('Success insertion: ' + JSON.stringify(item));
+                    Mailer.sendRegistrationConfirmation(item);// send email for confirmation
                 }
             });
         } else {
@@ -378,7 +386,7 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
         {
             Users.Model.update({_id: personal_info._id , token : token},
                 {$set : personal_info},
-                { upsert : true},
+                { upsert : false},
                 function (err, items) {
                     if (err) {
                         res.send(err);
@@ -386,7 +394,7 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
                     } else {
                         res.json({success : true, item : items});
                         console.log('Success insertion: ' + JSON.stringify(items));
-                        Mailer.sendProfileUpdateConfirmation(personal_info);
+                        // Mailer.sendProfileUpdateConfirmation(personal_info);
                     }
             });
         } else {
@@ -438,9 +446,34 @@ app.post('/bookworm/api/forums/add',ensureAuthorized,
             forum.save(function (error, new_forum) {
                 if (error) {
                     res.json(error);
+                } else {
+                    res.json({success : true, item :new_forum});
                 }
-                res.json(new_forum);
             });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
+});
+
+app.post('/bookworm/api/forums/update',ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var forum_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(forum_item);
+        if (forum_item._id)// check for not empty
+        {
+           Forums.Model.update(
+                        {_id : forum_item._id},
+                        { $set : forum_item},
+                        { upsert : false},
+                        function (error, new_forum) {
+                            if (error) {
+                                res.json(error);
+                            } else {
+                                res.json({success : true, item :new_forum});
+                            }
+
+                        });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -460,7 +493,6 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
                     if (forum_item) {
                         console.log(forum_item);
                         forum_item.chats.push(chat_item);
-                        chat_item.created_ts = new Date();
                         forum_item.save(function (error, new_forum) {
                             if (error) {
                                 res.send(error);
@@ -472,7 +504,7 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
                                     console.log('in socket');
                                     socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);
                                 }
-                                res.json(new_forum);
+                                res.json({success : true, item :new_forum});
                             }
 
                         });

@@ -487,7 +487,16 @@ a.btn:hover,
     padding: 22px 25px 22px 25px;
     position: relative;
 }
-
+.new-chat-text-container{
+    display: inline-block;
+    width: 89%;
+    position: relative;
+}
+.new-chat-button-container{
+    display: inline-block;
+    width: 10%;
+    position: relative;
+}
 .new-chat-content:after {
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAARCAYAAABTnsXCAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAAAc5pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+QWRvYmUgRmlyZXdvcmtzIENTNjwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KAHiqRgAAAGxJREFUSA3Fz9ENwCAIBNB2GPbfB4axMcakaoyKcNzP8XePl5kTET1REZEynSERybvN82jIAKgaFGQKQEGWAG/INsALcgywhqgBVpBrwC3EDKCFmANOIW6AXYg7YAWBAWYQOKCHhAH+kHpr+wNEhfVL8uVeRgAAAABJRU5ErkJggg==") 50% 0px no-repeat;
     content: "";

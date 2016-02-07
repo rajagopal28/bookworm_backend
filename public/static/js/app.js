@@ -54,6 +54,10 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/new-forum.html',
                     controller: 'NewForumController'
                 })
+                .when('/bookworm/edit-forum/:forumId', {
+                    templateUrl: 'templates/new-forum.html',
+                    controller: 'NewForumController'
+                })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
                     controller: 'MainController'

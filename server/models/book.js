@@ -20,6 +20,11 @@ function Book(mongoose) {
         }
     };
     var bookSchema = mongoose.Schema(bookSchemaDefinition);
+    bookSchema.pre('update', function(next){
+        var book = this;
+        book.last_modified_ts = Date.now();
+        next();
+    });
     this.Model = mongoose.model('Book', bookSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];
