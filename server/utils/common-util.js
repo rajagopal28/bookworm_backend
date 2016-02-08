@@ -2,6 +2,9 @@ function Utils() {
     'use strict';
     var self = this;
     this.constants = {
+        VARIABLE_TYPE_OBJECT : 'object',
+        PATTERN_TO_MATCH_FORMATTER_MESSAGE : /\{(\d+)\}/g,
+        RESET_TO_GMT_TIME_MINUTES_IN_MILLI : (60 * 1000),
         FORM_TYPE_URL_ENCODED :'application/x-www-form-urlencoded',
         HEADER_X_CSRF_TOKEN : 'X-CSRFToken',
         HEADER_ACCEPT_ENCODING: 'Accept-Encoding',
@@ -26,7 +29,24 @@ function Utils() {
         ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
         ERROR_MISSING_FIELDS : 'Missing one or more required fields',
         DEFAULT_ERROR_MSG : 'Sorry!! Something went wrong! Try after sometime!',
-        ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!'
+        ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
+        SMTP_CONFIG_KEY : 'smtpConfig',
+        MONGO_CONFIG_KEY : 'mongoConfig',
+        CLIENT_CONFIG_KEY : 'clientConfig',
+        DB_EVENT_NAME_OPEN : 'open',
+        APP_ENV_VAR_PORT : 'port',
+        EXPRESS_CONFIG_STATIC_DIR : 'public',
+        APP_FAV_ICON_PATH : '/public/static/images/favicon.ico',
+        APP_BODY_PARSER_APPLICATION_JSON : 'application/vnd.api+json',
+        APP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN : 'Access-Control-Allow-Origin',
+        APP_HEADER_VALUE_ACCESS_ALL_ORIGIN : '*',
+        APP_HEADER_ACCESS_CONTROL_ALLOW_METHODS : 'Access-Control-Allow-Methods',
+        APP_HEADER_VALUE_ALLOWED_METHOD_GET_POST : 'GET, POST',
+        APP_HEADER_ACCESS_CONTROL_ALLOW_HEADERS : 'Access-Control-Allow-Headers',
+        APP_HEADER_VALUE_ALLOWED_HEADERS : 'X-Requested-With,content-type, Authorization',
+        APP_X_HTTP_METHOD_OVERRIDE_HEADER : 'X-HTTP-Method-Override',
+        MORGAN_LOG_TYPE_COMBINED : 'combined',
+        ENV_VALUE_DEFAULT_PORT : 8080
     };
     var requestToDBKeys = {
         'id': '_id',
@@ -89,7 +109,7 @@ function Utils() {
             // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
             // but... JSON.parse(null) returns 'null', and typeof null === "object",
             // so we must check for that, too.
-            if (o && typeof o === "object" && o !== null) {
+            if (o && typeof o === self.constants.VARIABLE_TYPE_OBJECT && o !== null) {
                 return o;
             }
         } catch (e) {
@@ -109,7 +129,7 @@ function Utils() {
         if(jsonCheck) {
             keyValuePairJSON = jsonCheck;
         }
-        if (typeof keyValuePairJSON !== 'object' ||
+        if (typeof keyValuePairJSON !== self.constants.VARIABLE_TYPE_OBJECT ||
                 keyValuePairJSON instanceof Date) {
             return keyValuePairJSON;
         } else {
@@ -199,10 +219,11 @@ function Utils() {
         }
     };
     this.resetTimeToGMT = function(dateObj) {
-        return new Date(dateObj.getTime() + (dateObj.getTimezoneOffset() * 60 * 1000));
+
+        return new Date(dateObj.getTime() + (dateObj.getTimezoneOffset() * self.constants.RESET_TO_GMT_TIME_MINUTES_IN_MILLI));
     };
     this.formatWithArguments = function(string, replacements) {
-        return string.replace(/\{(\d+)\}/g, function() {
+        return string.replace(self.constants.PATTERN_TO_MATCH_FORMATTER_MESSAGE, function() {
             return replacements[arguments[1]];
         });
     };

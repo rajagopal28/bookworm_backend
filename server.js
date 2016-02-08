@@ -42,9 +42,9 @@ console.log(mongoose.connection.readyState);
 
 
 readConfigToSession(null, function(configFile) {
-    Mailer.setSMTPConfig(configFile['smtpConfig']);
+    Mailer.setSMTPConfig(configFile[constants.SMTP_CONFIG_KEY]);
     if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
-        var mongoConfig = configFile['mongoConfig'];
+        var mongoConfig = configFile[constants.MONGO_CONFIG_KEY];
         if(mongoConfig) {
             var connectionString = mongoConfig.connectionPrefix
                                     + mongoConfig.user
@@ -62,30 +62,28 @@ readConfigToSession(null, function(configFile) {
 
 var db = mongoose.connection;
 
-db.once('open', function () {
+db.once(constants.DB_EVENT_NAME_OPEN, function () {
     console.log('MongoDB connection successful.');
 });
 
 // all environments
 accessLogStream = fs.createWriteStream(__dirname + constants.LOG_FILE_RELATIVE_PATH, {flags: 'a'});
-app.set('port', process.env.PORT || 8080);
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-app.use(favicon(__dirname + '/public/static/images/favicon.ico'));
-app.use(morgan('combined', {stream: accessLogStream}));
+app.set(constants.APP_ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFAULT_PORT);
+app.use(express.static(path.join(__dirname, constants.EXPRESS_CONFIG_STATIC_DIR)));
+app.use(favicon(__dirname + constants.APP_FAV_ICON_PATH));
+app.use(morgan(constants.MORGAN_LOG_TYPE_COMBINED, {stream: accessLogStream}));
 app.use(multipart());
-app.use(bodyParser.json({type: 'application/vnd.api+json'}));
-app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(bodyParser.json({type: constants.APP_BODY_PARSER_APPLICATION_JSON}));
+app.use(methodOverride(constants.APP_X_HTTP_METHOD_OVERRIDE_HEADER));
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
 // parse application/json
 app.use(bodyParser.json());
 // allow cross origin access
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, constants.APP_HEADER_VALUE_ACCESS_ALL_ORIGIN);
+    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_METHODS, constants.APP_HEADER_VALUE_ALLOWED_METHOD_GET_POST);
+    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_HEADERS, constants.APP_HEADER_VALUE_ALLOWED_HEADERS);
     next();
 });
 // routes ======================================================================
@@ -568,7 +566,7 @@ app.get('/bookworm/api/forums/chats/all',
 
 app.get('/bookworm/api/config', function (req, res) {
     readConfigToSession(res, function(configJSON) {
-         res.json(configJSON['clientConfig']);
+         res.json(configJSON[constants.CLIENT_CONFIG_KEY]);
     });
 });
 

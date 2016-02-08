@@ -62,13 +62,16 @@ db.once('open', function () {
 // all environments
 accessLogStream = fs.createWriteStream(__dirname + '/public/logfile.txt', {flags: 'a'})
 app.set('port', process.env.PORT || 8080);
+// template engine can be used in express to build html easily by passing parameters
+// link --> http://expressjs.com/en/guide/using-template-engines.html
+// jade is the default tempate parser engine that is used to parse html
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 //app.use(express.favicon());
 app.use(favicon(__dirname + '/public/favicon.ico'));
 // app.use(express.logger('dev'));
 //app.use(logger({path: __dirname +"/public/logfile.txt"}));
-app.use(morgan('combined', {stream: accessLogStream}))
+app.use(morgan('combined', {stream: accessLogStream}));
 app.use(json());
 //app.use(bodyParser.urlencoded());
 app.use(methodOverride('X-HTTP-Method-Override'));

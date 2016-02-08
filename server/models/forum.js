@@ -1,6 +1,11 @@
 function Forum(mongoose) {
     'use strict';
     var self = this;
+    var constants = {
+        SCHEMA_HOOK_UPDATE : 'update',
+        SCHEMA_HOOK_SAVE : 'save'
+    };
+    var MODEL_NAME_FORUM = 'Forum';
     var chatSchemaDefinition = {
         chat_comment: String,
         author: {
@@ -32,12 +37,12 @@ function Forum(mongoose) {
         last_modified_ts: {type: Date, default: Date.now}
     };
     var forumSchema = mongoose.Schema(forumSchemaDefinition);
-    forumSchema.pre('update', function(next){
+    forumSchema.pre(constants.SCHEMA_HOOK_UPDATE, function(next){
         var forum = this;
         forum.last_modified_ts = Date.now();
         next();
     });
-    this.Model = mongoose.model('Forum', forumSchema);
+    this.Model = mongoose.model(MODEL_NAME_FORUM, forumSchema);
     this.buildSearchQuery = function (searchQuery) {
         if (searchQuery.title) {
             searchQuery.title = self.addRegexOption(searchQuery.title);

@@ -1,6 +1,11 @@
 function Book(mongoose) {
     'use strict';
     var self = this;
+    var constants = {
+        SCHEMA_HOOK_UPDATE : 'update',
+        SCHEMA_HOOK_SAVE : 'save'
+    };
+    var MODEL_NAME_BOOK = 'Book';
     var bookSchemaDefinition = {
         book_name: String,
         thumbnail_url: String,
@@ -20,12 +25,12 @@ function Book(mongoose) {
         }
     };
     var bookSchema = mongoose.Schema(bookSchemaDefinition);
-    bookSchema.pre('update', function(next){
+    bookSchema.pre(constants.SCHEMA_HOOK_SAVE, function(next){
         var book = this;
         book.last_modified_ts = Date.now();
         next();
     });
-    this.Model = mongoose.model('Book', bookSchema);
+    this.Model = mongoose.model(MODEL_NAME_BOOK, bookSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];
         if (searchQuery.book_name) {

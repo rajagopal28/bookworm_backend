@@ -1,5 +1,12 @@
 function User(mongoose, bcrypt) {
     'use strict';
+    var constants = {
+        SCHEMA_HOOK_UPDATE : 'update',
+        SCHEMA_HOOK_SAVE : 'save',
+        FIELD_PASSWORD : 'password',
+        FIELD_USERNAME : 'username'
+    };
+    var MODEL_NAME_USER = 'User';
     var self = this;
     var SALT_WORK_FACTOR = 10;
     var userSchemaDefinition = {
@@ -17,19 +24,19 @@ function User(mongoose, bcrypt) {
         last_modified_ts: {type: Date, default: Date.now}
     };
     var userSchema = mongoose.Schema(userSchemaDefinition);
-    userSchema.pre('update', function(next){
+    userSchema.pre(constants.SCHEMA_HOOK_UPDATE, function(next){
         var user = this;
-        console.log('updating user');
+        console.log('updating user in hook - pre update');
         user.last_modified_ts = new Date();
         console.log(user.last_modified_ts);
         next();
     });
-    userSchema.pre('save', function (next) {
+    userSchema.pre(constants.SCHEMA_HOOK_SAVE, function (next) {
         var user = this;
         user.last_modified_ts = new Date();
           // generate a salt
-        var isPasswordChanged = user.isModified('password');
-        var isUsernameChanged = user.isModified('username');
+        var isPasswordChanged = user.isModified(constants.FIELD_PASSWORD);
+        var isUsernameChanged = user.isModified(constants.FIELD_USERNAME);
         if(!(isPasswordChanged || isUsernameChanged)) {
             // go to next as we do not need any deferred hashing call
             next();
@@ -74,7 +81,7 @@ function User(mongoose, bcrypt) {
             cb(null, user);
         });
     };
-    this.Model = mongoose.model('User', userSchema);
+    this.Model = mongoose.model(MODEL_NAME_USER, userSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];
         if (searchQuery.username) {
