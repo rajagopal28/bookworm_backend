@@ -1,8 +1,8 @@
 // HomeController
-app.controller('HomeController', ['$scope', 'UsersService', 'ConfigService', 'BookwormAuthProvider',
-    function ($scope, UsersService, ConfigService, BookwormAuthProvider) {
+app.controller('HomeController', ['$scope', 'UsersService', 'BookwormAuthProvider',
+    function ($scope, UsersService, BookwormAuthProvider) {
         $scope.loginPopup = function () {
-            console.log('Login');
+            // console.log('Login');
         };
         $scope.isLoggedIn = function () {
             return BookwormAuthProvider.isLoggedIn();

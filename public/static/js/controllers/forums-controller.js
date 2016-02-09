@@ -15,7 +15,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                         // always open first one
                     }
                     $scope.pageSort.totalItems = response.data.totalItems;
-                    console.log($scope.pageSort);
+                    // console.log($scope.pageSort);
                 });
         };
         $scope.isLoggedIn = function () {
@@ -30,7 +30,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
     .controller('ForumChatController', ['$scope', '$routeParams','Constants', 'ForumsService', 'BookwormAuthProvider',
     function ($scope, $routeParams,Constants, ForumsService, BookwormAuthProvider) {
         var forumId = $routeParams.forumId;
-        console.log(forumId);
+        // console.log(forumId);
         $scope.newChat = {};
         $scope.currentUser = BookwormAuthProvider.getUser();
         $scope.isUserForumOwner = function() {
@@ -44,7 +44,8 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         };
         var pageSort = Constants.getDefaultPagingSortingData();
         $scope.addChat = function () {
-            if($scope.newChat.chatComment && $scope.newChat.chatComment.trim() !== '') {
+            if($scope.newChat.chatComment
+                && $scope.newChat.chatComment.trim() !== '') {
                 var options = $.extend({}, pageSort);
                 options.forumId = forumId;
                 options.chatComment = $scope.newChat.chatComment;
@@ -54,7 +55,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                 }
                 ForumsService.addChat(options)
                     .then(function (response) {
-                        console.log(response);
+                        // console.log(response);
                         //$scope.forumChats.push(options);
                         $scope.newChat.chatComment = '';
                     });
@@ -71,9 +72,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                     $scope.forumChats = response.data.chats;
                 }
             });
-        socket.on('new-chat', function (chatInfo) {
-            console.log('choot');
-            console.log(chatInfo);
+        socket.on(Constants.EVENT_NAME_NEW_CHAT, function (chatInfo) {
+            // console.log('choot');
+            // console.log(chatInfo);
             if (chatInfo.forumId === forumId) {
                 $scope.forumChats.push(chatInfo.chat);
             }
@@ -131,7 +132,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                 if (authorInfo) {
                     $scope.forum.author = authorInfo;
                 }
-                console.log($scope.forum);
+                // console.log($scope.forum);
                 ForumsService
                     .addForum($scope.forum)
                     .then(function(response) {
@@ -149,19 +150,19 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                     });
             };
             $scope.loadBookDetails = function (searchText) {
-                console.log("searchText=" + searchText);
-                if (searchText && searchText.length > 4) {
+                // console.log("searchText=" + searchText);
+                if (searchText && searchText.length > Constants.GOOGLE_BOOK_MIN_TITLE_QUERY_LIMIT) {
                     var newSearch = searchText.split(" ").join("+");
                     var options = {
-                        q: 'intitle:' + newSearch,
-                        maxResults: 10
+                        q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_IN_TITLE + newSearch,
+                        maxResults: Constants.GOOGLE_BOOKS_SEARCH_MAX_RESULTS
                     };
                     return GoogleAPIService.searchBooks(options)
                         .then(function (response) {
-                            // console.log(response);
+                            //  console.log(response);
                             if (response.data.items && response.data.items.length > 0) {
                                 return response.data.items.map(function (item) {
-                                    console.log(item);
+                                    // console.log(item);
                                     return BooksService.parseGBookToBook(item);
                                 });
                             }
@@ -174,8 +175,8 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
             };
             $scope.onBookSelect = function ($item, $model, $label) {
                 $scope.book = $item;
-                console.log($item);
-                console.log($model);
-                console.log($label);
+                // console.log($item);
+                // console.log($model);
+                // console.log($label);
             };
     }]);

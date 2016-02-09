@@ -2,11 +2,11 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
     function ($scope, $routeParams, $uibModal, Constants, ConfigService, UsersService, BookwormAuthProvider) {
         $scope.user = {};
         var userId = $routeParams.userId;
-        $scope.user.gender = "male";
+        $scope.user.gender = Constants.PARAM_VALUE_GENDER_MALE;
         $scope.user.dob = new Date();
-        $scope.$on('date-set', function (event, args) {
-            console.log(args);
-            console.log('recieving date-set');
+        $scope.$on(Constants.EVENT_NAME_DATE_SET, function (event, args) {
+            // console.log(args);
+            // console.log('recieving date-set');
             $scope.user.dob = args.selectedDate;
         });
         var noMaleImageURL, noFemaleImageURL, imagePath;
@@ -27,33 +27,14 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             warn: false,
             error: false
         };
-        $scope.open = function () {
-            var options = {
-                animation: true,
-                templateUrl: '../../../templates/login-modal.html',
-                controller: 'ModalInstanceCtrl',
-                size: 'l',
-                resolve: {
-                    options: function () {
-                        return {
-                            contentTemplate: '../../../templates/login.html',
-                            title: 'BookWorm',
-                            showControls: false
-                        };
-                    }
-                }
-            };
-            console.log(options);
-            var modalInstance = $uibModal.open(options);
-        };
         $scope.genderChange = function() {
             if(!$scope.user.thumbnailURL){
-                $scope.user.thumbnailURL = $scope.user.gender ==="male" ? noMaleImageURL : noFemaleImageURL;
+                $scope.user.thumbnailURL = $scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE? noMaleImageURL : noFemaleImageURL;
             }
-            if($scope.user.gender === 'female'
+            if($scope.user.gender === Constants.PARAM_VALUE_GENDER_FEMALE
                 && $scope.user.thumbnailURL === noMaleImageURL) {
                 $scope.user.thumbnailURL = noFemaleImageURL;
-            } else if ($scope.user.gender === 'male'
+            } else if ($scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE
                  && $scope.user.thumbnailURL === noFemaleImageURL){
                 $scope.user.thumbnailURL = noMaleImageURL;
             }
@@ -78,7 +59,7 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
           return BookwormAuthProvider.isLoggedIn();
         };
         $scope.update = function () {
-            console.log($scope.user);
+            // console.log($scope.user);
             UsersService.updateProfile($scope.user)
                 .then(function (response) {
                     $scope.status.success = true;
@@ -90,7 +71,7 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
 
         };
         $scope.signup = function () {
-            console.log($scope.user);
+            // console.log($scope.user);
             UsersService.registerUser($scope.user)
                 .then(function (response) {
                     $scope.status.success = true;
@@ -106,36 +87,29 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
         $scope.checkUsername = function () {
             UsersService.usernameUnique($scope.user)
                 .then(function (response) {
-                    console.log(response);
+                    // console.log(response);
                     if (response.data) {
                         $scope.user.isUsernameAvailable = response.data.isUsernameAvailable;
                         if (response.data.isUsernameAvailable) {
-                            $scope.user.customMessage = 'User name available';
+                            $scope.user.customMessage = Constants.MESSAGE_USERNAME_AVAILABLE;
                         } else {
-                            $scope.user.customMessage = 'User name is not available';
+                            $scope.user.customMessage = Constants.MESSAGE_USERNAME_UNAVAILABLE;
                         }
                     }
                 });
-        };
-        $scope.pingServer = function () {
-            // TIP: io() with no args does auto-discovery
-            socket.emit('ferret', {cricket: 'tobi', alt: 'Jiminy', context: 'Bazinga'}, function (data) {
-                console.log(data); // data will be 'woot'
-            });
-
         };
          $scope.showImageUploadModal = function () {
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: '../../../templates/image-upload.html',
                 controller: 'ImageUploadController',
-                size: 'l',
+                size: Constants.MODAL_SIZE_LARGE,
                 resolve: {
                     user : $scope.user
                 }
             });
             modalInstance.result.then(function(result) {
-                console.log(result);
+                // console.log(result);
             });
         };
         $scope.dismissAlert = function () {
@@ -164,18 +138,6 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 } else {
                     $scope.status.error = true;
                     $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
-                }
-            });
-        };
-        $scope.showLogin = function () {
-            var modalInstance = $uibModal.open({
-                animation: true,
-                templateUrl: '../../../templates/login-modal.html',
-                controller: 'ModalInstanceCtrl',
-                size: 'l',
-                resolve: {
-                    contentTemplate: '../../../templates/login.html',
-                    onConfirm: login
                 }
             });
         };
@@ -242,6 +204,6 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 }
             };
             $scope.cancel = function() {
-                $uibModalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
             };
     }]);

@@ -2,41 +2,47 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
     function ($scope, $http, Constants, BooksService, GoogleAPIService) {
         $scope.search = {};
         $scope.pageSort = Constants.getDefaultPagingSortingData();
+        // TODO query locations not used
         $scope.getLocations = function (queryText) {
-            console.log(queryText);
+            // console.log(queryText);
             return GoogleAPIService.getAddresses({'address': queryText})
                 .then(function (response) {
-                    console.log(response);
-                    return response.data.results.map(function (item) {
-                        return item.formatted_address;
-                    });
+                   if(response.data){
+                        // console.log(response);
+                        return response.data.results.map(function (item) {
+                            return item.formatted_address;
+                        });
+                   }
+                    return null;
                 });
         };
-        $scope.genres = BooksService.availableGenres();
+        $scope.genres = Constants.ALL_BOOK_GENRES;
         $scope.search.sortAscending = true;
         $scope.search.isAvailable = true;
-        $scope.genres = ['Drama', 'Mystery'];
+        $scope.genres = [];// ['Drama', 'Mystery'];
         $scope.search.genres = $scope.genres;
 
        $scope.pageChanged = function() {
-        var options = $scope.pageSort;
+        var options = $.extend({}, $scope.pageSort);
         $scope.search.genres = [];
         for (var index in $scope.genres) {
             var text = $scope.genres[index].text ? $scope.genres[index].text : $scope.genres[index];
             $scope.search.genres.push(text);
         }
-        var sortOrder = $scope.search.sortAscending ? Constants.SORT_ORDER_ASC : Constants.SORT_ORDER_DESC;
+        var sortOrder = $scope.search.sortAscending
+            ? Constants.SORT_ORDER_ASC
+            : Constants.SORT_ORDER_DESC;
         $scope.pageSort.primarySort = {'lendDate' : sortOrder};
         $scope.search = $.extend($scope.search, $scope.pageSort);
-        console.log($scope.search);
+        // console.log($scope.search);
         BooksService.rentalBooks($scope.search)
            .then(function (response) {
-              console.log(response.data);
+              // console.log(response.data);
                $scope.availableBooks = response.data.items;
                $scope.pageSort.totalItems = response.data.totalItems;
            });
         };
-        console.log($scope.availableBooks);
+        // console.log($scope.availableBooks);
         $scope.searchBooks = function () {
             $scope.pageChanged();
         };
@@ -64,15 +70,15 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
         };
         $scope.borrowBook = function() {
             var options = $scope.book;
-            console.log('Requesting to borrow book');
+            // console.log('Requesting to borrow book');
             var currentUser = BookwormAuthProvider.getUser();
             if(options && currentUser && currentUser.username){
                options.borrowerName = currentUser.username;
-               console.log(options);
+               // console.log(options);
                BooksService
                 .requestBook(options)
                 .then(function(response) {
-                    console.log(response);
+                    // console.log(response);
                     if (response.data.success) {
                         $scope.status.success = true;
                         $scope.status.error = false;
@@ -91,8 +97,8 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
           return BookwormAuthProvider.isLoggedIn();
         };
     }])
-    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'ConfigService', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
-        function ($scope, $routeParams, $http, ConfigService, BooksService, BookwormAuthProvider, GoogleAPIService) {
+    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'Constants', 'ConfigService', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
+        function ($scope, $routeParams, $http, Constants, ConfigService, BooksService, BookwormAuthProvider, GoogleAPIService) {
             $scope.book = {};
             $scope.status = {
                 success: false,
@@ -125,7 +131,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                             $scope.book.genresList = $scope.book.genres;
                             $scope.book.authorName = $scope.book.authorName.join(', ');
                             $scope.book.contributor = contributor;
-                            console.log($scope.book);
+                            // console.log($scope.book);
                         }
                     });
             }
@@ -135,8 +141,8 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             $scope.editBook = function() {
               BooksService.editBook($scope.book)
                     .then(function (response) {
-                        console.log(response);
-                        if (response.status === 200) {
+                        // console.log(response);
+                        if (response.success) {
                             $scope.status.success = true;
                             $scope.status.error = false;
                         } else {
@@ -147,37 +153,37 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             };
             $scope.loadBookDetails = function (searchText) {
                 var isbn = $scope.book.isbn;
-                console.log("isbn=" + isbn);
-                console.log("searchText=" + searchText);
+                // console.log("isbn=" + isbn);
+                // console.log("searchText=" + searchText);
                 if (!isNaN(isbn)) {
-                    if (isbn.length == 10 || isbn.length == 10) {
+                    if (Constants.GOOGLE_BOOK_VALID_ISBN_LENGTHS.indexOf(isbn.length) != -1) {
                         var options = {
-                            q: 'isbn:' + isbn,
-                            maxResults: 10
+                            q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_ISBN + isbn,
+                            maxResults: Constants.GOOGLE_BOOKS_SEARCH_MAX_RESULTS
                         };
                         GoogleAPIService.searchBooks(options)
                             .then(function (response) {
-                                console.log(response);
+                                // console.log(response);
                                 if (response.data.items && response.data.items.length > 0) {
                                     $scope.book = BooksService.parseGBookToBook(response.data.items[0]);
                                 }
                             });
                     }
                 }
-                if (searchText && searchText.length > 4) {
+                if (searchText && searchText.length > Constants.GOOGLE_BOOK_MIN_TITLE_QUERY_LIMIT) {
                     var newSearch = searchText.split(" ").join("+");
-                    //console.log('In else block');
-                    //console.log(newSearch);
+                    //  console.log('In else block');
+                    //  console.log(newSearch);
                     var options = {
-                        q: 'intitle:' + newSearch,
-                        maxResults: 10
+                        q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_IN_TITLE + newSearch,
+                        maxResults: Constants.GOOGLE_BOOKS_SEARCH_MAX_RESULTS
                     };
                     return GoogleAPIService.searchBooks(options)
                         .then(function (response) {
-                            // console.log(response);
+                            //  console.log(response);
                             if (response.data.items && response.data.items.length > 0) {
                                 return response.data.items.map(function (item) {
-                                    console.log(item);
+                                    // console.log(item);
                                     return BooksService.parseGBookToBook(item);
                                 });
                             }
@@ -186,17 +192,17 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             };
             $scope.onBookSelect = function ($item, $model, $label) {
                 $scope.book = $item;
-                console.log($item);
-                console.log($model);
-                console.log($label);
+                // console.log($item);
+                // console.log($model);
+                // console.log($label);
             };
-            $scope.genres = BooksService.availableGenres();
-            $scope.book.genresList = [{text: 'Drama'}, {text: 'Mystery'}];
+            $scope.genres = Constants.ALL_BOOK_GENRES;
+            $scope.book.genresList = [];//[{text: 'Drama'}, {text: 'Mystery'}];
             $scope.changeSorting = function (value) {
                 $scope.search.sortAscending = !value;
             };
             $scope.lendBook = function () {
-                console.log($scope.book);
+                // console.log($scope.book);
                 if(!$scope.book.thumbnailURL) {
                     $scope.book.thumbnailURL = noImageURL;
                 }
@@ -208,7 +214,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                 $scope.book.contributor = contributor;
                 BooksService.lendBook($scope.book)
                     .then(function (response) {
-                        console.log(response);
+                        // console.log(response);
                         if (response.data.success) {
                             $scope.status.success = true;
                             $scope.status.error = false;

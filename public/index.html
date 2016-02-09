@@ -23,13 +23,14 @@
         <script src="./vendors/js/modules/bootstrap-angular-ui.js"></script>
         <script src="./vendors/js/modules/ng-tags-input.min.js"></script>
     </head>
-    <body ng-app="bookworm-ui" bs-loading-overlay>
+    <body ng-app="bookworm-ui">
         <div ng-include="'./includes/header.htm'"></div>
         <div ng-view></div>
         <div ng-include="'./includes/footer.htm'"></div>
         <!--        Static app JS files      -->
         <!--        Static DOM related scripts -->
         <script src="./static/js/other/app-script.js"></script>
+        <script src="./static/js/other/jquery-loader.js"></script>
         <!--        Main App Module JS      -->
         <script src="./static/js/app.js"></script>
         <!--        Constants JS Files      -->
@@ -49,7 +50,9 @@
         <script src="./static/js/services/user-services.js"></script>
         <script src="./static/js/services/forum-services.js"></script>
         <script src="./static/js/services/google-services.js"></script>
+        <script src="./static/js/services/loader-services.js"></script>
         <!--        Factories JS Files      -->
         <script src="./static/js/factories/auth-provider.js"></script>
+        <script src="./static/js/factories/http-interceptor.js"></script>
     </body>
 </html>

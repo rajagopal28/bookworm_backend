@@ -18,7 +18,7 @@ function Utils() {
         COOKIE_VAR_STRING_EXPIRES_PREFIX : 'expires=',
         REQUEST_PARAM_CLOUD_FILE_NAME : 'file',
         REQ_HEADER_AUTHORIZATION : 'authorization',
-        LOG_FILE_RELATIVE_PATH : '/server/logfile.txt',
+        LOG_FILE_RELATIVE_PATH : '/server/logfile.log',
         CONFIG_FILE_RELATIVE_PATH : '/server/config.json',
         TEMP_FILE_PATH : './public/static/images/',
         SOCKET_EVENT_CONNECTION : 'connection',

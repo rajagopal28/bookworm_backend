@@ -2,7 +2,6 @@
   "name": "BookWormBackend",
   "version": "0.5.1",
   "description": "Backend for Book Worm Mobile Application",
-  "main": "app.js",
   "dependencies": {
     "mongodb": "2.0.42",
     "mongoose": "4.1.5",
@@ -20,6 +19,10 @@
     "nodemailer": "2.1.0",
     "nodemailer-smtp-transport": "2.0.1"
   },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "main": "server.js",
   "author": "Rajagopal",
   "license": "BSD"
 }

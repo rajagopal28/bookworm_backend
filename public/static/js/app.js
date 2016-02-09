@@ -66,38 +66,19 @@ app.config(['$routeProvider', '$httpProvider',
                     redirectTo: '/bookworm/home'
                 });
 
-            $httpProvider.interceptors.push(['$q', '$location', '$localStorage', function ($q, $location, $localStorage) {
-                return {
-                    'request': function (config) {
-                        if (config && config.url
-                            && config.url.indexOf('/bookworm') !== -1) {
-                            config.headers = config.headers || {};
-                            if ($localStorage.token) {
-                                config.headers.Authorization = 'Bearer ' + $localStorage.token;
-                            }
-                        }
-                        return config;
-                    },
-                    'responseError': function (response) {
-                        if (response.status === 401 || response.status === 403) {
-                            $location.path('/bookworm/login');
-                        }
-                        return $q.reject(response);
-                    }
-                };
-            }]);
+            $httpProvider.interceptors.push('BookWormHTTPInterceptor');
         }])
     .run(['$rootScope', '$location', 'BookwormAuthProvider', function ($rootScope, $location, BookwormAuthProvider) {
         $rootScope.$on('$locationChangeStart', function (event, next, current) {
             // check only for authenticated pages
             if (next && next.indexOf('/bookworm/auth') !== -1) {
                 if (!BookwormAuthProvider.isLoggedIn()) {
-                    console.log('DENY : Redirecting to Login');
+                    // console.log('DENY : Redirecting to Login');
                     event.preventDefault();
                     $location.path('/bookworm/login');
                 }
                 else {
-                    console.log('ALLOW');
+                    // console.log('ALLOW');
                 }
             }
         });
