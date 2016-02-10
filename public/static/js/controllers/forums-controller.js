@@ -32,6 +32,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         var forumId = $routeParams.forumId;
         // console.log(forumId);
         $scope.newChat = {};
+        $scope.loggedTime = new Date();
         $scope.currentUser = BookwormAuthProvider.getUser();
         $scope.isUserForumOwner = function() {
             return $scope.forum && BookwormAuthProvider.isCurrentUser($scope.forum.author);

@@ -64,6 +64,7 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 .then(function (response) {
                     $scope.status.success = true;
                     $scope.status.error = false;
+                    BookwormAuthProvider.updateUser($scope.user);
                 }, function (error) {
                     $scope.status.error = true;
                     $scope.status.success = false;

@@ -20,7 +20,7 @@ html {
     width: 100%
 }
 
-a.btn {
+.portfolio-btn.btn {
     background-color: rgba(0, 0, 0, 0.9);
     border-radius: 0;
     color: #fff;
@@ -114,6 +114,11 @@ a.btn {
     background-position: center center
 }
 
+.pinterest {
+    background-image: url(../images/pinterest.svg);
+    background-position: center center
+}
+
 .vimeo {
     background-image: url(../images/vimeo.svg);
     background-position: center center
@@ -129,10 +134,6 @@ a.btn {
     background-position: center center
 }
 
-.pinterest {
-    background-image: url(../images/pinterest.svg);
-    background-position: center center
-}
 
 .gplus {
     background-image: url(../images/gplus.svg);
@@ -154,7 +155,7 @@ a.btn {
     color: #fff
 }
 
-a.btn:hover,
+.portfolio-btn.btn:hover,
 .nav li a:hover,
 .nav-btn:hover {
     background-color: #337ab7;

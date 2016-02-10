@@ -2,16 +2,7 @@
     <div class="jumbotron slideshow">
         <div class="slideshow-container">
             <div class="slide">
-                <img alt="Slide01" src="../static/images/slide02.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide03" src="../static/images/slide03.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide04" src="../static/images/slide04.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide05" src="../static/images/slide05.jpg">
+                <img alt="Slide02" src="https://file.ac/1vjO3iSZ5G4/slide02.jpg">
             </div>
         </div>
     </div>
@@ -20,7 +11,7 @@
             <h3 class="panel-title">Forums by BookWorms</h3></div>
         <div>
             <div class="panel-body">
-                <div class="well well-lg" ng-if="isLoggedIn()"><a type="button" href="#/bookworm/new-forum" class="btn btn-primary btn-lg">New
+                <div class="well well-lg" ng-if="isLoggedIn()"><a type="button" href="#/bookworm/auth/new-forum" class="btn btn-primary btn-lg">New
                     Discussion</a> Start your discussion now!
                 </div>
                 <div class="alert alert-info alert-dismissible" role="alert" ng-if="!forums.length">
@@ -37,16 +28,17 @@
                         {{ forum.description }}
                         <a href="#/bookworm/forums/{{ forum.id }}">View talks</a>
                         <div class="meta">
-                            <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg"
+                            <img src="{{ forum.author.thumbnailURL }}"
+                                 alt="{{ forum.author.authorName }}"
                                  class="avatar">
-                            <a ng-href="#/bookworm/users/{{ forum.author.username }}" class="author" ng-class="{'owner' : isCreatorAuthor(forum)}">
+                            <a ng-href="#/bookworm/auth/users/{{ forum.author.username }}" class="author" ng-class="{'owner' : isCreatorAuthor(forum)}">
                                 {{ forum.author.authorName }}
                             </a>
-                            <a href="#comments_43710" class="date">
-                                <time datetime="2013-11-08">{{forum.createdTS}}</time>
-                            </a>
+                            <span class="date">
+                                <time>{{forum.createdTS}}</time>
+                            </span>
                             <div class="count">
-                                Commented {{ $index+1 }}
+                                Username : {{ forum.author.username }}
                             </div>
                         </div>
                     </uib-accordion-group>

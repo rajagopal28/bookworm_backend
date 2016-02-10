@@ -2,19 +2,7 @@
     <div class="jumbotron slideshow">
         <div class="slideshow-container">
             <div class="slide">
-                <img alt="Slide01" src="../static/images/slide01.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide02" src="../static/images/slide02.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide03" src="../static/images/slide03.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide04" src="../static/images/slide04.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide05" src="../static/images/slide05.jpg">
+                <img alt="Slide01" src="https://file.ac/1vjO3iSZ5G4/slide01.jpg">
             </div>
         </div>
     </div>
@@ -107,7 +95,7 @@
                             </div>
                         </div>
                         <div class="media-body">
-                            <h4 class="media-heading"><a ng-href="#/bookworm/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
+                            <h4 class="media-heading"><a ng-href="#/bookworm/auth/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
                             <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
                                 <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
                             {{ book.description }}

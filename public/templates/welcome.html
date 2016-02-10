@@ -5,8 +5,9 @@
                 the book that have been a good reading companion for quite a few days and now I have finished reading
                 it". This is my basic site to enable people lending and borrowing books of your own, with people with
                 simlar wavelength. </h2>
-            <a class="btn left" href="#/bookworm/lend">Lend Book</a>
-            <a class="btn right" href="#/bookworm/borrow">Borrow Book</a>
+            <a ng-if="isLoggedIn()" class="portfolio-btn btn left" href="#/bookworm/auth/lend">Lend Book</a>
+            <a ng-if="!isLoggedIn()" class="portfolio-btn btn left" href="#/bookworm/login">Login</a>
+            <a  ng-if="isLoggedIn()" class="portfolio-btn btn right" href="#/bookworm/borrow">Borrow Book</a>
         </div>
     </div>
 </div>

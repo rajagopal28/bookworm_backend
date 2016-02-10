@@ -7,21 +7,21 @@
             <div>
                 <ul class="nav navbar-nav navbar-nav-padding">
                     <li class="active"><a href="#">Home</a></li>
-                    <li>
-                        <a href="https://portfolio-rails-2633.herokuapp.com/portfolio">Portfolio</a>
+                    <li ng-if="isLoggedIn()">
+                        <a href="#/bookworm/auth/users">Users</a>
                     </li>
-                    <li>
-                        <a href="https://medium.com/about-codecademy">Blog</a>
+                    <li ng-if="isLoggedIn()">
+                        <a href="https://medium.com/about-codecademy">Blog</a></li>
                     <li>
                         <a href="#/bookworm/forums">Forums</a>
                     </li>
-                    </li>
                     <li>
-                        <a href="https://portfolio-rails-2633.herokuapp.com/about">About</a>
+                        <a href="#/bookworm/about">About</a>
                     </li>
                     <li>
                         <a href="#/bookworm/contact">Contact</a>
                     </li>
+
                 </ul>
                 <ul class="nav navbar-nav navbar-right" ng-if="isLoggedIn()">
                     <li class="dropdown">
@@ -29,7 +29,7 @@
                            Welcome {{ getDisplayName() }}<img src="{{ getThumbnail() }}" class="profile-image img-circle">
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a ng-href="#/bookworm/users/{{ getUserName() }}"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
+                            <li><a ng-href="#/bookworm/auth/users/{{ getUserName() }}"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
                             <li class="divider"></li>
                             <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
                         </ul>

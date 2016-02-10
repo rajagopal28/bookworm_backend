@@ -2,10 +2,7 @@
     <div class="jumbotron slideshow">
         <div class="slideshow-container">
             <div class="slide">
-                <img alt="Slide04" src="../static/images/slide04.jpg">
-            </div>
-            <div class="slide">
-                <img alt="Slide05" src="../static/images/slide05.jpg">
+                <img alt="Slide04" src="https://file.ac/1vjO3iSZ5G4/slide04.jpg">
             </div>
         </div>
     </div>
@@ -17,7 +14,7 @@
             <div class="panel-body">
                 <div class="well">
                     <p>{{ forum.description }}</p>
-                    <a href="#/bookworm/forums/" ng-if="isUserForumOwner()" class="btn btn-primary">Edit</a>
+                    <a href="#/bookworm/auth/edit-forum/{{ forum.id }}" ng-if="isUserForumOwner()" class="btn btn-primary">Edit</a>
                     <div class="media"  ng-if="forum.referredBook">
                       <div class="media-left">
                         <a class="media-object" href="#">
@@ -32,18 +29,18 @@
                 </div>
                 <div class="container" ng-repeat="chat in forumChats">
                     <div class="meta">
-                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg"
+                        <img src="{{ chat.author.thumbnailURL }}"
                              class="avatar" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
 
-                        <a ng-href="#/bookworm/users/{{ chat.author.username }}" class="author"
+                        <a ng-href="#/bookworm/auth/users/{{ chat.author.username }}" class="author"
                            ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">{{ chat.author.authorName }}</a>
 
-                        <a href="#comments_43710" class="date" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
-                            <time datetime="2013-11-08">{{ chat.createdTS }}</time>
-                        </a>
+                        <span class="date" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
+                            <time >{{ chat.createdTS }}</time>
+                        </span>
 
                         <div class="count" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
-                            Commented as {{ $index+1 }}
+                            Username: {{ forum.author.username }}
                         </div>
 
                     </div><!-- div meta -->
@@ -63,14 +60,14 @@
                        </div>
                     </div>
                     <div class="meta">
-                        <img src="//www.gravatar.com/avatar/b2b6777100f6a72412d18513c3bf8ab0?s=120&amp;d=http%3A%2F%2Fwww%2Ebennadel%2Ecom%2Fimages%2Fgravatar%2Farnold%2Ejpg"
+                        <img src="{{ currentUser.thumbnailURL }}"
                              class="avatar chat-owner">
-                        <a ng-href="#/bookworm/users/{{ currentUser.username }}" class="author chat-owner">{{ currentUser.authorName }}</a>
-                        <a href="#comments_43710" class="date chat-owner">
-                            <time datetime="2013-11-08">Nov 8, 2013 at 8:16 PM</time>
-                        </a>
+                        <a ng-href="#/bookworm/auth/users/{{ currentUser.username }}" class="author chat-owner">{{ currentUser.authorName }}</a>
+                        <span class="date chat-owner">
+                            <time >{{ loggedTime }}</time>
+                        </span>
                         <div class="count chat-owner">
-                            5 Comments
+                           Username : {{ currentUser.username }}
                         </div>
                     </div>
                 </div>

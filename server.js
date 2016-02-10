@@ -498,6 +498,7 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
                                 if (socket) {
                                     var item = {};
                                     item.forumId = forum_item._id;
+                                    chat_item.created_ts = new Date();
                                     item.chat = mUtils.parseDBToResponseKeys(chat_item);
                                     console.log('in socket');
                                     socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);

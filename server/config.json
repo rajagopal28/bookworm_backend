@@ -37,15 +37,9 @@
     "uploadedImagesDirectory": "https://file.ac/JzawZwyM0U8/"
   },
   "clientConfig": {
-    "imagesDirectory": "https://file.ac/JzawZwyM0U8/",
-    "noMaleImageURL" : "../static/images/no-image-male.jpg",
-    "noFemaleImageURL" : "../static/images/no-image-female.jpg",
-    "noImageURL" : "../static/images/no-image-female.jpg",
-    "smartFileAuthHeaders": {
-      "csrftoken": "",
-      "sessionid": "",
-      "X-CSRFToken": "",
-      "Accept-Encoding": "gzip, deflate"
-    }
+    "imagesDirectory": "https://file.ac/1vjO3iSZ5G4/",
+    "noMaleImageURL" : "https://file.ac/1vjO3iSZ5G4/no-image-male.jpg",
+    "noFemaleImageURL" : "https://file.ac/1vjO3iSZ5G4/no-image-female.jpg",
+    "noImageURL" : "https://file.ac/1vjO3iSZ5G4/no-image-available.jpg "
   }
 }

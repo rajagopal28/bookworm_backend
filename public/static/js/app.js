@@ -14,31 +14,31 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/register.html',
                     controller: 'UserRegistrationController'
                 })
-                .when('/bookworm/users', {
+                .when('/bookworm/auth/users', {
                     templateUrl: 'templates/users.html',
                     controller: 'UsersController'
                 })
-                .when('/bookworm/users/:username', {
+                .when('/bookworm/auth/users/:username', {
                     templateUrl: 'templates/view-user.html',
                     controller: 'UserDetailsController'
                 })
-                .when('/bookworm/update-profile/:userId', {
+                .when('/bookworm/auth/update-profile/:userId', {
                     templateUrl: 'templates/update-profile.html',
                     controller: 'UserRegistrationController'
                 })
-                .when('/bookworm/borrow', {
+                .when('/bookworm/auth/borrow', {
                     templateUrl: 'templates/borrow.html',
                     controller: 'BorrowBooksController'
                 })
-                .when('/bookworm/borrow/:bookId', {
+                .when('/bookworm/auth/borrow/:bookId', {
                     templateUrl: 'templates/view-lent.html',
                     controller: 'ViewBookController'
                 })
-                .when('/bookworm/lend', {
+                .when('/bookworm/auth/lend', {
                     templateUrl: 'templates/lend.html',
                     controller: 'LendBookController'
                 })
-                .when('/bookworm/edit-book/:bookId', {
+                .when('/bookworm/auth/edit-book/:bookId', {
                     templateUrl: 'templates/lend.html',
                     controller: 'LendBookController'
                 })
@@ -50,17 +50,21 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/forum-chats.html',
                     controller: 'ForumChatController'
                 })
-                .when('/bookworm/new-forum', {
+                .when('/bookworm/auth/new-forum', {
                     templateUrl: 'templates/new-forum.html',
                     controller: 'NewForumController'
                 })
-                .when('/bookworm/edit-forum/:forumId', {
+                .when('/bookworm/auth/edit-forum/:forumId', {
                     templateUrl: 'templates/new-forum.html',
                     controller: 'NewForumController'
                 })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
                     controller: 'MainController'
+                })
+                .when('/bookworm/about', {
+                    templateUrl: 'templates/about.html',
+                    controller: 'HomeController'
                 })
                 .otherwise({
                     redirectTo: '/bookworm/home'
