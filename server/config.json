@@ -19,7 +19,8 @@
     "port" :587,
     "username": "somemail@gmail.com",
     "password": "password",
-    "fromEmail" : "somemail@gmail.com"
+    "fromEmail" : "somemail@gmail.com",
+    "feedbackToEmail" : "somemail@gmail.com"
   },
   "cloudConfig": {
     "host": "rajagopal28.smartfile.com",

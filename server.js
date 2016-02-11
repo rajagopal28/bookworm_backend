@@ -571,6 +571,20 @@ app.get('/bookworm/api/config', function (req, res) {
     });
 });
 
+app.post('/bookworm/api/feedback/add',
+    function (req, res) {
+        console.log(req.body);
+        var feedback_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(feedback_item);
+        if (feedback_item.feedback_text)// check for not empty
+        {
+            Mailer.sendFeedbackEmail(feedback_item);
+            res.json({success : true, item : feedback_item});
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
+});
+
 app.get('/test/test', ensureAuthorized, function (req, res) {
     var rent = db.collection('rent_books');
     rent.find({}).toArray(function (err, items) {

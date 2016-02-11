@@ -87,7 +87,8 @@ function Utils() {
         'primarySort' : 'primary_sort',
         'contributor' : 'contributor',
         'contributions' : 'contributions',
-        'borrowerName' : 'borrower_name'
+        'borrowerName' : 'borrower_name',
+        'feedbackComment' : 'feedback_text'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

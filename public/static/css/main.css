@@ -162,7 +162,7 @@ html {
     color: #fff;
     transition: background-color .5s
 }
-.dropdown .dropdown-toggle img.profile-image {
+.dropdown img.profile-image {
     height: 60px;
 }
 .navbar-nav-padding {

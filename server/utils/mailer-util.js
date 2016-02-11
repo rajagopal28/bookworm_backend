@@ -2,7 +2,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     'use strict';
     var self = this;
     var smtpTransport;
-    var fromEmail;
+    var fromEmail, feedbackToEmail;
     var templates = {
         REGISTRATION_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Registration Successful',
                                                 html: '<h3>Dear {0} </h3><p>Your Bookworm registration is successful</p><p> Thanks, BookWorm Team.</p>',
@@ -15,7 +15,10 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 plain : 'Profile update successful'},
         LEND_BOOK_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Book details added Successfully',
                                                 html: '<h3>Dear {0} </h3><p>Your Book <strong>{1}</strong> has been added to the available books list. Thank you for your valuable contribution. Kep contributing.</p><p> Regards, BookWorm Team.</p>',
-                                                plain : 'New book lending successful'}
+                                                plain : 'New book lending successful'},
+        FEEDBACK_MAIL_CONTENT : { subject: '[BookWorm Feedback] New feedback',
+                                                html: '<h3>User {0}, with email {1} has sent a feedback on {2} </h3><p>{3}</p>',
+                                                plain : 'New feedback from user'}
     };
     this.setSMTPConfig = function(smtpConfig) {
         if(smtpConfig) {
@@ -30,6 +33,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                     }
             }));
             fromEmail = smtpConfig.fromEmail;
+            feedbackToEmail = smtpConfig.feedbackToEmail;
         }
     };
     this.sendRegistrationConfirmation = function(user_info) {
@@ -110,6 +114,25 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
             html: emailContentHTML // html body
         };
         sendEmail(mailOptions);
+    };
+    this.sendFeedbackEmail = function(feedback_info) {
+        console.log('feedback email sending');
+        var template = templates.FEEDBACK_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [feedback_info.author_name ? feedback_info.author_name : 'N/A',
+                                            feedback_info.email ? feedback_info.email : 'N/A',
+                                            new Date(),
+                                            feedback_info.feedback_text]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: feedbackToEmail, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+        //sendEmail(mailOptions);
     };
     function sendEmail(mailOptions){
         if(smtpTransport) {

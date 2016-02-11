@@ -207,4 +207,42 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.cancel = function() {
                 $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
             };
+    }])
+    .controller('FeedbackController', ['$scope','$routeParams','Constants',  'UsersService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
+            $scope.feedback = {};
+            $scope.status = {success : false, error: false};
+            if(BookwormAuthProvider.isLoggedIn()) {
+                var options = Constants.getDefaultPagingSortingData();
+                options.username = $routeParams.username;
+                UsersService.getUsers(options)
+                    .then(function(response){
+                        if(response.data && response.data.items){
+                            $scope.feedback = $.extend($scope.feedback, response.data.items[0]);
+                            $scope.feedback.authorName = $scope.feedback.firstName + ' ' + $scope.feedback.lastName;
+                        }
+                    });
+            }
+            $scope.dismissAlert = function () {
+                $scope.status = {success : false, error: false};
+            };
+            $scope.sendFeedback = function() {
+                if($scope.feedback.feedbackComment){
+                    UsersService
+                        .postFeedback($scope.feedback)
+                        .then(function(response){
+                            if(response && response.data && response.data.success){
+                                $scope.status.error = false;
+                                $scope.status.success = true;
+                            } else {
+                                $scope.status.error = true;
+                                $scope.status.success = false;
+                            }
+                        }, function(error) {
+                            $scope.status.error =  true;
+                            $scope.status.success = false;
+                        });
+                }
+            };
+
     }]);

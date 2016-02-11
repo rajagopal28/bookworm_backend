@@ -66,6 +66,10 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/about.html',
                     controller: 'HomeController'
                 })
+                .when('/bookworm/feedback', {
+                    templateUrl: 'templates/feedback.html',
+                    controller: 'FeedbackController'
+                })
                 .otherwise({
                     redirectTo: '/bookworm/home'
                 });

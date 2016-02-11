@@ -45,4 +45,7 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
             return $q.reject({error : Constants.ERROR_MISSING_REQUIRED_FIELDS})
 
         };
+        this.postFeedback = function(feedback){
+            return $http.post('/bookworm/api/feedback/add', feedback, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
 }]);
