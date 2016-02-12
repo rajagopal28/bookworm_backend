@@ -2,12 +2,12 @@
 app.controller('HomeController', ['$scope', 'UsersService', 'BookwormAuthProvider',
     function ($scope, UsersService, BookwormAuthProvider)  {
         $scope.tabs = [{
-            title : 'Author',
-            template :'../../../templates/about-author.html',
-            active : true},
-        {
             title : 'BookWorm',
-            template :'../../../templates/about-author.html',
+            template :'./templates/about-site.html',
+            active : true},
+            {
+            title : 'Author',
+            template :'./templates/about-author.html',
             active : false}];
         $scope.loginPopup = function () {
             // console.log('Login');

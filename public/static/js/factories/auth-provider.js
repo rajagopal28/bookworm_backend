@@ -39,7 +39,7 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
             if(authenticatedUser
                 && authenticatedUser.authSuccess
                 && aUser
-                && aUser.username){
+                && aUser.username === authenticatedUser.username ){
                 var newUser = {
                     authSuccess : authenticatedUser.authSuccess,
                     authorName : ('' + (aUser.firstName ? aUser.firstName : '') + ' ' + (aUser.lastName ? aUser.lastName : '')).trim(),
@@ -47,7 +47,7 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
                     thumbnailURL : aUser.thumbnailURL,
                     token : authenticatedUser.token
                 };
-                $localStorage.user = JSON.stringify(aUser);
+                $localStorage.user = JSON.stringify(newUser);
                 authenticatedUser = newUser;
             }
 

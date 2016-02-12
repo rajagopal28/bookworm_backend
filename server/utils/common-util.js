@@ -14,7 +14,7 @@ function Utils() {
         METHOD_POST : 'POST',
         FORMAT_UTF_8: 'utf8',
         COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX : 'csrftoken=',
-        COOKIE_VAR_STRING_SESSION_ID_PREFIX : 'sessioid=',
+        COOKIE_VAR_STRING_SESSION_ID_PREFIX : 'sessionid=',
         COOKIE_VAR_STRING_EXPIRES_PREFIX : 'expires=',
         REQUEST_PARAM_CLOUD_FILE_NAME : 'file',
         REQ_HEADER_AUTHORIZATION : 'authorization',

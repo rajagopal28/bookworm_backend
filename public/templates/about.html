@@ -1,25 +1,6 @@
 
  <uib-tabset justified="true">
-   <uib-tab heading="Author" active="true" >
-       <div class="row">
-            <div class="col-md-6 thumbnail"><img alt="Me" src="https://file.ac/1vjO3iSZ5G4/author-image.jpg"></div>
-            <div class="col-md-6"><h2>Hello. My name is <span class="highlight">Rajagopal</span></h2>
-                <p>Tech enthusiast. Love to code. Interested in all super-duper coding languages. Java crazy.</p>
-                <p>This site is a result of my MEAN stack experiment. Not a huge UI guy, apologies if something doesn't look great.
-                    If you like this site, kindly send your feedbacks through the feedbacks page. Will try to improve in the future.
-                    Keep sending feedbacks, keep supporting and Happy Coding !!</p>
-                </div>
-        </div>
-   </uib-tab>
-   <uib-tab heading="BookWorm" >
-        <div class="row">
-            <div class="col-md-6 thumbnail"><img alt="Me" src="https://file.ac/1vjO3iSZ5G4/author-image.jpg"></div>
-            <div class="col-md-6"><h2>Hello. My name is <span class="highlight">Rajagopal</span></h2>
-                <p>Tech enthusiast. Love to code. Interested in all super-duper coding languages. Java crazy.</p>
-                <p>This site is a result of my MEAN stack experiment. Not a huge UI guy, apologies if something doesn't look great.
-                    If you like this site, kindly send your feedbacks through the feedbacks page. Will try to improve in the future.
-                    Keep sending feedbacks, keep supporting and Happy Coding !!</p>
-                </div>
-        </div>
+   <uib-tab heading="{{ tab.title }}" active="tab.active" ng-repeat="tab in tabs">
+       <div ng-include="tab.template"></div>
    </uib-tab>
   </uib-tabset>

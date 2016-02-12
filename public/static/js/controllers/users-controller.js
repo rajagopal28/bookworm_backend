@@ -111,6 +111,11 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             });
             modalInstance.result.then(function(result) {
                 // console.log(result);
+                if(result.data
+                    && result.data.success
+                    && result.data.fileAbsolutePath) {
+                    $scope.user.thumbnailURL = result.data.fileAbsolutePath;
+                }
             });
         };
         $scope.dismissAlert = function () {
@@ -174,11 +179,11 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     }
                 });
     }])
-    .controller('ImageUploadController', ['$scope','$uibModalInstance','Constants',  'UsersService', 'BookwormAuthProvider','user',
-        function ($scope, $uibModalInstance, Constants, UsersService, BookwormAuthProvider, user) {
+    .controller('ImageUploadController', ['$scope','$uibModalInstance', '$timeout', 'Constants',  'UsersService', 'BookwormAuthProvider','user',
+        function ($scope, $uibModalInstance, $timeout, Constants, UsersService, BookwormAuthProvider, user) {
             $scope.user = user;
             $scope.profileThumbnail = null;
-            $scope.status = {error: false};
+            $scope.status = {error: false, success: false};
             $scope.uploadImage = function() {
                 var file = $scope.profileThumbnail;
                 if(file && file.size < Constants.MAX_FILE_UPLOAD_LIMIT) {
@@ -186,23 +191,38 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     .postImage(file)
                     .then(function(response){
                         if(response && response.data){
-                            if(response.data.error) {
-                                $scope.status.error = true;
-                                $scope.errorMessage = response.data.error;
+                            if(response.data.success) {
+                               $scope.status.error = false;
+                                $scope.status.success = true;
+                                $scope.user.thumbnailURL = $scope.user.thumbnailURL !== response.data.fileAbsolutePath
+                                    ? response.data.fileAbsolutePath
+                                    : response.data.fileAbsolutePath + '?lastmod=' + (new Date()).getTime();
+                                $timeout(function(){
+                                 $uibModalInstance.close(response.data);
+                                }, 5000);
+                                $scope.profileThumbnail = null;
                             } else {
-                                $uibModalInstance.close(response.data);
+                                 $scope.status.error = true;
+                                $scope.status.success = false;
+                                $scope.errorMessage = response.data.error;
                             }
                         } else {
                             $scope.status.error = true;
+                            $scope.status.success = false;
                             $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
                         }
                     }, function(error) {
                         if(error) {
                             $scope.status.error = true;
+                            $scope.status.success = false;
                             $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
                         }
                     });
                 }
+            };
+            $scope.dismissAlert = function() {
+                $scope.status.error = false;
+                $scope.status.success = false;
             };
             $scope.cancel = function() {
                 $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
@@ -224,14 +244,15 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     });
             }
             $scope.dismissAlert = function () {
-                $scope.status = {success : false, error: false};
+                $scope.status.error = false;
+                $scope.status.success = false;
             };
             $scope.sendFeedback = function() {
                 if($scope.feedback.feedbackComment){
                     UsersService
                         .postFeedback($scope.feedback)
                         .then(function(response){
-                            if(response && response.data && response.data.success){
+                            if(response.data && response.data.success){
                                 $scope.status.error = false;
                                 $scope.status.success = true;
                             } else {

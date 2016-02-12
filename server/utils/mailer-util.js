@@ -132,7 +132,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
             text : template.plain,
             html: emailContentHTML // html body
         };
-        //sendEmail(mailOptions);
+        sendEmail(mailOptions);
     };
     function sendEmail(mailOptions){
         if(smtpTransport) {
