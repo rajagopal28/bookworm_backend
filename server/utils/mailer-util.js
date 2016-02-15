@@ -1,7 +1,7 @@
 function Mailer(nodemailer, smtpTransport, mUtils) {
     'use strict';
     var self = this;
-    var smtpTransport;
+    var smtpTransport = smtpTransport;
     var fromEmail, feedbackToEmail;
     var templates = {
         REGISTRATION_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Registration Successful',
@@ -17,7 +17,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 html: '<h3>Dear {0} </h3><p>Your Book <strong>{1}</strong> has been added to the available books list. Thank you for your valuable contribution. Kep contributing.</p><p> Regards, BookWorm Team.</p>',
                                                 plain : 'New book lending successful'},
         FEEDBACK_MAIL_CONTENT : { subject: '[BookWorm Feedback] New feedback',
-                                                html: '<h3>User {0}, with email {1} has sent a feedback on {2} </h3><p>{3}</p>',
+                                                html: '<h3>User {0}, with email {1} has sent a feedback[type={2}] on {3} </h3><p>{4}</p>',
                                                 plain : 'New feedback from user'}
     };
     this.setSMTPConfig = function(smtpConfig) {
@@ -122,6 +122,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                         template.html,
                                         [feedback_info.author_name ? feedback_info.author_name : 'N/A',
                                             feedback_info.email ? feedback_info.email : 'N/A',
+                                            feedback_info.feedback_type,
                                             new Date(),
                                             feedback_info.feedback_text]);
         console.log(emailContentHTML);

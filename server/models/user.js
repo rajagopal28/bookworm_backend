@@ -1,14 +1,7 @@
-function User(mongoose, bcrypt) {
+function User(mongoose, bcrypt, mUtils) {
     'use strict';
-    var constants = {
-        SCHEMA_HOOK_UPDATE : 'update',
-        SCHEMA_HOOK_SAVE : 'save',
-        FIELD_PASSWORD : 'password',
-        FIELD_USERNAME : 'username'
-    };
-    var MODEL_NAME_USER = 'User';
+    var constants = mUtils.constants;
     var self = this;
-    var SALT_WORK_FACTOR = 10;
     var userSchemaDefinition = {
         username: String,
         first_name: String,
@@ -41,7 +34,7 @@ function User(mongoose, bcrypt) {
             // go to next as we do not need any deferred hashing call
             next();
         }
-        bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+        bcrypt.genSalt(constants.SALT_WORK_FACTOR, function (err, salt) {
             if (err) return next(err);
             // hash the password along with our new salt
         // only hash the password if it has been modified (or is new)
@@ -81,7 +74,7 @@ function User(mongoose, bcrypt) {
             cb(null, user);
         });
     };
-    this.Model = mongoose.model(MODEL_NAME_USER, userSchema);
+    var Model = mongoose.model(constants.MODELS.USER, userSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];
         if (searchQuery.username) {
@@ -111,7 +104,7 @@ function User(mongoose, bcrypt) {
         return null;
     };
     this.authenticateUser = function (user, cb) {
-        self.Model.findOne({
+        Model.findOne({
             $or: [
                 {username: user.username},
                 {email: user.username}
@@ -132,6 +125,75 @@ function User(mongoose, bcrypt) {
                 }
             }
         });
+    };
+    this.incrementContributionOfUser = function(username, token, callback) {
+        Model
+            .findOneAndUpdate(
+                {username : username, token : token},
+                { $inc : { contributions : 1}})
+            .select('-password')
+            .select('-token')
+            .exec(function(err,item){
+                    callback(err,item);
+            });
+    };
+    this.findUsersWithUsernames = function(usernames_array, callback) {
+        var search_users = this.searchUsersWithUserNameQuery(usernames_array);
+            if(search_users){
+                Model
+                .find(search_users)
+                .select('-token')
+                .select('-password')
+                .exec(function(err, items){
+                    callback(err, items)
+                });
+            }
+    };
+    this.checkUniqueUsername = function(searchQuery, callback){
+        searchQuery = {username : searchQuery.username};
+        Model.find(searchQuery)
+            .exec(function (err, items) {
+                callback(err, items);
+            });
+    };
+    this.addNewUser = function(personal_info, callback){
+        var new_user = new Model(personal_info);
+        new_user.save(function (err, item) {
+            callback(err, item);
+        });
+    };
+    this.updateExistingUser = function(personal_info, token, callback){
+      Model.update({_id: personal_info._id , token : token},
+        {$set : personal_info},
+        { upsert : false},
+            function (err, items) {
+                callback(err, items);
+        });
+    };
+    this.findUsersPaged = function(searchQuery, pagingSorting, callback) {
+        Model.count(searchQuery, function(err, totalCount){
+            if(err){
+                callback(err, null, 0);
+            } else {
+                Model
+                    .find(searchQuery)
+                    .select('-password')
+                    .select('-token')
+                    .skip(pagingSorting.skipCount)
+                    .limit(pagingSorting.itemsPerPage)
+                    .sort(pagingSorting.sortField)
+                    .exec(function (err, items) {
+                        callback(err, items, totalCount);
+                    });
+            }
+        });
+    };
+    this.getCountOfUsers = function(searchQuery, callback) {
+        Model
+        .count(searchQuery,
+            function(err, totalCount){
+                callback(err, totalCount);
+            });
     };
 };
 module.exports.User = User;

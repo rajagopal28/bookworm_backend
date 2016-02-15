@@ -30,9 +30,9 @@ var mongoose = require('mongoose')
 /* Models */
 var mUtils = new utils.Utils();
 var Mailer = new mailer.Mailer(nodemailer, smtpTransport,  mUtils);
-var Books = new book.Book(mongoose);
-var Users = new user.User(mongoose, bcrypt);
-var Forums = new forum.Forum(mongoose);
+var Books = new book.Book(mongoose, mUtils);
+var Users = new user.User(mongoose, bcrypt, mUtils);
+var Forums = new forum.Forum(mongoose, mUtils);
 /*** Global Variables*/
 var serverConfigJSON;
 var socket;
@@ -97,8 +97,7 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
         if (item.book_name) {
             console.log('has book details');
             item.is_available = true;
-            var new_rental_book = new Books.Model(item);
-            new_rental_book.save(function (error, new_rental_book) {
+            Books.addNewBook(item, function (error, new_rental_book) {
                 if (error) {
                     res.json(error);
                 } else {
@@ -107,15 +106,9 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
                     if(new_rental_book.contributor
                         && new_rental_book.contributor.username
                         && req.token) {
-                        Users.Model
-                            .findOneAndUpdate(
-                                {username : new_rental_book.contributor.username, token : req.token},
-                                { $inc : { contributions : 1}})
-                            .select('-password')
-                            .select('-token')
-                            .exec(
-                                function(err,item){
-                                    console.log(item);
+                        Users.incrementContributionOfUser(new_rental_book.contributor.username,
+                            req.token, function(err, item){
+                                console.log(item);
                                 if(err){
                                     console.error(err);
                                 } else if(item){
@@ -126,6 +119,8 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
                     }
                 }
             });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
@@ -135,17 +130,15 @@ app.post('/bookworm/api/books/rental/update',ensureAuthorized,
         console.log(inputParams);
         var item = mUtils.parseRequestToDBKeys(inputParams);
         if (item._id && req.token) {
-            Books.Model.update(
-                {_id : item._id, token : req.token},
-                { $set : item }, {upsert : false},
-                function (error, saved_rental_book) {
-                if (error) {
+            Books.updateBookDetails(item, function (error, item) {
+               if (error) {
                     res.send(error);
                 } else {
-                    res.json({success : true, item : saved_rental_book});
+                    res.json({success : true, item : item});
                 }
-
             });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
@@ -154,13 +147,8 @@ app.post('/bookworm/api/books/rental/request',ensureAuthorized,
         var inputParams = req.body;
         var item = mUtils.parseRequestToDBKeys(inputParams);
         if (item.borrower_name && item.contributor) {
-            var search_users = Users.searchUsersWithUserNameQuery([item.borrower_name, item.contributor.username]);
-            if(search_users){
-                Users.Model
-                .find(search_users)
-                .select('-token')
-                .select('-password')
-                .exec(function(err, items){
+            Users.findUsersWithUsernames([item.borrower_name, item.contributor.username],
+                function(err, items){
                     if(err) {
                         res.send({success : false, error : constants.DEFAULT_ERROR_MSG});
                     } else {
@@ -170,7 +158,8 @@ app.post('/bookworm/api/books/rental/request',ensureAuthorized,
                         }
                     }
                 });
-            }
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 
@@ -182,29 +171,19 @@ app.get('/bookworm/api/books/rental/all', function (req, res) {
     console.log(pagingSorting);
     searchQuery = Books.buildSearchQuery(searchQuery, mUtils);
     console.log(searchQuery);
-    Books.Model.count(searchQuery,
-        function(err,totalCount){
-        if(err) {
-            res.send(err);
-        } else {
-            Books.Model
-                .find(searchQuery)
-                .skip(pagingSorting.skipCount)
-                .limit(pagingSorting.itemsPerPage)
-                .sort(pagingSorting.sortField)
-                .exec(function (err, items) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        var parsedItems = mUtils.parseDBToResponseKeys(items);
-                        res.json({
-                            totalItems : totalCount,
-                            items : parsedItems
-                        });
-                    }
+    Books.findPagedBookItems(searchQuery,
+        pagingSorting,
+        function (err, items, totalCount) {
+            if (err) {
+                res.send(err);
+            } else {
+                var parsedItems = mUtils.parseDBToResponseKeys(items);
+                res.json({
+                    totalItems : totalCount,
+                    items : parsedItems
                 });
-        }
-    });
+            }
+        });
 });
 
 app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
@@ -327,16 +306,17 @@ app.post('/bookworm/api/users/check-unique',
         var inputParams = req.body;
         var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
         if (searchQuery.username) {
-            searchQuery = {username : searchQuery.username};
-            Users.Model.find(searchQuery)
-                .exec(function (err, items) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        var isUsernameAvailable = items.length === 0;
-                        res.json({isUsernameAvailable: isUsernameAvailable});
-                    }
-                });
+            Users.checkUniqueUsername(searchQuery,
+                function (err, items) {
+                if (err) {
+                    res.send(err);
+                } else {
+                    var isUsernameAvailable = items.length === 0;
+                    res.json({isUsernameAvailable: isUsernameAvailable});
+                }
+            });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/login-auth',
@@ -353,6 +333,8 @@ app.post('/bookworm/api/users/login-auth',
                     res.json(response);
                 }
             });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/register',
@@ -361,17 +343,17 @@ app.post('/bookworm/api/users/register',
         console.log(personal_info);
         if (personal_info.first_name)// check for not empty
         {
-            var new_user = new Users.Model(personal_info);
-            new_user.save(function (err, item) {
-                if (err) {
-                    res.send(err);
-                    console.error(JSON.stringify(err));
-                } else {
-                    res.json({success : true, item : item});
-                    console.log('Success insertion: ' + JSON.stringify(item));
-                    Mailer.sendRegistrationConfirmation(item);// send email for confirmation
-                }
-            });
+            Users.addNewUser(personal_info,
+                function (err, item) {
+                    if (err) {
+                        res.send(err);
+                        console.error(JSON.stringify(err));
+                    } else {
+                        res.json({success : true, item : item});
+                        console.log('Success insertion: ' + JSON.stringify(item));
+                        Mailer.sendRegistrationConfirmation(item);// send email for confirmation
+                    }
+                });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -382,9 +364,8 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
         var token = req.token;
         if (personal_info._id && token)// check for not empty
         {
-            Users.Model.update({_id: personal_info._id , token : token},
-                {$set : personal_info},
-                { upsert : false},
+            Users.updateExistingUser(personal_info,
+                token,
                 function (err, items) {
                     if (err) {
                         res.send(err);
@@ -392,9 +373,9 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
                     } else {
                         res.json({success : true, item : items});
                         console.log('Success insertion: ' + JSON.stringify(items));
-                        // Mailer.sendProfileUpdateConfirmation(personal_info);
+                        Mailer.sendProfileUpdateConfirmation(personal_info);
                     }
-            });
+                });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -406,31 +387,20 @@ app.get('/bookworm/api/users/all',
         searchQuery = Users.buildSearchQuery(searchQuery);
         var pagingSorting = mUtils.getPagingSortingData(searchQuery);
         console.log(searchQuery);
-        Users.Model.count(searchQuery, function(err, totalCount){
-            if(err){
-                res.send(err);
-            } else {
-                Users.Model
-                    .find(searchQuery)
-                    .select('-password')
-                    .select('-token')
-                    .skip(pagingSorting.skipCount)
-                    .limit(pagingSorting.itemsPerPage)
-                    .sort(pagingSorting.sortField)
-                    .exec(function (err, items) {
-                        if (err) {
-                            res.send(err);
-                            console.error(JSON.stringify(err));
-                        } else {
-                            var parsedItems = mUtils.parseDBToResponseKeys(items);
-                            res.json({
-                                'totalItems' : totalCount,
-                                'items' : parsedItems
-                            });
-                        }
+        Users.findUsersPaged(searchQuery,
+            pagingSorting,
+            function (err, items, totalCount) {
+                if (err) {
+                    res.send(err);
+                    console.error(JSON.stringify(err));
+                } else {
+                    var parsedItems = mUtils.parseDBToResponseKeys(items);
+                    res.json({
+                        'totalItems' : totalCount,
+                        'items' : parsedItems
                     });
-            }
-        });
+                }
+            });
 });
 
 app.post('/bookworm/api/forums/add',ensureAuthorized,
@@ -440,14 +410,14 @@ app.post('/bookworm/api/forums/add',ensureAuthorized,
         console.log(forum_item);
         if (forum_item.forum_title)// check for not empty
         {
-            var forum = new Forums.Model(forum_item);
-            forum.save(function (error, new_forum) {
-                if (error) {
-                    res.json(error);
-                } else {
-                    res.json({success : true, item :new_forum});
-                }
-            });
+            Forums.addNewForum(forum_item,
+                function (error, new_forum) {
+                    if (error) {
+                        res.json(error);
+                    } else {
+                        res.json({success : true, item :new_forum});
+                    }
+                });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -460,18 +430,13 @@ app.post('/bookworm/api/forums/update',ensureAuthorized,
         console.log(forum_item);
         if (forum_item._id)// check for not empty
         {
-           Forums.Model.update(
-                        {_id : forum_item._id},
-                        { $set : forum_item},
-                        { upsert : false},
-                        function (error, new_forum) {
-                            if (error) {
-                                res.json(error);
-                            } else {
-                                res.json({success : true, item :new_forum});
-                            }
-
-                        });
+            Forums.updateForum(forum_item, function(error, new_forum){
+                if (error) {
+                    res.json(error);
+                } else {
+                    res.json({success : true, item :new_forum});
+                }
+            });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -484,32 +449,23 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
         console.log(chat_item);
         if (chat_item.forum_id)// check for not empty
         {
-            var forum = Forums.Model
-                .findOne({_id: chat_item.forum_id})
-                .exec(function (error, forum_item) {
-                    delete chat_item.forum_id;
-                    if (forum_item) {
-                        console.log(forum_item);
-                        forum_item.chats.push(chat_item);
-                        forum_item.save(function (error, new_forum) {
-                            if (error) {
-                                res.send(error);
-                            } else {
-                                if (socket) {
-                                    var item = {};
-                                    item.forumId = forum_item._id;
-                                    chat_item.created_ts = new Date();
-                                    item.chat = mUtils.parseDBToResponseKeys(chat_item);
-                                    console.log('in socket');
-                                    socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);
-                                }
-                                res.json({success : true, item :new_forum});
-                            }
-
-                        });
+            Forums.addChatInForum(chat_item,
+                function (error, new_forum) {
+                    if (error) {
+                        res.send(error);
+                    } else {
+                        if (socket) {
+                            var item = {};
+                            item.forumId = new_forum._id;
+                            chat_item.created_ts = new Date();
+                            item.chat = mUtils.parseDBToResponseKeys(chat_item);
+                            console.log('in socket');
+                            socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);
+                        }
+                        res.json({success : true, item :new_forum});
                     }
-                });
 
+                });
         } else {
             res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
         }
@@ -520,32 +476,21 @@ app.get('/bookworm/api/forums/all', function (req, res) {
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
     var pagingSorting = mUtils.getPagingSortingData(searchQuery);
     searchQuery = Forums.buildSearchQuery(searchQuery);
-    Forums.Model.count(searchQuery, function(err, totalCount){
-        if (err) {
-            res.send(err);
-        } else {
-            Forums.Model.find(searchQuery)
-            .select('-chats')
-                .skip(pagingSorting.skipCount)
-                .limit(pagingSorting.itemsPerPage)
-                .sort(pagingSorting.sortField)
-                .exec(function (err, items) {
-                    if (err) {
-                        res.send(err);
-                    } else {
-                        console.log(items);
-                        var parsedItems = mUtils.parseDBToResponseKeys(items);
-                        console.log(parsedItems);
-                        res.json({
-                            items : parsedItems,
-                            totalItems : totalCount
-                        });
-                    }
+    Forums.findForumsPaged(searchQuery,
+        pagingSorting,
+        function (err, items, totalCount) {
+            if (err) {
+                res.send(err);
+            } else {
+                console.log(items);
+                var parsedItems = mUtils.parseDBToResponseKeys(items);
+                console.log(parsedItems);
+                res.json({
+                    items : parsedItems,
+                    totalItems : totalCount
                 });
-        }
-
-    });
-    console.log(JSON.stringify(searchQuery));
+            }
+        });
 });
 
 app.get('/bookworm/api/forums/chats/all',
@@ -553,16 +498,15 @@ app.get('/bookworm/api/forums/chats/all',
         var inputParams = req.query;
         var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
         searchQuery = Forums.buildSearchQuery(searchQuery);
-        Forums.Model.findOne(searchQuery)
-            .exec(function (err, forum) {
-                if (err) {
-                    res.send(err);
-                } else {
-                    var parsed = mUtils.parseDBToResponseKeys(forum);
-                    console.log(parsed);
-                    res.send(parsed);
-                }
-            });
+        Forums.getChatsOfForum(searchQuery, function (err, forum) {
+            if (err) {
+                res.send(err);
+            } else {
+                var parsed = mUtils.parseDBToResponseKeys(forum);
+                console.log(parsed);
+                res.send(parsed);
+            }
+        });
 });
 
 app.get('/bookworm/api/config', function (req, res) {
@@ -621,16 +565,15 @@ function ensureAuthorized(req, res, next) {
     if (bearerHeader) {
         var bearer = bearerHeader.split(' ');
         bearerToken = bearer[1];// because bearer[0] === 'Bearer'
-        Users.Model
-            .count({token: bearerToken},
-                function(err, totalCount){
-                    if(err || totalCount === 0){
-                        res.sendStatus(403);
-                    } else {
-                        req.token = bearerToken;
-                        next();
-                    }
-                });
+        Users.getCountOfUsers({token: bearerToken},
+            function(err, totalCount){
+                if(err || totalCount === 0){
+                    res.sendStatus(403);
+                } else {
+                    req.token = bearerToken;
+                    next();
+                }
+            });
     } else {
         res.sendStatus(403);
     }
@@ -721,6 +664,11 @@ function uploadFileToCloud(req, serverConfig, callback) {
         targetPath = constants.TEMP_FILE_PATH
                         + cloudFileName
                         + fileExtension;
+    if(req.files.file.length > constants.MAX_FILE_UPLOAD_SIZE) {
+        console.error('FILE LIMIT EXCEEDED');
+        callback(null);
+        return;
+    }
     if (ACCEPTED_FILE_PATHS
         && fileExtension
         && ACCEPTED_FILE_PATHS.indexOf(fileExtension) !== -1) {
@@ -778,6 +726,8 @@ function uploadFileToCloud(req, serverConfig, callback) {
                 });
               }
         });
+    } else {
+        console.error('Unknown file type');
     }
 }
 // socket IO -----------------------------------------------------------------

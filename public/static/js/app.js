@@ -60,7 +60,7 @@ app.config(['$routeProvider', '$httpProvider',
                 })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
-                    controller: 'MainController'
+                    controller: 'HomeController'
                 })
                 .when('/bookworm/about', {
                     templateUrl: 'templates/about.html',

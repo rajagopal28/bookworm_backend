@@ -46,7 +46,18 @@ function Utils() {
         APP_HEADER_VALUE_ALLOWED_HEADERS : 'X-Requested-With,content-type, Authorization',
         APP_X_HTTP_METHOD_OVERRIDE_HEADER : 'X-HTTP-Method-Override',
         MORGAN_LOG_TYPE_COMBINED : 'combined',
-        ENV_VALUE_DEFAULT_PORT : 8080
+        ENV_VALUE_DEFAULT_PORT : 8080,
+        MAX_FILE_UPLOAD_SIZE : 5242880,
+        SCHEMA_HOOK_UPDATE : 'update',
+        SCHEMA_HOOK_SAVE : 'save',
+        FIELD_PASSWORD : 'password',
+        FIELD_USERNAME : 'username',
+        SALT_WORK_FACTOR : 10,
+        MODELS : {
+            FORUM : 'Forum',
+            USER : 'User',
+            BOOK : 'Book'
+        }
     };
     var requestToDBKeys = {
         'id': '_id',
@@ -88,7 +99,8 @@ function Utils() {
         'contributor' : 'contributor',
         'contributions' : 'contributions',
         'borrowerName' : 'borrower_name',
-        'feedbackComment' : 'feedback_text'
+        'feedbackComment' : 'feedback_text',
+        'feedbackType' : 'feedback_type'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

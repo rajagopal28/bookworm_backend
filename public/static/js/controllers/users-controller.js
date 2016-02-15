@@ -228,20 +228,23 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
             };
     }])
-    .controller('FeedbackController', ['$scope','$routeParams','Constants',  'UsersService', 'BookwormAuthProvider',
-        function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
-            $scope.feedback = {};
+    .controller('FeedbackController', ['$scope','Constants',  'UsersService', 'BookwormAuthProvider',
+        function ($scope, Constants, UsersService, BookwormAuthProvider) {
+            $scope.feedback = {feedbackType:'query'};
             $scope.status = {success : false, error: false};
             if(BookwormAuthProvider.isLoggedIn()) {
-                var options = Constants.getDefaultPagingSortingData();
-                options.username = $routeParams.username;
-                UsersService.getUsers(options)
+                var currentUser = BookwormAuthProvider.getUser();
+                if(currentUser && currentUser.username) {
+                    var options = Constants.getDefaultPagingSortingData();
+                    options.username = currentUser.username;
+                    UsersService.getUsers(options)
                     .then(function(response){
                         if(response.data && response.data.items){
                             $scope.feedback = $.extend($scope.feedback, response.data.items[0]);
                             $scope.feedback.authorName = $scope.feedback.firstName + ' ' + $scope.feedback.lastName;
                         }
                     });
+                }
             }
             $scope.dismissAlert = function () {
                 $scope.status.error = false;
@@ -259,9 +262,11 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                                 $scope.status.error = true;
                                 $scope.status.success = false;
                             }
+                            $scope.feedback.feedbackComment = '';
                         }, function(error) {
                             $scope.status.error =  true;
                             $scope.status.success = false;
+                            $scope.feedback.feedbackComment = '';
                         });
                 }
             };

@@ -1,11 +1,7 @@
-function Book(mongoose) {
+function Book(mongoose, mUtils) {
     'use strict';
     var self = this;
-    var constants = {
-        SCHEMA_HOOK_UPDATE : 'update',
-        SCHEMA_HOOK_SAVE : 'save'
-    };
-    var MODEL_NAME_BOOK = 'Book';
+    var constants = mUtils.constants;
     var bookSchemaDefinition = {
         book_name: String,
         thumbnail_url: String,
@@ -30,7 +26,7 @@ function Book(mongoose) {
         book.last_modified_ts = Date.now();
         next();
     });
-    this.Model = mongoose.model(MODEL_NAME_BOOK, bookSchema);
+    var Model = mongoose.model(constants.MODELS.BOOK, bookSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];
         if (searchQuery.book_name) {
@@ -52,6 +48,38 @@ function Book(mongoose) {
             searchQuery.$or = $or;
         }
         return searchQuery;
+    };
+
+    this.addNewBook = function(new_book, callback){
+        var new_rental_book = new Model(new_book);
+            new_rental_book.save(function (error, new_rental_book) {
+                callback(error, new_rental_book);
+            });
+    };
+    this.updateBookDetails = function(book_item, callback){
+      Model
+          .update({_id : book_item._id},
+            { $set : book_item }, {upsert : false},
+            function (error, saved_rental_book) {
+                callback(error, saved_rental_book);
+            });
+    };
+    this.findPagedBookItems = function(searchQuery, pagingSorting, callback) {
+        Model.count(searchQuery,
+        function(err,totalCount){
+            if(err) {
+                callback(err, null, 0);
+            } else {
+                Model
+                    .find(searchQuery)
+                    .skip(pagingSorting.skipCount)
+                    .limit(pagingSorting.itemsPerPage)
+                    .sort(pagingSorting.sortField)
+                    .exec(function (err, items) {
+                        callback(err,items, totalCount);
+                    });
+            }
+        });
     };
 };
 module.exports.Book = Book;

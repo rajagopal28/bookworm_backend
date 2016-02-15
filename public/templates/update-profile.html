@@ -40,16 +40,7 @@
                     <div class="form-group">
                         <label for="dob" class="control-label col-xs-2">Date of Birth</label>
                         <div class="col-xs-8">
-                            <p class="input-group" ng-controller="DatepickerCtrl">
-                                <input type="text" class="form-control" uib-datepicker-popup="{{ format }}" ng-model="dt"
-                                       is-open="status.opened" min-date="minDate" max-date="maxDate"
-                                       datepicker-options="dateOptions" ng-required="true" close-text="Close"
-                                       show-button-bar="false" ng-change="onDatePicked()" name="user.dob"/>
-                          <span class="input-group-btn">
-                            <button type="button" class="btn btn-default" ng-click="showDatepicker($event)"><i
-                                    class="glyphicon glyphicon-calendar"></i></button>
-                          </span>
-                            </p>
+                            <date-picker-input init-date="user.dob"></date-picker-input>
                         </div>
                     </div>
                     <div class="form-group">
