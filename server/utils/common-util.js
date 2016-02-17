@@ -52,7 +52,10 @@ function Utils() {
         SCHEMA_HOOK_SAVE : 'save',
         FIELD_PASSWORD : 'password',
         FIELD_USERNAME : 'username',
-        SALT_WORK_FACTOR : 10,
+        CRYPTO_DEFAULT_ITERATIONS : 10000,
+        STRING_ENCODING_BASE_64 : 'base64',
+        RANDOM_STRING_LENGTH_16 : 16,
+        RANDOM_STRING_LENGTH_64 : 64,
         MODELS : {
             FORUM : 'Forum',
             USER : 'User',

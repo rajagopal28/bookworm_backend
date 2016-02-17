@@ -124,8 +124,8 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.status.warn = false;
         };
     }])
-    .controller('UserLoginController', ['$scope', '$location', '$uibModal', 'UsersService',
-        function ($scope, $location, $uibModal, UsersService) {
+    .controller('UserLoginController', ['$scope', '$location', '$uibModal', 'Constants', 'UsersService',
+        function ($scope, $location, $uibModal, Constants, UsersService) {
         $scope.user = {};
         $scope.status = {error: false};
         $scope.dismissMessage = function () {

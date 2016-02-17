@@ -13,7 +13,6 @@
     "method-override": "2.3.5",
     "serve-favicon": "2.3.0",
     "socket.io": "1.4.4",
-    "bcrypt": "0.8.5",
     "connect-multiparty": "2.0.0",
     "form-data": "0.2.0",
     "nodemailer": "2.1.0",
@@ -21,6 +20,9 @@
   },
   "scripts": {
     "start": "node server.js"
+  },
+  "config": {
+    "unsafe-perm":true
   },
   "main": "server.js",
   "author": "Rajagopal",

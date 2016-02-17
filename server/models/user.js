@@ -1,7 +1,9 @@
-function User(mongoose, bcrypt, mUtils) {
+function User(mongoose, mCrypto, mUtils) {
     'use strict';
     var constants = mUtils.constants;
     var self = this;
+    var crypto = mCrypto;
+    var salt = crypto.randomBytes(constants.RANDOM_STRING_LENGTH_16).toString(constants.STRING_ENCODING_BASE_64);
     var userSchemaDefinition = {
         username: String,
         first_name: String,
@@ -28,52 +30,37 @@ function User(mongoose, bcrypt, mUtils) {
         var user = this;
         user.last_modified_ts = new Date();
           // generate a salt
-        var isPasswordChanged = user.isModified(constants.FIELD_PASSWORD);
-        var isUsernameChanged = user.isModified(constants.FIELD_USERNAME);
-        if(!(isPasswordChanged || isUsernameChanged)) {
-            // go to next as we do not need any deferred hashing call
-            next();
+        if (user.isModified(constants.FIELD_PASSWORD)){
+            user.password = hashString(user.password);
         }
-        bcrypt.genSalt(constants.SALT_WORK_FACTOR, function (err, salt) {
-            if (err) return next(err);
-            // hash the password along with our new salt
-        // only hash the password if it has been modified (or is new)
-            if (isPasswordChanged){
-                 bcrypt.hash(user.password, salt, function (err, hash) {
-                    if (err) return next(err);
-
-                    // override the cleartext password with the hashed one
-                    user.password = hash;
-                     if(!isUsernameChanged) {
-                         next();
-                     }
-                     // wait till the next hash async call execution to call next()
-                });
-            }
-            if(isUsernameChanged) {
-                bcrypt.hash(user.username, salt, function (err, hash) {
-                    if (err) return next(err);
-                    // override the cleartext password with the hashed one
-                    user.token = hash;
-                    next();
-                });
-            }
-
-        });
+        if(user.isModified(constants.FIELD_USERNAME)) {
+            user.token = hashString(user.username);
+        }
+        next();
     });
     userSchema.methods.getFullName = function () {
         return this.first_name + ' ' + this.last_name;
     };
     userSchema.methods.comparePassword = function (candidatePassword, user, cb) {
-        bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-            if (err) return cb(err);
-            if (!isMatch) {
-                user = {};
-            }
+        console.log(hashString(candidatePassword));
+        console.log(this.password);
+        var isMatch = candidatePassword &&
+            this.password === hashString(candidatePassword);
+        if(isMatch) {
             user.auth_success = isMatch;
-            cb(null, user);
-        });
+        } else {
+            user = {auth_success : isMatch};
+        }
+        cb(null, user);
     };
+    function hashString(input) {
+        if (!input) return '';
+        var saltBuffer = new Buffer(salt, constants.STRING_ENCODING_BASE_64);
+        return crypto.pbkdf2Sync(input,
+            saltBuffer,
+            constants.CRYPTO_DEFAULT_ITERATIONS,
+            constants.RANDOM_STRING_LENGTH_64).toString(constants.STRING_ENCODING_BASE_64);
+      }
     var Model = mongoose.model(constants.MODELS.USER, userSchema);
     this.buildSearchQuery = function (searchQuery, mUtils) {
         var $or = [];

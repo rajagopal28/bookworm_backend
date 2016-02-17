@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
     , mongodb = require('mongodb')
     , express = require('express')
     , app = express()
-    , bcrypt = require('bcrypt')
+    , crypto = require('crypto')
     , morgan = require('morgan')
     , logUtil = require('util')
     , fs = require('fs')
@@ -31,7 +31,7 @@ var mongoose = require('mongoose')
 var mUtils = new utils.Utils();
 var Mailer = new mailer.Mailer(nodemailer, smtpTransport,  mUtils);
 var Books = new book.Book(mongoose, mUtils);
-var Users = new user.User(mongoose, bcrypt, mUtils);
+var Users = new user.User(mongoose, crypto, mUtils);
 var Forums = new forum.Forum(mongoose, mUtils);
 /*** Global Variables*/
 var serverConfigJSON;
@@ -557,7 +557,7 @@ app.get('/test/test1', function (req, res) {
 
 // application -------------------------------------------------------------
 app.get('*', function (req, res) {
-    res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
+    res.sendFile(__dirname + '/public/index-dev.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;
