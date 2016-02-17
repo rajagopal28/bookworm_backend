@@ -26,11 +26,11 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" ng-if="isLoggedIn()">
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown">
+                    <li class="dropdown" uib-dropdown>
+                        <a uib-dropdown-toggle class="dropdown-toggle" data-toggle="dropdown">
                            Welcome {{ getDisplayName() }}<img src="{{ getThumbnail() }}" class="profile-image img-circle">
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul uib-dropdown-menu class="dropdown-menu">
                             <li><a ng-href="#/bookworm/auth/users/{{ getUserName() }}"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
                             <li class="divider"></li>
                             <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
