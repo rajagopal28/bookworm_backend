@@ -21,8 +21,19 @@
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">= 4.1.1",
+    "npm": ">= 2.14.4"
+  },
   "config": {
     "unsafe-perm":true
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-cssmin": "^0.14.0",
+    "grunt-contrib-uglify": "^0.11.1",
+    "grunt-ng-annotate": "^1.0.1"
   },
   "main": "server.js",
   "author": "Rajagopal",

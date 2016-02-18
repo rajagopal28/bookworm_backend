@@ -20,8 +20,18 @@ var mongoose = require('mongoose')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
     , forum = require('./server/models/forum')
-    , socketServer = app.listen(8080)
-    , io = require('socket.io')(socketServer, {
+    , SERVER_HOST_IP = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+    , SERVER_HOST_PORT = process.env.OPENSHIFT_NODEJS_PORT || 8080
+    , socketServer = app.listen(
+        SERVER_HOST_PORT,
+        SERVER_HOST_IP,
+        function(){
+        console.log((new Date())
+            + ' Server is listening on port '
+            + SERVER_HOST_PORT
+            + 'on ip address '
+            + SERVER_HOST_IP);
+    }), io = require('socket.io')(socketServer, {
         serveClient: true,
         path: '/socket.io'
     })
@@ -54,6 +64,15 @@ readConfigToSession(null, function(configFile) {
                                     + mongoConfig.port
                                     + '/'
                                     + mongoConfig.database;
+            if(process
+                && process.env
+                && process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
+                  connectionString = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
+                  process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
+                  process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+                  process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
+                  process.env.OPENSHIFT_APP_NAME;
+            }
             mongoose.connect(connectionString);
         }
     }

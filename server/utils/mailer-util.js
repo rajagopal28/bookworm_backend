@@ -22,7 +22,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     };
     this.setSMTPConfig = function(smtpConfig) {
         if(smtpConfig) {
-            console.log(smtpConfig);
+            // console.log(smtpConfig);
             smtpTransport = nodemailer.createTransport(smtpTransport(
                 {host : smtpConfig.host,
                     secureConnection : false,
