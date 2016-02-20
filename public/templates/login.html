@@ -3,24 +3,32 @@
         <h3 class="panel-title">Sign in</h3>
     </div>
     <div class="panel-body">
-
+        <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Success:</span>Success!</strong> Your Will receive an email confirmation shortly!!.
+        </div>
         <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
                     aria-hidden="true">&times;</span></button>
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>Error!</strong> {{ errorMessage }}
         </div>
-        <form class="form-horizontal">
+        <form class="form-horizontal" name="loginForm">
             <div class="form-group">
-                <label for="inputEmail" class="control-label col-xs-2">Login</label>
+                <label for="authorName" class="control-label"><sup>*</sup>Indicates required fields</label>
+            </div>
+            <div class="form-group">
+                <label for="inputEmail" class="control-label col-xs-2">Login<sup>*</sup></label>
                 <div class="col-xs-5">
-                    <input class="form-control" ng-model="user.username" id="inputEmail" placeholder="Email/Username">
+                    <input class="form-control" ng-required="true" ng-model="user.username" id="inputEmail" placeholder="Username">
                 </div>
             </div>
             <div class="form-group">
-                <label for="inputPassword" class="control-label col-xs-2">Password</label>
+                <label for="inputPassword" class="control-label col-xs-2">Password<sup>*</sup></label>
                 <div class="col-xs-5">
-                    <input type="password" class="form-control" id="inputPassword" ng-model="user.password"
+                    <input type="password" ng-required="true" class="form-control" id="inputPassword" ng-model="user.password"
                            placeholder="Password">
                 </div>
             </div>
@@ -28,13 +36,13 @@
                 <div class="col-xs-offset-2 col-xs-5">
                     <div class="checkbox">
                         <a href="#/bookworm/register">Register</a>
-                        <label><input ng-model="user.rememberMe" type="checkbox"> Remember me</label>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-xs-offset-2 col-xs-5">
-                    <button type="submit" class="btn btn-primary" ng-click="login()">Login</button>
+                    <button type="submit" ng-disabled="!loginForm.$valid" class="btn btn-primary" ng-click="login()">Login</button>
+                    <button type="submit" ng-disabled="!user.username" class="btn btn-primary" ng-click="sendResetPasswordRequest()">ForgotPassword</button>
                 </div>
             </div>
         </form>

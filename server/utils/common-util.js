@@ -28,6 +28,10 @@ function Utils() {
         HTTP_REQUEST_EVENT_NAME_ERROR : 'error',
         ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
         ERROR_MISSING_FIELDS : 'Missing one or more required fields',
+        ERROR_INVALID_ACCOUNT : 'Invalid Input',
+        ERROR_ACCOUNT_NOT_VERIFIED : 'Your email is not verified!',
+        ERROR_INVALID_CREDENTIAL : 'Current password incorrect',
+        ERROR_INVALID_RESET_LINK : 'Reset password link expired',
         DEFAULT_ERROR_MSG : 'Sorry!! Something went wrong! Try after sometime!',
         ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
         SMTP_CONFIG_KEY : 'smtpConfig',
@@ -52,10 +56,12 @@ function Utils() {
         SCHEMA_HOOK_SAVE : 'save',
         FIELD_PASSWORD : 'password',
         FIELD_USERNAME : 'username',
+        DEFAULT_PASSWORD_RESET_EXPIRATION : (1000 * 60 * 60 * 24 * 5), //<-- 5 days
         CRYPTO_DEFAULT_ITERATIONS : 10000,
         STRING_ENCODING_BASE_64 : 'base64',
-        RANDOM_STRING_LENGTH_16 : 16,
+        SALT_STRING_RANDOM_CHIPHER : 'L0nd0n6rdi9eIsF@11in9DownTwink1eTwin1eLitt1e5t@r',
         RANDOM_STRING_LENGTH_64 : 64,
+        HASH_ALGO_SHA_16 : 'sha512',
         MODELS : {
             FORUM : 'Forum',
             USER : 'User',
@@ -103,7 +109,9 @@ function Utils() {
         'contributions' : 'contributions',
         'borrowerName' : 'borrower_name',
         'feedbackComment' : 'feedback_text',
-        'feedbackType' : 'feedback_type'
+        'feedbackType' : 'feedback_type',
+        'currentPassword' : 'current_password',
+        'query' : 'query'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

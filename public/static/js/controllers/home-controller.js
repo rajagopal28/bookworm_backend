@@ -1,6 +1,6 @@
 // HomeController
-app.controller('HomeController', ['$scope', 'UsersService', 'BookwormAuthProvider',
-    function ($scope, UsersService, BookwormAuthProvider)  {
+app.controller('HomeController', ['$scope', '$location', 'UsersService', 'BookwormAuthProvider',
+    function ($scope, $location, UsersService, BookwormAuthProvider)  {
         $scope.tabs = [{
             title : 'BookWorm',
             template :'./templates/about-site.html',
@@ -35,5 +35,6 @@ app.controller('HomeController', ['$scope', 'UsersService', 'BookwormAuthProvide
         };
         $scope.logout = function () {
             UsersService.logout();
+            $location.path('/bookworm/home');
         };
 }]);

@@ -96,7 +96,8 @@
                         </div>
                         <div class="media-body">
                             <h4 class="media-heading"><a ng-href="#/bookworm/auth/borrow/{{ book.id }}">{{ book.bookName }}</a></h4>
-                            <div><span ng-if="book.isAvailable" class="label label-success">Available</span>
+                            <div><span class="label label-default">Added : {{ book.lendDate | formatDate }}</span>
+                            <span ng-if="book.isAvailable" class="label label-success">Available</span>
                                 <span ng-if="!book.isAvailable" class="label label-error">Unavailable</span></div>
                             {{ book.description }}
                         </div>

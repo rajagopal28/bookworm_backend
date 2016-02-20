@@ -26,6 +26,18 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/update-profile.html',
                     controller: 'UserRegistrationController'
                 })
+                .when('/bookworm/auth/change-password', {
+                    templateUrl: 'templates/change-password.html',
+                    controller: 'UserPasswordController'
+                })
+                .when('/bookworm/reset-password-link/:requestToken', {
+                    templateUrl: 'templates/reset-password.html',
+                    controller: 'UserPasswordController'
+                })
+                .when('/bookworm/verify-account-link/:requestToken', {
+                    templateUrl: 'templates/login.html',
+                    controller: 'UserLoginController'
+                })
                 .when('/bookworm/auth/borrow', {
                     templateUrl: 'templates/borrow.html',
                     controller: 'BorrowBooksController'

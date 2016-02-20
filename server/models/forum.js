@@ -14,7 +14,10 @@ function Forum(mongoose, mUtils) {
     };
     var charSchema = mongoose.Schema(chatSchemaDefinition);
     var forumSchemaDefinition = {
-        forum_title: String,
+        forum_title: {
+            type: String,
+            required: true
+          },
         referred_book :{
             book_name : String,
             isbn : String,
@@ -22,7 +25,10 @@ function Forum(mongoose, mUtils) {
             thumbnail_url : String,
             description : String
         },
-        description: String,
+        description: {
+            type: String,
+            required: true
+          },
         author: {
             author_name: String,
             username: String,

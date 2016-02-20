@@ -5,7 +5,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     var fromEmail, feedbackToEmail;
     var templates = {
         REGISTRATION_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Registration Successful',
-                                                html: '<h3>Dear {0} </h3><p>Your Bookworm registration is successful</p><p> Thanks, BookWorm Team.</p>',
+                                                html: '<h3>Dear {0} </h3><p>Your Bookworm registration is successful. Click on this link to verify your account. <a href="{1}">VerifyAccount</a></p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'Your Bookworm registration is successful'},
         REQUEST_BOOK_MAIL_CONTENT : { subject: '[BookWorm] New borrow request for your book',
                                                 html: '<h3>Dear {0} </h3><p> A user named {1}, has requested to borrow your book item <strong>{2}</strong> posted on {3}. Kindly respond to the user with an email directly. Email address : <a href="mailto:{4}">{4}</a></p><p> Thanks, BookWorm Team.</p>',
@@ -18,7 +18,13 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 plain : 'New book lending successful'},
         FEEDBACK_MAIL_CONTENT : { subject: '[BookWorm Feedback] New feedback',
                                                 html: '<h3>User {0}, with email {1} has sent a feedback[type={2}] on {3} </h3><p>{4}</p>',
-                                                plain : 'New feedback from user'}
+                                                plain : 'New feedback from user'},
+        REST_PASSWORD_MAIL_CONTENT : { subject: '[BookWorm] Rest password request',
+                                                html: '<h3>Dear {0} </h3><p> We have received your reset credential request. Please click on this <a href="{1}">link </a>to reset your password. Please note that this link will expire by {2}</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'We have processed your reset request'},
+        ACCOUNT_VERIFIED_MAIL_CONTENT : { subject: '[BookWorm] Account verified',
+                                                html: '<h3>Dear {0} </h3><p> We have verified your email. Now you can contribute to fellow bookworms.</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'We have verified your email'}
     };
     this.setSMTPConfig = function(smtpConfig) {
         if(smtpConfig) {
@@ -42,7 +48,8 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         var template = templates.REGISTRATION_SUCCESS_MAIL_CONTENT;
         var emailContentHTML = mUtils.formatWithArguments(
                                         template.html,
-                                        [user_info.getFullName()]);
+                                        [user_info.getFullName(),
+                                        user_info.email_link]);
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address
@@ -125,6 +132,40 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                             feedback_info.feedback_type,
                                             new Date(),
                                             feedback_info.feedback_text]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: feedbackToEmail, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+        sendEmail(mailOptions);
+    };
+    this.sendResetPasswordEmail = function(reset_info) {
+        console.log('reset password email sending');
+        var template = templates.REST_PASSWORD_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [reset_info.getFullName(),
+                                            reset_info.link,
+                                            reset_info.password_reset_expiry_ts]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: feedbackToEmail, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+        sendEmail(mailOptions);
+    };
+    this.sendAccountVerifiedConfirmation = function(user_info) {
+        console.log('account verified email sending');
+        var template = templates.ACCOUNT_VERIFIED_MAIL_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [user_info.getFullName()]);
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address

@@ -6,7 +6,7 @@
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
                     aria-hidden="true">&times;</span></button>
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Done:</span>Sucess!</strong> Your details have been submitted.
+                <span class="sr-only">Done:</span>Success!</strong> Your details have been submitted.
         </div>
         <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
@@ -14,11 +14,22 @@
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
         </div>
+        <div class="alert alert-info alert-dismissible" role="alert">
+            <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Info:</span>
+            </strong>
+            Kindly give a valid email ID.
+            The current system depends on emails to allow interaction between bookworms.
+            We are working on bringing smarter ways of interactions.
+        </div>
         <div class="row">
                 <div class="col-xs-8">
                     <form class="form-horizontal" name="registrationForm">
                         <div class="form-group">
-                            <label for="firstName" class="control-label col-xs-2">First name</label>
+                            <label for="authorName" class="control-label"><sup>*</sup>Indicates required fields</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName" class="control-label col-xs-2">First name<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <input ng-model="user.firstName" type="text" class="form-control" name="firstName"
                                        placeholder="Tyrion" ng-required="true">
@@ -32,7 +43,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="dob" class="control-label col-xs-2">Date of Birth</label>
+                            <label for="dob" class="control-label col-xs-2">Date of Birth<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <date-picker-input init-date="user.dob"></date-picker-input>
                             </div>
@@ -47,14 +58,14 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputEmail" class="control-label col-xs-2">Email</label>
+                            <label for="inputEmail" class="control-label col-xs-2">Email<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <input ng-model="user.email" type="email" class="form-control" name="inputEmail"
                                        placeholder="tyrion.lan@kings.landing" ng-required="true">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="username" class="control-label col-xs-2">Username</label>
+                            <label for="username" class="control-label col-xs-2">Username<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <input ng-model="user.username" type="text" class="form-control" name="username"
                                        placeholder="coinmaster26" ng-blur="checkUsername()" ng-required="true">
@@ -66,14 +77,14 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputPassword" class="control-label col-xs-2">Password</label>
+                            <label for="inputPassword" class="control-label col-xs-2">Password<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <input ng-model="user.password" type="password" class="form-control" name="inputPassword"
                                        placeholder="Password" ng-required="true">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="cofirmPassword" class="control-label col-xs-2">Confirm Password</label>
+                            <label for="cofirmPassword" class="control-label col-xs-2">Confirm Password<sup>*</sup></label>
                             <div class="col-xs-8">
                                 <input ng-model="user.confirmPassword" type="password" class="form-control" name="confirmPassword"
                                        placeholder="Re-Password" ng-required="true" equals="{{ user.password }}">

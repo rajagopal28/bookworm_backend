@@ -155,7 +155,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                 var isbn = $scope.book.isbn;
                 // console.log("isbn=" + isbn);
                 // console.log("searchText=" + searchText);
-                if (!isNaN(isbn)) {
+                if (!isNaN(isbn) && !(searchText && searchText.length)) {
                     if (Constants.GOOGLE_BOOK_VALID_ISBN_LENGTHS.indexOf(isbn.length) != -1) {
                         var options = {
                             q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_ISBN + isbn,
@@ -169,8 +169,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                                 }
                             });
                     }
-                }
-                if (searchText && searchText.length > Constants.GOOGLE_BOOK_MIN_TITLE_QUERY_LIMIT) {
+                } else if (searchText && searchText.length > Constants.GOOGLE_BOOK_MIN_TITLE_QUERY_LIMIT) {
                     var newSearch = searchText.split(" ").join("+");
                     //  console.log('In else block');
                     //  console.log(newSearch);

@@ -300,7 +300,10 @@ html {
 .list-group-item > ul > li{
     margin-left: 15px;
 }
-
+label  sup {
+    font-size: 15px;
+    color : #dd6807
+}
 @media screen and (max-width: 800px) {
     .container {
         padding: 0 20px 0 100px;

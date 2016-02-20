@@ -1,18 +1,32 @@
 function User(mongoose, mCrypto, mUtils) {
     'use strict';
-    var constants = mUtils.constants;
     var self = this;
     var crypto = mCrypto;
-    var salt = crypto.randomBytes(constants.RANDOM_STRING_LENGTH_16).toString(constants.STRING_ENCODING_BASE_64);
+    var mUtils = mUtils;
+    var constants = mUtils.constants;
+    var salt = constants.SALT_STRING_RANDOM_CHIPHER;
     var userSchemaDefinition = {
-        username: String,
-        first_name: String,
-        dob: {type: Date},
+        username: {
+            type: String,
+            required: true,
+            unique : true
+          },
+        first_name: {
+            type: String,
+            required: true
+          },
+        dob: {type: Date,
+            required: true},
         last_name: String,
         password: String,
         gender: String,
-        email: String,
+        email: {
+            type: String,
+            required: true
+          },
         thumbnail_url: String,
+        password_reset_expiry_ts : {type: Date, default: Date.now},
+        is_verified : {type: Boolean, default: false},
         contributions: {type: Number, default: 0},
         token: String,
         created_ts: {type: Date, default: Date.now},
@@ -59,22 +73,28 @@ function User(mongoose, mCrypto, mUtils) {
         return crypto.pbkdf2Sync(input,
             saltBuffer,
             constants.CRYPTO_DEFAULT_ITERATIONS,
-            constants.RANDOM_STRING_LENGTH_64).toString(constants.STRING_ENCODING_BASE_64);
+            constants.RANDOM_STRING_LENGTH_64,
+            constants.HASH_ALGO_SHA_16).toString(constants.STRING_ENCODING_BASE_64);
       }
     var Model = mongoose.model(constants.MODELS.USER, userSchema);
-    this.buildSearchQuery = function (searchQuery, mUtils) {
+    this.buildSearchQuery = function (searchQuery) {
         var $or = [];
         if (searchQuery.username) {
             searchQuery.username = mUtils.addRegexOption(searchQuery.username);
             $or.push({username: searchQuery.username});
             delete searchQuery.username;// remove the key value pair
         }
+        if (searchQuery.query
+            && searchQuery.query.trim() !== '') {
+            $or.push({username: mUtils.addRegexOption(searchQuery.query)});
+            $or.push({first_name: mUtils.addRegexOption(searchQuery.query)});
+            $or.push({last_name: mUtils.addRegexOption(searchQuery.query)});
+            $or.push({email: mUtils.addRegexOption(searchQuery.query)});
+            delete searchQuery.query;// remove the key value pair
+        }
         if ($or.length > 0) {
             searchQuery.$or = $or;
         }
-        return searchQuery;
-    };
-    this.buildSearchQuery = function(searchQuery){
         if(searchQuery.password) {
             delete searchQuery.password;
         }
@@ -90,17 +110,25 @@ function User(mongoose, mCrypto, mUtils) {
         }
         return null;
     };
+
+    this.findUserAccount = function(user, callback) {
+      Model.findOne({
+              username: user.username
+          }, function (error, worm) {
+            if(error || !worm){
+                error = error ? error : {};
+             error.msg = !worm ? constants.ERROR_INVALID_ACCOUNT: null;
+            }
+            callback(error, worm);
+        });
+    };
+
     this.authenticateUser = function (user, cb) {
-        Model.findOne({
-            $or: [
-                {username: user.username},
-                {email: user.username}
-            ]
-        }, function (error, worm) {
+        self.findUserAccount(user, function(error,worm){
             if (error) {
                 cb(error);
             } else {
-                if (worm) {
+                if (worm && worm.is_verified) {
                     var authResponse = {};
                     authResponse.author_name = worm.getFullName();
                     authResponse.username = worm.username;
@@ -108,7 +136,9 @@ function User(mongoose, mCrypto, mUtils) {
                     authResponse.token = worm.token;
                     worm.comparePassword(user.password, authResponse, cb);
                 } else {
-                    cb(null, null);
+                    var err = {};
+                    err.msg = worm && !worm.is_verified? constants.ERROR_ACCOUNT_NOT_VERIFIED : constants.ERROR_INVALID_ACCOUNT;
+                    cb(err, worm);
                 }
             }
         });
@@ -158,6 +188,7 @@ function User(mongoose, mCrypto, mUtils) {
         });
     };
     this.findUsersPaged = function(searchQuery, pagingSorting, callback) {
+        searchQuery = this.buildSearchQuery(searchQuery);
         Model.count(searchQuery, function(err, totalCount){
             if(err){
                 callback(err, null, 0);
@@ -181,6 +212,85 @@ function User(mongoose, mCrypto, mUtils) {
             function(err, totalCount){
                 callback(err, totalCount);
             });
+    };
+    this.updateUserPassword = function(userItem, token, callback){
+        Model.findOne({username : userItem.username, token : token},
+            function(err, worm){
+                if(err){
+                    callback(err,null);
+                } else {
+                    var authResponse = {};
+                    authResponse.username = worm.username;
+                    authResponse.token = worm.token;
+                    worm.comparePassword(userItem.current_password,
+                        authResponse,
+                        function(error, item) {
+                            if(error || !item.auth_success){
+                                error = error ? error : {};
+                                error.msg = !item.auth_success ? constants.ERROR_INVALID_CREDENTIAL : null;
+                                callback(error, item);
+                            } else {
+                                worm.password = userItem.password;
+                                worm.save(function(e, response){
+                                    callback(e,response);
+                                });
+                            }
+                        });
+                }
+        });
+    };
+    this.initiateResetPassword = function(user_item, callback){
+        this.findUserAccount(user_item,
+            function (error, user_account) {
+                if (error || !user_account) {
+                    error = error ? error : {};
+                    error.msg = constants.ERROR_INVALID_ACCOUNT;
+                    callback(error, null);
+                } else {
+                    var now = new Date().getTime();
+                    user_account.password_reset_expiry_ts = new Date(now + constants.DEFAULT_PASSWORD_RESET_EXPIRATION);
+                    user_account.save(function(err, item){
+                        callback(err,item);
+                    });
+                }
+             });
+    };
+    this.resetUserPassword = function(userItem, callback){
+        Model.findOne({_id : userItem.token},
+            function(err, worm){
+                if(err || !worm){
+                    err = error ? error : {};
+                    err.msg = constants.ERROR_INVALID_ACCOUNT;
+                    callback(err,null);
+                } else {
+                    var now = new Date();
+                    if(worm.password_reset_expiry_ts.getTime() >= now.getTime()) {
+                        worm.password = userItem.password;
+                        worm.password_reset_expiry_ts = now;
+                        worm.save(function(e, response){
+                            callback(e,response);
+                        });
+                    } else {
+                        var error = {msg : constants.ERROR_INVALID_RESET_LINK};
+                        callback(error, null);
+                    }
+                }
+        });
+    };
+    this.verifyAccount = function(userItem, callback){
+        Model.findOne({_id : userItem.token},
+            function(err, worm){
+                if(err || !worm){
+                    err = error ? error : {};
+                    err.msg = constants.ERROR_INVALID_ACCOUNT;
+                    callback(err,null);
+                } else {
+                    worm.is_verified = true;
+                    worm.save(function(e, response){
+                        callback(e,response);
+                    });
+                }
+        });
     };
 };
 module.exports.User = User;

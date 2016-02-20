@@ -10,6 +10,34 @@
         <div ng-include="'./includes/header.htm'"></div>
         <div ng-view></div>
         <div ng-include="'./includes/footer.htm'"></div>
-        <script src="./static/min/app.js"></script>
+        <!--        Static app JS files      -->
+        <!--        Static DOM related scripts -->
+        <script src="./static/js/other/app-script.js"></script>
+        <script src="./static/js/other/jquery-loader.js"></script>
+        <!--        Main App Module JS      -->
+        <script src="./static/js/app.js"></script>
+        <!--        Constants JS Files      -->
+        <script src="./static/js/constants/constants.js"></script>
+        <!--        Controller JS Files      -->
+        <script src="./static/js/controllers/home-controller.js"></script>
+        <script src="./static/js/controllers/users-controller.js"></script>
+        <script src="./static/js/controllers/books-controller.js"></script>
+        <script src="./static/js/controllers/forums-controller.js"></script>
+        <!--        Directive JS Files      -->
+        <script src="./static/js/directives/equals-directive.js"></script>
+        <script src="./static/js/directives/file-model.js"></script>
+        <script src="./static/js/directives/date-picker.js"></script>
+        <!--        Services JS Files      -->
+        <script src="./static/js/services/book-services.js"></script>
+        <script src="./static/js/services/config-services.js"></script>
+        <script src="./static/js/services/user-services.js"></script>
+        <script src="./static/js/services/forum-services.js"></script>
+        <script src="./static/js/services/google-services.js"></script>
+        <script src="./static/js/services/loader-services.js"></script>
+        <!--        Factories JS Files      -->
+        <script src="./static/js/factories/auth-provider.js"></script>
+        <script src="./static/js/factories/http-interceptor.js"></script>
+        <!--        Filters JS Files      -->
+        <script src="./static/js/filters/date-format-filter.js"></script>
     </body>
 </html>

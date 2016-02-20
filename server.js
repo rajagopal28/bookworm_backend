@@ -370,7 +370,12 @@ app.post('/bookworm/api/users/register',
                     } else {
                         res.json({success : true, item : item});
                         console.log('Success insertion: ' + JSON.stringify(item));
-                        Mailer.sendRegistrationConfirmation(item);// send email for confirmation
+                        readConfigToSession(res, function(configJSON){
+                            item.email_link = configJSON.DOMAIN
+                                        + configJSON.VERIFY_ACCOUNT_LINK
+                                        + item._id;
+                            Mailer.sendRegistrationConfirmation(item);// send email for confirmation
+                        });
                     }
                 });
         } else {
@@ -420,6 +425,96 @@ app.get('/bookworm/api/users/all',
                     });
                 }
             });
+});
+
+app.post('/bookworm/api/users/change-password',ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (user_item.username && req.token)// check for not empty
+        {
+            Users.updateUserPassword(user_item,
+                req.token,
+                function (error, item) {
+                    if (error) {
+                        res.json({ success: false , error : error.msg});
+                    } else {
+                        Mailer.sendProfileUpdateConfirmation(item);
+                        res.json({success : true, item :item});
+                    }
+                });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
+});
+app.post('/bookworm/api/users/verify-account',
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (user_item.token)// check for not empty
+        {
+            Users.verifyAccount(user_item,
+                function (error, item) {
+                    if (error) {
+                        res.json({ success: false , error : error.msg});
+                    } else {
+                        Mailer.sendAccountVerifiedConfirmation(item);
+                        res.json({success : true, item :item});
+                    }
+                });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
+});
+
+app.post('/bookworm/api/users/request-password-reset',
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (user_item.username)// check for not empty
+        {
+            Users.initiateResetPassword(user_item,
+                function(error, user_account){
+                    if(!error){
+                        readConfigToSession(res,
+                            function(serverConfig){
+                                user_account.link = serverConfig.DOMAIN
+                                        +serverConfig.RESET_PASSWORD_LINK
+                                    + user_account._id;
+                                Mailer.sendResetPasswordEmail(user_account);
+                                res.json({success : true, item :user_account});
+                            });
+                    } else {
+                        res.json({success: false, error : error.msg});
+                    }
+            });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
+});
+
+app.post('/bookworm/api/users/reset-password',
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (user_item.token && user_item.password)// check for not empty
+        {
+            Users.resetUserPassword(user_item,
+                function (error, item) {
+                    if (error) {
+                        res.json({ success: false , error : error.msg});
+                    } else {
+                        Mailer.sendProfileUpdateConfirmation(item);
+                        res.json({success : true, item :item});
+                    }
+                 });
+        } else {
+            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+        }
 });
 
 app.post('/bookworm/api/forums/add',ensureAuthorized,

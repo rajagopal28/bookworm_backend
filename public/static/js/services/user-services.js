@@ -48,4 +48,16 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         this.postFeedback = function(feedback){
             return $http.post('/bookworm/api/feedback/add', feedback, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
         };
+        this.updatePassword = function(credentials){
+            return $http.post('/bookworm/api/users/change-password', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.requestResetPassword = function(credentials){
+            return $http.post('/bookworm/api/users/request-password-reset', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.resetPassword = function(credentials){
+            return $http.post('/bookworm/api/users/reset-password', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.verifyAccount = function(credentials){
+            return $http.post('/bookworm/api/users/verify-account', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
 }]);

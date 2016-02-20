@@ -35,7 +35,7 @@
                                 {{ forum.author.authorName }}
                             </a>
                             <span class="date">
-                                <time>{{forum.createdTS}}</time>
+                                <time>{{forum.createdTS | formatDate}}</time>
                             </span>
                             <div class="count">
                                 Username : {{ forum.author.username }}

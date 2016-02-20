@@ -12,9 +12,9 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">Search Users</label>
                 <div class="input-group col-xs-10">
-                  <input type="text" class="form-control" placeholder="Search for...">
+                  <input type="text" ng-model="search.query" class="form-control" placeholder="Search for...">
                   <span class="input-group-btn">
-                    <button class="btn btn-default" type="button">Go!</button>
+                    <button class="btn btn-default" ng-click="searchUsers()" type="button">Go!</button>
                   </span>
                 </div><!-- /input-group -->
             </div><!-- form group -->
@@ -36,8 +36,8 @@
                     <div class="media-body">
                         <h4 class="media-heading"><a ng-href="#/bookworm/auth/users/{{ user.username }}">{{ user.firstName }} {{ user.lastName }}</a></h4>
                         <h4 class="media-heading"><a href="mailto:{{ user.email }}">{{ user.email }}</a></h4>
-                        <h4 class="media-heading">15 Contributions</h4>
-                        <h4 class="media-heading">{{ user.gender }}</h4>
+                        <h4 class="media-heading">{{ user.contributions }} Contributions</h4>
+                        <h4 class="media-heading">BookWorm Since :{{ user.createdTS | formatDate}}</h4>
                     </div>
                 </div>
                 <div class="center"  ng-if="pageSort.totalItems > 0">

@@ -36,7 +36,7 @@
                            ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">{{ chat.author.authorName }}</a>
 
                         <span class="date" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
-                            <time >{{ chat.createdTS }}</time>
+                            <time >{{ chat.createdTS | formatDate }}</time>
                         </span>
 
                         <div class="count" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
@@ -54,7 +54,7 @@
                            <textarea class="form-control" ng-model="newChat.chatComment"></textarea>
                        </div>
                        <div class="new-chat-button-container text-right">
-                            <button class="btn btn-primary" ng-click="addChat()">Send
+                            <button class="btn btn-primary" ng-disabled="!newChat.chatComment" ng-click="addChat()">Send
                                 <i class="glyphicon glyphicon-send"></i>
                             </button>
                        </div>
@@ -64,7 +64,7 @@
                              class="avatar chat-owner">
                         <a ng-href="#/bookworm/auth/users/{{ currentUser.username }}" class="author chat-owner">{{ currentUser.authorName }}</a>
                         <span class="date chat-owner">
-                            <time >{{ loggedTime }}</time>
+                            <time >{{ loggedTime | formatDate }}</time>
                         </span>
                         <div class="count chat-owner">
                            Username : {{ currentUser.username }}

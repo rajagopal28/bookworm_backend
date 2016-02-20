@@ -3,7 +3,10 @@ function Book(mongoose, mUtils) {
     var self = this;
     var constants = mUtils.constants;
     var bookSchemaDefinition = {
-        book_name: String,
+        book_name: {
+            type: String,
+            required: true
+          },
         thumbnail_url: String,
         description: String,
         google_id : String,

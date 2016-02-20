@@ -6,7 +6,7 @@
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
                     aria-hidden="true">&times;</span></button>
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>Sucess!</strong> Your details have been submitted.
+                <span class="sr-only">Success:</span>Success!</strong> Your details have been submitted.
         </div>
         <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
@@ -15,8 +15,6 @@
                 <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
         </div>
         <div class="alert alert-info alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
-                    aria-hidden="true">&times;</span></button>
             <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                 <span class="sr-only">Info:</span></strong> This form has autocomplete enabled for some fields. Type in
             ISBN or Book name to fill in details.
@@ -25,7 +23,10 @@
             <div class="col-xs-8">
                 <form class="form-horizontal" name="lendForm">
                     <div class="form-group">
-                        <label for="isbn" class="control-label col-xs-2">ISBN</label>
+                        <label for="authorName" class="control-label"><sup>*</sup>Indicates required fields</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="isbn" class="control-label col-xs-2">ISBN<sup>*</sup></label>
                         <div class="col-xs-8">
                             <input ng-model="book.isbn" type="text" class="form-control" name="isbn"
                                    placeholder="12345678" ng-required="true" uib-tooltip="Enter a 13or10 digit ISBN no."
@@ -34,7 +35,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="bookName" class="control-label col-xs-2">Book name</label>
+                        <label for="bookName" class="control-label col-xs-2">Book name<sup>*</sup></label>
                         <div class="col-xs-8">
                             <input ng-model="book.bookName" type="text" class="form-control" name="bookName"
                                    placeholder="Song of Ice and Fire" ng-required="true"

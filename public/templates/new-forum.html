@@ -16,7 +16,7 @@
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
                             aria-hidden="true">&times;</span></button>
                     <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Done:</span>Sucess!</strong> Your details have been submitted.
+                        <span class="sr-only">Done:</span>Success!</strong> Your details have been submitted.
                 </div>
                 <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
@@ -24,26 +24,29 @@
                     <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                         <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
                 </div>
-                <form class="form-horizontal">
+                <form class="form-horizontal" name="discussionForm">
                     <div class="form-group">
-                        <label for="forumTitle" class="control-label col-xs-2">Title</label>
+                        <label for="authorName" class="control-label"><sup>*</sup>Indicates required fields</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="forumTitle" class="control-label col-xs-2">Title<sup>*</sup></label>
                         <div class="col-xs-5">
                             <input type="text" class="form-control" id="forumTitle" ng-model="forum.forumTitle"
-                                   placeholder="Why Tyrion killed Tywin Lannister?">
+                                   placeholder="Why Tyrion killed Tywin Lannister?" ng-required="true">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputPassword" class="control-label col-xs-2">Description</label>
+                        <label for="inputPassword" class="control-label col-xs-2">Description<sup>*</sup></label>
                         <div class="col-xs-5">
                             <textarea class="form-control" rows="5" ng-model="forum.description" name="description"
-                                      placeholder="Because he was a mean father."></textarea>
+                                      placeholder="Because he was a mean father." ng-required="true"></textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="inputPassword" class="control-label col-xs-2">Reference book</label>
                         <div class="col-xs-5">
                             <input ng-model="book.bookName" type="text" class="form-control" name="bookName"
-                                   placeholder="Song of Ice and Fire" ng-required="true"
+                                   placeholder="Song of Ice and Fire"
                                    typeahead-loading="loadingBooks"
                                    uib-typeahead="ibook.bookName for ibook in loadBookDetails($viewValue) | limitTo:8"
                                    typeahead-min-length="5" typeahead-on-select="onBookSelect($item, $model, $label)">
@@ -52,9 +55,9 @@
                     </div>
                     <div class="form-group" ng-if="isLoggedIn()">
                         <div class="col-xs-offset-2 col-xs-5">
-                            <button type="submit" ng-if="!isEditMode()" class="btn btn-primary" ng-click="addForum()">Start Discussion
+                            <button type="submit" ng-if="!isEditMode()" ng-disabled="!discussionForm.$valid" class="btn btn-primary" ng-click="addForum()">Start Discussion
                             </button>
-                             <button type="submit" ng-if="isEditMode()" class="btn btn-primary" ng-click="updateForum()">Edit Discussion
+                             <button type="submit" ng-if="isEditMode()" ng-disabled="!discussionForm.$valid" class="btn btn-primary" ng-click="updateForum()">Edit Discussion
                             </button>
                         </div>
                     </div>

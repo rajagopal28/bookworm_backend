@@ -6,6 +6,9 @@
     ".jpeg",
     ".bmp"
   ],
+  "DOMAIN" : "http://127.0.0.1",
+  "RESET_PASSWORD_LINK" : "/#/bookworm/reset-password-link/",
+  "VERIFY_ACCOUNT_LINK" : "/#/bookworm/verify-account-link/",
   "mongoConfig" : {
     "connectionPrefix" : "mongodb://",
     "host" : "localhost",
@@ -32,10 +35,10 @@
     "cookieString": "_ga=GA1.2.1883368505.1453891337; optimizelyEndUserId=oeu1453891338904r0.5625616400502622; optimizelySegments=%7B%223018470184%22%3A%22gc%22%2C%223018720298%22%3A%22search%22%2C%223023000432%22%3A%22false%22%7D; optimizelyBuckets=%7B%7D; __hstc=20283623.368dbee3677a5c15a485ecf50bc702dd.1453891341364.1453891341364.1453891341364.1; __hssrc=1; hsfirstvisit=https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F|https%3A%2F%2Fwww.google.co.in%2F|1453891341362; hubspotutk=368dbee3677a5c15a485ecf50bc702dd; _pk_ref.1.dc32=%5B%22%22%2C%22%22%2C1453891373%2C%22https%3A%2F%2Fwww.smartfile.com%2Fdeveloper%2F%22%5D; PRUM_EPISODES=s=1453892646058&r=https%3A//app.smartfile.com/ftp/login/; _pk_id.1.dc32=91a58db4e853bb9b.1453891373.1.1453892687.1453891373.; _pk_ses.1.dc32=*; __zlcmid=YtfHekQLGTVouL;",
     "referer": "https://rajagopal28.smartfile.com/",
     "origin": "http://www.smartfile.com/developer",
-    "expirationTimeStamp": 1454519126000,
-    "csrftoken": "L4eWqte3RlGWKFWsG937vp9taNR3kexW",
-    "sessionid": "4746a1f6bd7d2c11c53096a79c3160f4",
-    "uploadedImagesDirectory": "https://file.ac/JzawZwyM0U8/"
+    "expirationTimeStamp": 1455279821000,
+    "csrftoken": "QMpMABQ1wWH1x952LyVpH2kwsxzkzgJM",
+    "uploadedImagesDirectory": "https://file.ac/JzawZwyM0U8/",
+    "sessionid": "b55648aae8a5ded8b620d2575d80c7df"
   },
   "clientConfig": {
     "imagesDirectory": "https://file.ac/1vjO3iSZ5G4/",

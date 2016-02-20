@@ -10,7 +10,7 @@ module.exports = function(grunt) {
             app: {
                 files: {
                     './public/min-safe/js/static.js': ['./public/static/js/*.js','./public/static/js/*/*.js'],
-                    './public/min-safe/js/vendors/all-vendors.js': ['./public/vendors/js/*.js', './public/vendors/js/modules/*.js'],
+                    './public/min-safe/js/vendors/all-vendors.js': ['./public/vendors/js/libraries/*.js','./public/vendors/js/*.js',  './public/vendors/js/modules/*.js'],
                     './public/min-safe/app.js': ['./public/static/js/app.js']
                 }
             }
