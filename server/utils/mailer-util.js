@@ -153,7 +153,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address
-            to: feedbackToEmail, // list of receivers
+            to: reset_info.email, // list of receivers
             subject: template.subject, // Subject line,
             text : template.plain,
             html: emailContentHTML // html body
@@ -169,7 +169,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address
-            to: feedbackToEmail, // list of receivers
+            to: user_info.email, // list of receivers
             subject: template.subject, // Subject line,
             text : template.plain,
             html: emailContentHTML // html body
