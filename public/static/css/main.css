@@ -287,6 +287,10 @@ label  sup {
     font-size: 15px;
     color : #dd6807
 }
+.thumbnail.profile-image{
+    max-width: 250px;
+    max-height: 375px;
+}
 @media screen and (max-width: 800px) {
     .container {
         padding: 0 20px 0 100px;
