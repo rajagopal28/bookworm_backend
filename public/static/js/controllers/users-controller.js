@@ -259,13 +259,13 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
 
             var options = Constants.getDefaultPagingSortingData();
             $scope.user = {};
+            options.identifier = $routeParams.identifier;
             $scope.isUserContributor = function(){
                 return BookwormAuthProvider.isCurrentUser($scope.user);
             };
             $scope.isLoggedIn = function() {
               return BookwormAuthProvider.isLoggedIn();
             };
-            options.username = $routeParams.username;
             UsersService.getUsers(options)
                 .then(function(response){
                     if(response.data && response.data.items){
@@ -323,8 +323,8 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
             };
     }])
-    .controller('FeedbackController', ['$scope','Constants',  'UsersService', 'BookwormAuthProvider',
-        function ($scope, Constants, UsersService, BookwormAuthProvider) {
+    .controller('FeedbackController', ['$scope','Constants',  'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
+        function ($scope, Constants, UsersService, BookwormAuthProvider, formatUserName) {
             $scope.feedback = {feedbackType:'query'};
             $scope.status = {success : false, error: false};
             if(BookwormAuthProvider.isLoggedIn()) {
@@ -336,7 +336,7 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     .then(function(response){
                         if(response.data && response.data.items){
                             $scope.feedback = $.extend($scope.feedback, response.data.items[0]);
-                            $scope.feedback.authorName = $scope.feedback.firstName + ' ' + $scope.feedback.lastName;
+                            $scope.feedback.authorName = formatUserName($scope.feedback);
                         }
                     });
                 }

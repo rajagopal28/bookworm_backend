@@ -87,22 +87,22 @@ db.once(constants.DB_EVENT_NAME_OPEN, function () {
 
 // all environments
 accessLogStream = fs.createWriteStream(__dirname + constants.LOG_FILE_RELATIVE_PATH, {flags: 'a'});
-app.set(constants.APP_ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFAULT_PORT);
+app.set(constants.APP.ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFAULT_PORT);
 app.use(express.static(path.join(__dirname, constants.EXPRESS_CONFIG_STATIC_DIR)));
-app.use(favicon(__dirname + constants.APP_FAV_ICON_PATH));
+app.use(favicon(__dirname + constants.APP.FAV_ICON_PATH));
 app.use(morgan(constants.MORGAN_LOG_TYPE_COMBINED, {stream: accessLogStream}));
 app.use(multipart());
-app.use(bodyParser.json({type: constants.APP_BODY_PARSER_APPLICATION_JSON}));
-app.use(methodOverride(constants.APP_X_HTTP_METHOD_OVERRIDE_HEADER));
+app.use(bodyParser.json({type: constants.APP.BODY_PARSER_APPLICATION_JSON}));
+app.use(methodOverride(constants.APP.X_HTTP_METHOD_OVERRIDE_HEADER));
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: false}));
 // parse application/json
 app.use(bodyParser.json());
 // allow cross origin access
 app.use(function (req, res, next) {
-    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, constants.APP_HEADER_VALUE_ACCESS_ALL_ORIGIN);
-    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_METHODS, constants.APP_HEADER_VALUE_ALLOWED_METHOD_GET_POST);
-    res.setHeader(constants.APP_HEADER_ACCESS_CONTROL_ALLOW_HEADERS, constants.APP_HEADER_VALUE_ALLOWED_HEADERS);
+    res.setHeader(constants.APP.HEADER.ACCESS_CONTROL_ALLOW_ORIGIN, constants.APP.HEADER.VALUE_ACCESS_ALL_ORIGIN);
+    res.setHeader(constants.APP.HEADER.ACCESS_CONTROL_ALLOW_METHODS, constants.APP.HEADER.VALUE_ALLOWED_METHOD_GET_POST);
+    res.setHeader(constants.APP.HEADER.ACCESS_CONTROL_ALLOW_HEADERS, constants.APP.HEADER.VALUE_ALLOWED_HEADERS);
     next();
 });
 // routes ======================================================================
@@ -139,7 +139,7 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
                 }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -157,7 +157,7 @@ app.post('/bookworm/api/books/rental/update',ensureAuthorized,
                 }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -169,7 +169,7 @@ app.post('/bookworm/api/books/rental/request',ensureAuthorized,
             Users.findUsersWithUsernames([item.borrower_name, item.contributor.username],
                 function(err, items){
                     if(err) {
-                        res.send({success : false, error : constants.DEFAULT_ERROR_MSG});
+                        res.send({success : false, error : constants.ERROR.DEFAULT});
                     } else {
                         if(items && items.length === 2) {
                             Mailer.sendBookRequestEmail(items, item);
@@ -178,7 +178,7 @@ app.post('/bookworm/api/books/rental/request',ensureAuthorized,
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -237,15 +237,15 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                                         fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
                                     });
                                 } else {
-                                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
-                                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                                    console.log(constants.ERROR.FILE_UPLOAD_FAILED);
+                                    res.json({success: false, error : constants.ERROR.FILE_UPLOAD_FAILED});
                                 }
                             });
                             // write the newly created config tokens
                             writeConfigToFile(configJSON);
                         } else {
-                            console.log(constants.ERROR_CLOUD_LOGIN_FAILED);
-                            res.json({success: false, error : constants.ERROR_CLOUD_LOGIN_FAILED});
+                            console.log(constants.ERROR.CLOUD_LOGIN_FAILED);
+                            res.json({success: false, error : constants.ERROR.CLOUD_LOGIN_FAILED});
                         }
                     });
                 } else {
@@ -260,8 +260,8 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                                 fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
                             });
                         } else {
-                            console.log(constants.ERROR_FILE_UPLOAD_FAILED);
-                            res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                            console.log(constants.ERROR.FILE_UPLOAD_FAILED);
+                            res.json({success: false, error : constants.ERROR.FILE_UPLOAD_FAILED});
                         }
                     });
                 }
@@ -289,15 +289,15 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                                 fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
                             });
                         } else {
-                            console.log(constants.ERROR_FILE_UPLOAD_FAILED);
-                            res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                            console.log(constants.ERROR.FILE_UPLOAD_FAILED);
+                            res.json({success: false, error : constants.ERROR.FILE_UPLOAD_FAILED});
                         }
                     });
                     // write the newly created config tokens
                     writeConfigToFile(configJSON);
                 } else {
-                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
-                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                    console.log(constants.ERROR.FILE_UPLOAD_FAILED);
+                    res.json({success: false, error : constants.ERROR.FILE_UPLOAD_FAILED});
                 }
             });
         } else {
@@ -312,8 +312,8 @@ app.post('/bookworm/api/user/profile-upload', ensureAuthorized,
                         fileAbsolutePath : configJSON.cloudConfig.uploadedImagesDirectory + response.fileName
                     });
                 } else {
-                    console.log(constants.ERROR_FILE_UPLOAD_FAILED);
-                    res.json({success: false, error : constants.ERROR_FILE_UPLOAD_FAILED});
+                    console.log(constants.ERROR.FILE_UPLOAD_FAILED);
+                    res.json({success: false, error : constants.ERROR.FILE_UPLOAD_FAILED});
                 }
             });
         }
@@ -335,7 +335,7 @@ app.post('/bookworm/api/users/check-unique',
                 }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/login-auth',
@@ -353,7 +353,7 @@ app.post('/bookworm/api/users/login-auth',
                 }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/register',
@@ -379,7 +379,7 @@ app.post('/bookworm/api/users/register',
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/update', ensureAuthorized,
@@ -401,7 +401,7 @@ app.post('/bookworm/api/users/update', ensureAuthorized,
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -445,7 +445,7 @@ app.post('/bookworm/api/users/change-password',ensureAuthorized,
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 app.post('/bookworm/api/users/verify-account',
@@ -465,7 +465,7 @@ app.post('/bookworm/api/users/verify-account',
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -492,7 +492,7 @@ app.post('/bookworm/api/users/request-password-reset',
                     }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -513,7 +513,7 @@ app.post('/bookworm/api/users/reset-password',
                     }
                  });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -533,7 +533,7 @@ app.post('/bookworm/api/forums/add',ensureAuthorized,
                     }
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -552,7 +552,7 @@ app.post('/bookworm/api/forums/update',ensureAuthorized,
                 }
             });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -581,7 +581,7 @@ app.post('/bookworm/api/forums/chats/add',ensureAuthorized,
 
                 });
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -639,7 +639,7 @@ app.post('/bookworm/api/feedback/add',
             Mailer.sendFeedbackEmail(feedback_item);
             res.json({success : true, item : feedback_item});
         } else {
-            res.json({success: false, error : constants.ERROR_MISSING_FIELDS});
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
 
@@ -730,38 +730,38 @@ function loginToCloudEnvironment(cloudConfig, callback){
         var buff = '';
         var config = {};
         var apiRequest = https.request(options, function(apiRes) {
-            var setCookie = apiRes.headers[constants.HEADER_SET_COOKIE];
+            var setCookie = apiRes.headers[constants.HEADER.SET_COOKIE];
             for(var index=0; index< setCookie.length; index++) {
                 var cookieItem = setCookie[index];
                 var segments = cookieItem.split(';');
-                if (cookieItem.indexOf(constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX) != -1) {
+                if (cookieItem.indexOf(constants.COOKIE_VAR_STRING.CSFR_TOKEN_PREFIX) != -1) {
                     var temp = segments[0].trim();
-                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX)
-                                        + constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX.length;
+                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING.CSFR_TOKEN_PREFIX)
+                                        + constants.COOKIE_VAR_STRING.CSFR_TOKEN_PREFIX.length;
                     config.csrftoken = temp.substring(startIndex);
                 }
-                if(cookieItem.indexOf(constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX) != -1) {
+                if(cookieItem.indexOf(constants.COOKIE_VAR_STRING.SESSION_ID_PREFIX) != -1) {
                     temp = segments[0].trim();
-                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX)
-                                        + constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX.length;
+                    var startIndex = temp.indexOf(constants.COOKIE_VAR_STRING.SESSION_ID_PREFIX)
+                                        + constants.COOKIE_VAR_STRING.SESSION_ID_PREFIX.length;
                     config.sessionid = temp.substring(startIndex);
                     temp = segments[1].trim();
-                    var endIndex = temp.indexOf(constants.COOKIE_VAR_STRING_EXPIRES_PREFIX);
-                    config.expirationTimestamp = temp.substring(endIndex + constants.COOKIE_VAR_STRING_EXPIRES_PREFIX.length).trim();
+                    var endIndex = temp.indexOf(constants.COOKIE_VAR_STRING.EXPIRES_PREFIX);
+                    config.expirationTimestamp = temp.substring(endIndex + constants.COOKIE_VAR_STRING.EXPIRES_PREFIX.length).trim();
                 }
             }
             apiRes.setEncoding(constants.FORMAT_UTF_8);
-            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_DATA
+            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME.DATA
                 , function (chunk) {
                   buff+= chunk;
                 });
-            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_END
+            apiRes.on(constants.HTTP_REQUEST_EVENT_NAME.END
                 , function() {
                     //console.log(buff);
                     callback(config);
                 });
         });
-        apiRequest.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
+        apiRequest.on(constants.HTTP_REQUEST_EVENT_NAME.ERROR
                     , function (error) {
                         console.error(error);
                         callback(null);
@@ -795,18 +795,18 @@ function uploadFileToCloud(req, serverConfig, callback) {
                 someForm.append(constants.REQUEST_PARAM_CLOUD_FILE_NAME, fs.createReadStream(targetPath));
                 var fileHeader = someForm.getHeaders();
                 someForm.getLength(function(err,length){
-                    fileHeader[constants.HEADER_CONTENT_LENGTH] = length;
+                    fileHeader[constants.HEADER.CONTENT_LENGTH] = length;
                     fileHeader.cookie = cloudConfig.cookieString
                         + ' '
-                        + constants.COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX
+                        + constants.COOKIE_VAR_STRING.CSFR_TOKEN_PREFIX
                         + cloudConfig.csrftoken +';'
                         + ' '
-                        + constants.COOKIE_VAR_STRING_SESSION_ID_PREFIX
+                        + constants.COOKIE_VAR_STRING.SESSION_ID_PREFIX
                         + cloudConfig.sessionid ;
                     fileHeader.referer = cloudConfig.referer;
                     fileHeader.origin = cloudConfig.origin;
-                    fileHeader[constants.HEADER_X_CSRF_TOKEN] = cloudConfig.csrftoken;
-                    fileHeader[constants.HEADER_ACCEPT_ENCODING] =  constants.DEFAULT_ACCEPT_HEADER_FOR_UPLOAD;
+                    fileHeader[constants.HEADER.X_CSRF_TOKEN] = cloudConfig.csrftoken;
+                    fileHeader[constants.HEADER.ACCEPT_ENCODING] =  constants.DEFAULT_ACCEPT_HEADER_FOR_UPLOAD;
                     console.log(fileHeader);
                     var options = {
                         host: cloudConfig.host,
@@ -820,11 +820,11 @@ function uploadFileToCloud(req, serverConfig, callback) {
                         console.log('HEADERS: ' + JSON.stringify(apiRes.headers));
                         apiRes.setEncoding(constants.FORMAT_UTF_8);
                         var buff= '';
-                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_DATA
+                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME.DATA
                             , function (chunk) {
                               buff+= chunk;
                             });
-                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME_END
+                        apiRes.on(constants.HTTP_REQUEST_EVENT_NAME.END
                             , function() {
                                 // console.log(buff);
                                 fs.unlink(targetPath);
@@ -832,7 +832,7 @@ function uploadFileToCloud(req, serverConfig, callback) {
                             });
                     });
                     someForm.pipe(apiReq);
-                    apiReq.on(constants.HTTP_REQUEST_EVENT_NAME_ERROR
+                    apiReq.on(constants.HTTP_REQUEST_EVENT_NAME.ERROR
                         , function (error) {
                             console.error(error);
                             callback(null);

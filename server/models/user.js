@@ -33,21 +33,21 @@ function User(mongoose, mCrypto, mUtils) {
         last_modified_ts: {type: Date, default: Date.now}
     };
     var userSchema = mongoose.Schema(userSchemaDefinition);
-    userSchema.pre(constants.SCHEMA_HOOK_UPDATE, function(next){
+    userSchema.pre(constants.SCHEMA_HOOK.UPDATE, function(next){
         var user = this;
         console.log('updating user in hook - pre update');
         user.last_modified_ts = new Date();
         console.log(user.last_modified_ts);
         next();
     });
-    userSchema.pre(constants.SCHEMA_HOOK_SAVE, function (next) {
+    userSchema.pre(constants.SCHEMA_HOOK.SAVE, function (next) {
         var user = this;
         user.last_modified_ts = new Date();
           // generate a salt
-        if (user.isModified(constants.FIELD_PASSWORD)){
+        if (user.isModified(constants.FIELD.PASSWORD)){
             user.password = hashString(user.password);
         }
-        if(user.isModified(constants.FIELD_USERNAME)) {
+        if(user.isModified(constants.FIELD.USERNAME)) {
             user.token = hashString(user.username);
         }
         next();
@@ -83,6 +83,15 @@ function User(mongoose, mCrypto, mUtils) {
             searchQuery.username = mUtils.addRegexOption(searchQuery.username);
             $or.push({username: searchQuery.username});
             delete searchQuery.username;// remove the key value pair
+        }
+        if (searchQuery.identifier) {
+            if(mongoose.Types.ObjectId.isValid(searchQuery.identifier)) {
+                $or.push({_id: searchQuery.identifier});
+            } else {
+                $or.push({username: searchQuery.identifier});
+                $or.push({email: searchQuery.identifier});
+            }
+            delete searchQuery.identifier;// remove the key value pair
         }
         if (searchQuery.query
             && searchQuery.query.trim() !== '') {
@@ -134,6 +143,7 @@ function User(mongoose, mCrypto, mUtils) {
                     authResponse.username = worm.username;
                     authResponse.thumbnail_url = worm.thumbnail_url;
                     authResponse.token = worm.token;
+                    authResponse._id = worm._id;
                     worm.comparePassword(user.password, authResponse, cb);
                 } else {
                     var err = {};

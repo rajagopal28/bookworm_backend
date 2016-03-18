@@ -6,16 +6,34 @@ function Utils() {
         PATTERN_TO_MATCH_FORMATTER_MESSAGE : /\{(\d+)\}/g,
         RESET_TO_GMT_TIME_MINUTES_IN_MILLI : (60 * 1000),
         FORM_TYPE_URL_ENCODED :'application/x-www-form-urlencoded',
-        HEADER_X_CSRF_TOKEN : 'X-CSRFToken',
-        HEADER_ACCEPT_ENCODING: 'Accept-Encoding',
-        HEADER_CONTENT_LENGTH : 'content-length',
-        HEADER_SET_COOKIE : 'set-cookie',
+        HEADER: {
+            X_CSRF_TOKEN : 'X-CSRFToken',
+            ACCEPT_ENCODING: 'Accept-Encoding',
+            SET_COOKIE : 'set-cookie',
+            CONTENT_LENGTH : 'content-length'
+        },
+        APP : {
+            ENV_VAR_PORT : 'port',
+            FAV_ICON_PATH : '/public/static/images/favicon.ico',
+            BODY_PARSER_APPLICATION_JSON : 'application/vnd.api+json',
+            X_HTTP_METHOD_OVERRIDE_HEADER : 'X-HTTP-Method-Override',
+            HEADER : {
+                ACCESS_CONTROL_ALLOW_ORIGIN : 'Access-Control-Allow-Origin',
+                ACCESS_CONTROL_ALLOW_HEADERS : 'Access-Control-Allow-Headers',
+                VALUE_ACCESS_ALL_ORIGIN : '*',
+                VALUE_ALLOWED_METHOD_GET_POST : 'GET, POST',
+                ACCESS_CONTROL_ALLOW_METHODS : 'Access-Control-Allow-Methods',
+                VALUE_ALLOWED_HEADERS : 'X-Requested-With,content-type, Authorization'
+            }
+        },
         DEFAULT_ACCEPT_HEADER_FOR_UPLOAD: 'gzip, deflate',
         METHOD_POST : 'POST',
         FORMAT_UTF_8: 'utf8',
-        COOKIE_VAR_STRING_CSFR_TOKEN_PREFIX : 'csrftoken=',
-        COOKIE_VAR_STRING_SESSION_ID_PREFIX : 'sessionid=',
-        COOKIE_VAR_STRING_EXPIRES_PREFIX : 'expires=',
+        COOKIE_VAR_STRING : {
+            CSFR_TOKEN_PREFIX : 'csrftoken=',
+            SESSION_ID_PREFIX : 'sessionid=',
+            EXPIRES_PREFIX : 'expires='
+        },
         REQUEST_PARAM_CLOUD_FILE_NAME : 'file',
         REQ_HEADER_AUTHORIZATION : 'authorization',
         LOG_FILE_RELATIVE_PATH : '/server/logfile.log',
@@ -23,39 +41,40 @@ function Utils() {
         TEMP_FILE_PATH : './public/static/images/',
         SOCKET_EVENT_CONNECTION : 'connection',
         SOCKET_EVENT_NEW_CHAT: 'new-chat',
-        HTTP_REQUEST_EVENT_NAME_DATA : 'data',
-        HTTP_REQUEST_EVENT_NAME_END : 'end',
-        HTTP_REQUEST_EVENT_NAME_ERROR : 'error',
-        ERROR_FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
-        ERROR_MISSING_FIELDS : 'Missing one or more required fields',
-        ERROR_INVALID_ACCOUNT : 'Invalid Input',
-        ERROR_ACCOUNT_NOT_VERIFIED : 'Your email is not verified!',
-        ERROR_INVALID_CREDENTIAL : 'Current password incorrect',
-        ERROR_INVALID_RESET_LINK : 'Reset password link expired',
-        DEFAULT_ERROR_MSG : 'Sorry!! Something went wrong! Try after sometime!',
-        ERROR_CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
+        HTTP_REQUEST_EVENT_NAME : {
+            DATA : 'data',
+            END : 'end',
+            ERROR : 'error'
+        },
+        ERROR: {
+            FILE_UPLOAD_FAILED : 'Unable to upload file to cloud!!',
+            MISSING_FIELDS : 'Missing one or more required fields',
+            INVALID_ACCOUNT : 'Invalid Input',
+            ACCOUNT_NOT_VERIFIED : 'Your email is not verified!',
+            INVALID_CREDENTIAL : 'Current password incorrect',
+            INVALID_RESET_LINK : 'Reset password link expired',
+            CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
+            DEFAULT : 'Sorry!! Something went wrong! Try after sometime!'
+        },
         SMTP_CONFIG_KEY : 'smtpConfig',
         MONGO_CONFIG_KEY : 'mongoConfig',
         CLIENT_CONFIG_KEY : 'clientConfig',
         DB_EVENT_NAME_OPEN : 'open',
-        APP_ENV_VAR_PORT : 'port',
         EXPRESS_CONFIG_STATIC_DIR : 'public',
-        APP_FAV_ICON_PATH : '/public/static/images/favicon.ico',
-        APP_BODY_PARSER_APPLICATION_JSON : 'application/vnd.api+json',
-        APP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN : 'Access-Control-Allow-Origin',
-        APP_HEADER_VALUE_ACCESS_ALL_ORIGIN : '*',
-        APP_HEADER_ACCESS_CONTROL_ALLOW_METHODS : 'Access-Control-Allow-Methods',
-        APP_HEADER_VALUE_ALLOWED_METHOD_GET_POST : 'GET, POST',
-        APP_HEADER_ACCESS_CONTROL_ALLOW_HEADERS : 'Access-Control-Allow-Headers',
-        APP_HEADER_VALUE_ALLOWED_HEADERS : 'X-Requested-With,content-type, Authorization',
-        APP_X_HTTP_METHOD_OVERRIDE_HEADER : 'X-HTTP-Method-Override',
         MORGAN_LOG_TYPE_COMBINED : 'combined',
         ENV_VALUE_DEFAULT_PORT : 8080,
         MAX_FILE_UPLOAD_SIZE : 5242880,
-        SCHEMA_HOOK_UPDATE : 'update',
-        SCHEMA_HOOK_SAVE : 'save',
-        FIELD_PASSWORD : 'password',
-        FIELD_USERNAME : 'username',
+        SCHEMA_HOOK : {
+            UPDATE : 'update',
+            SAVE : 'save'
+        },
+        FIELD : {
+            PASSWORD : 'password',
+            USERNAME : 'username',
+            CONTRIBUTOR : 'contributor',
+            AUTHOR : 'author',
+            AUTHOR_IN_CHATS : 'chats.author'
+        },
         DEFAULT_PASSWORD_RESET_EXPIRATION : (1000 * 60 * 60 * 24 * 5), //<-- 5 days
         CRYPTO_DEFAULT_ITERATIONS : 10000,
         STRING_ENCODING_BASE_64 : 'base64',
@@ -111,7 +130,8 @@ function Utils() {
         'feedbackComment' : 'feedback_text',
         'feedbackType' : 'feedback_type',
         'currentPassword' : 'current_password',
-        'query' : 'query'
+        'query' : 'query',
+        'identifier':'identifier'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {

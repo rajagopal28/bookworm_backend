@@ -4,11 +4,7 @@ function Forum(mongoose, mUtils) {
     var constants = mUtils.constants;
     var chatSchemaDefinition = {
         chat_comment: String,
-        author: {
-            author_name: String,
-            username: String,
-            thumbnail_url: String
-        },
+        author: {type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER },
         created_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now}
     };
@@ -29,17 +25,13 @@ function Forum(mongoose, mUtils) {
             type: String,
             required: true
           },
-        author: {
-            author_name: String,
-            username: String,
-            thumbnail_url: String
-        },
+        author: {type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER },
         chats: [charSchema],
         created_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now}
     };
     var forumSchema = mongoose.Schema(forumSchemaDefinition);
-    forumSchema.pre(constants.SCHEMA_HOOK_UPDATE, function(next){
+    forumSchema.pre(constants.SCHEMA_HOOK.UPDATE, function(next){
         var forum = this;
         forum.last_modified_ts = Date.now();
         next();
@@ -86,6 +78,7 @@ function Forum(mongoose, mUtils) {
             } else {
                 Model.find(searchQuery)
                 .select('-chats')
+                .populate(constants.FIELD.AUTHOR)
                 .skip(pagingSorting.skipCount)
                 .limit(pagingSorting.itemsPerPage)
                 .sort(pagingSorting.sortField)
@@ -98,6 +91,7 @@ function Forum(mongoose, mUtils) {
     };
     this.getChatsOfForum = function(searchQuery, callback){
       Model.findOne(searchQuery)
+        .populate(constants.FIELD.AUTHOR_IN_CHATS)
         .exec(function (err, forum) {
            callback(err,forum);
         });

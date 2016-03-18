@@ -114,13 +114,9 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                 });
 
             var currentUser = BookwormAuthProvider.getUser();
-            var contributor = {};
+            var contributor;
             if(currentUser) {
-                contributor = {
-                    authorName : currentUser.authorName,
-                    username : currentUser.username,
-                    thumbnailURL : currentUser.thumbnailURL
-                };
+                contributor = currentUser.id;
             }
             var bookId = $routeParams.bookId;
             if(bookId) {

@@ -50,9 +50,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                 var options = $.extend({}, pageSort);
                 options.forumId = forumId;
                 options.chatComment = $scope.newChat.chatComment;
-                var authorInfo = ForumsService.getCurrentAuthorInfo();
+                var authorInfo = BookwormAuthProvider.getUser();
                 if (authorInfo) {
-                    options.author = authorInfo;
+                    options.author = authorInfo.id;
                 }
                 ForumsService.addChat(options)
                     .then(function (response) {
@@ -109,9 +109,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
             };
             $scope.updateForum = function() {
                 $scope.forum.referredBook = $scope.book;
-                var authorInfo = ForumsService.getCurrentAuthorInfo();
+                var authorInfo = BookwormAuthProvider.getUser();
                 if (authorInfo) {
-                    $scope.forum.author = authorInfo;
+                    $scope.forum.author = authorInfo.id;
                 }
                 ForumsService
                     .updateForum($scope.forum)

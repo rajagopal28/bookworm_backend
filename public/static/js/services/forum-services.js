@@ -1,4 +1,4 @@
-app.service('ForumsService', ['$http', 'Constants', 'BookwormAuthProvider', function ($http, Constants, BookwormAuthProvider) {
+app.service('ForumsService', ['$http', 'Constants', function ($http, Constants) {
     this.addForum = function (options) {
         return $http.post('/bookworm/api/forums/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
     };
@@ -13,16 +13,5 @@ app.service('ForumsService', ['$http', 'Constants', 'BookwormAuthProvider', func
     };
     this.addChat = function (options) {
         return $http.post('/bookworm/api/forums/chats/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
-    };
-    this.getCurrentAuthorInfo = function(){
-        var currentUser = BookwormAuthProvider.getUser();
-        if(currentUser) {
-            return {
-                authorName : currentUser.authorName,
-                username : currentUser.username,
-                thumbnailURL : currentUser.thumbnailURL
-            };
-        }
-        return null;
     };
 }]);

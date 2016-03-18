@@ -15,32 +15,38 @@
             <div class="col-xs-6">
                 <div class="form-horizontal">
                     <div class="form-group">
-                        <label for="isbn" class="control-label col-xs-2">First name</label>
+                        <label class="control-label col-xs-2">First name</label>
                         <div class="col-xs-10">
                             {{ user.firstName }}
 
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="userName" class="control-label col-xs-2">Last name</label>
+                        <label class="control-label col-xs-2">Last name</label>
                         <div class="col-xs-10">
                             {{ user.lastName }}
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="authorName" class="control-label col-xs-2">Birthday</label>
+                        <label class="control-label col-xs-2">Birthday</label>
                         <div class="col-xs-10">
                             {{ user.dob | formatDate }}
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="description" class="control-label col-xs-2">Gender</label>
+                        <label class="control-label col-xs-2">Gender</label>
                         <div class="col-xs-10">
                             {{ user.gender }}
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="genres" class="control-label col-xs-2">Contributions</label>
+                        <label class="control-label col-xs-2">Email</label>
+                        <div class="col-xs-10">
+                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-xs-2">Contributions</label>
                         <div class="col-xs-10">
                             {{ user.contributions }}
                         </div>

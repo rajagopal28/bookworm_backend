@@ -59,11 +59,11 @@
                     <div class="form-group">
                         <label for="meta" class="control-label col-xs-2">Contribution</label>
                         <div class="meta col-xs-10">
-                            <img src="{{ forum.author.thumbnailURL }}"
-                                 alt="{{ forum.author.authorName }}"
+                            <img src="{{ book.contributor.thumbnailURL }}"
+                                 alt="{{ book.contributor | formatUserName }}"
                                  class="avatar">
                             <a href="#/bookworm/auth/users/{{ book.contributor.username }}" class="author" ng-class="{'owner' : isUserContributor()}">
-                                {{ book.contributor.authorName }}
+                                {{ book.contributor | formatUserName }}
                             </a>
                             <span class="date">
                                 <time >{{book.lendDate}}</time>

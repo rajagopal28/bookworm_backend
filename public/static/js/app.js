@@ -18,7 +18,7 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/users.html',
                     controller: 'UsersController'
                 })
-                .when('/bookworm/auth/users/:username', {
+                .when('/bookworm/auth/users/:identifier', {
                     templateUrl: 'templates/view-user.html',
                     controller: 'UserDetailsController'
                 })

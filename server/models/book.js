@@ -17,14 +17,10 @@ function Book(mongoose, mUtils) {
         last_modified_ts: {type: Date, default: Date.now},
         is_available: Boolean,
         exchange_only: Boolean,
-        contributor: {
-            author_name: String,
-            username: String,
-            thumbnail_url: String
-        }
+        contributor: {type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER }
     };
     var bookSchema = mongoose.Schema(bookSchemaDefinition);
-    bookSchema.pre(constants.SCHEMA_HOOK_SAVE, function(next){
+    bookSchema.pre(constants.SCHEMA_HOOK.SAVE, function(next){
         var book = this;
         book.last_modified_ts = Date.now();
         next();
@@ -77,6 +73,7 @@ function Book(mongoose, mUtils) {
                     .find(searchQuery)
                     .skip(pagingSorting.skipCount)
                     .limit(pagingSorting.itemsPerPage)
+                    .populate(constants.FIELD.CONTRIBUTOR)
                     .sort(pagingSorting.sortField)
                     .exec(function (err, items) {
                         callback(err,items, totalCount);

@@ -1,6 +1,6 @@
 // HomeController
-app.controller('HomeController', ['$scope', '$location', 'UsersService', 'BookwormAuthProvider',
-    function ($scope, $location, UsersService, BookwormAuthProvider)  {
+app.controller('HomeController', ['$scope', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
+    function ($scope, $location, UsersService, BookwormAuthProvider, formatUserName)  {
         $scope.tabs = [{
             title : 'BookWorm',
             template :'./templates/about-site.html',
@@ -17,8 +17,8 @@ app.controller('HomeController', ['$scope', '$location', 'UsersService', 'Bookwo
         };
         $scope.getDisplayName = function() {
           var user = BookwormAuthProvider.getUser();
-            if (user && user.authorName) {
-                return user.authorName;
+            if (user) {
+                return formatUserName(user);
             }
         };
          $scope.getUserName = function() {

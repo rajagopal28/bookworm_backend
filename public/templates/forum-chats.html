@@ -33,7 +33,7 @@
                              class="avatar" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
 
                         <a ng-href="#/bookworm/auth/users/{{ chat.author.username }}" class="author"
-                           ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">{{ chat.author.authorName }}</a>
+                           ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">{{chat.author | formatUserName}}</a>
 
                         <span class="date" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
                             <time >{{ chat.createdTS | formatDate }}</time>
@@ -62,7 +62,7 @@
                     <div class="meta">
                         <img src="{{ currentUser.thumbnailURL }}"
                              class="avatar chat-owner">
-                        <a ng-href="#/bookworm/auth/users/{{ currentUser.username }}" class="author chat-owner">{{ currentUser.authorName }}</a>
+                        <a ng-href="#/bookworm/auth/users/{{ currentUser.username }}" class="author chat-owner">{{ currentUser | formatUserName }}</a>
                         <span class="date chat-owner">
                             <time >{{ loggedTime | formatDate }}</time>
                         </span>

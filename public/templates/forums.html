@@ -29,10 +29,10 @@
                         <a href="#/bookworm/forums/{{ forum.id }}">View talks</a>
                         <div class="meta">
                             <img src="{{ forum.author.thumbnailURL }}"
-                                 alt="{{ forum.author.authorName }}"
+                                 alt="{{ forum.author | formatUserName }}"
                                  class="avatar">
                             <a ng-href="#/bookworm/auth/users/{{ forum.author.username }}" class="author" ng-class="{'owner' : isCreatorAuthor(forum)}">
-                                {{ forum.author.authorName }}
+                                {{ forum.author | formatUserName }}
                             </a>
                             <span class="date">
                                 <time>{{forum.createdTS | formatDate}}</time>
