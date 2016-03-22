@@ -10,6 +10,12 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         REQUEST_BOOK_MAIL_CONTENT : { subject: '[BookWorm] New borrow request for your book',
                                                 html: '<h3>Dear {0} </h3><p> A user named {1}, has requested to borrow your book item <strong>{2}</strong> posted on {3}. Kindly respond to the user with an email directly. Email address : <a href="mailto:{4}">{4}</a></p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'New borrow request on your book item'},
+        REQUEST_TO_ADD_NETWORK_CONTENT : { subject: '[BookWorm] New friend request from a fellow bookworm',
+                                                html: '<h3>Dear {0} </h3><p> {1}, has requested to add to their friends network. Kindly click on the link to <a href="{2}">Accept</a> their request</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'New borrow request on your book item'},
+        REQUEST_TO_ADDED_TO_NETWORK_CONTENT : { subject: '[BookWorm] Friend request Accepted',
+                                                html: '<h3>Dear {0} </h3><p> {1}, has Accepted your friend request</p><p> Thanks, BookWorm Team.</p>',
+                                                plain : 'New borrow request on your book item'},
         PROFILE_UPDATE_SUCCESS_MAIL_CONTENT : { subject: '[BookWorm] Profile update Successful',
                                                 html: '<h3>Dear {0} </h3><p>Your Bookworm profile has been successfully updated</p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'Profile update successful'},
@@ -122,6 +128,57 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         };
         sendEmail(mailOptions);
     };
+    this.sendFriendRequestEmail = function(users_list, user_info) {
+        console.log('friend request email sending');
+        var requester, owner;
+        if(users_list[1].username === user_info.username) {
+            requester = users_list[0];
+            owner = users_list[1];
+        } else {
+            requester = users_list[1];
+            owner = users_list[0];
+        }
+        var template = templates.REQUEST_TO_ADD_NETWORK_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [requester.getFullName(),
+                                            owner.getFullName(),
+                                            user_info.email_link]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: owner.email, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+        sendEmail(mailOptions);
+    };
+    this.sendAcceptedFriendRequestEmail = function(users_list, user_info) {
+        console.log('friend request email sending');
+        var requester, owner;
+        if(users_list[0].username === user_info.username) {
+            requester = users_list[0];
+            owner = users_list[1];
+        } else {
+            requester = users_list[1];
+            owner = users_list[0];
+        }
+        var template = templates.REQUEST_TO_ADDED_TO_NETWORK_CONTENT;
+        var emailContentHTML = mUtils.formatWithArguments(
+                                        template.html,
+                                        [requester.getFullName(),
+                                            owner.getFullName()]);
+        console.log(emailContentHTML);
+        var mailOptions = {
+            from: fromEmail, // sender address
+            to: owner.email, // list of receivers
+            subject: template.subject, // Subject line,
+            text : template.plain,
+            html: emailContentHTML // html body
+        };
+        sendEmail(mailOptions);
+    };
     this.sendFeedbackEmail = function(feedback_info) {
         console.log('feedback email sending');
         var template = templates.FEEDBACK_MAIL_CONTENT;
@@ -148,7 +205,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         var emailContentHTML = mUtils.formatWithArguments(
                                         template.html,
                                         [reset_info.getFullName(),
-                                            reset_info.link,
+                                            reset_info.email_link,
                                             reset_info.password_reset_expiry_ts]);
         console.log(emailContentHTML);
         var mailOptions = {

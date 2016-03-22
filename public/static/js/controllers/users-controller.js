@@ -124,8 +124,8 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.status.warn = false;
         };
     }])
-    .controller('UserLoginController', ['$scope', '$routeParams', '$location', '$uibModal', 'Constants', 'UsersService',
-        function ($scope, $routeParams, $location, $uibModal, Constants, UsersService) {
+    .controller('UserLoginController', ['$scope', '$routeParams', '$location', '$uibModal','$localStorage', 'Constants', 'UsersService',
+        function ($scope, $routeParams, $location, $uibModal, $localStorage, Constants, UsersService) {
         $scope.user = {};
         $scope.status = {error: false, success : false};
         $scope.dismissMessage = function () {
@@ -155,7 +155,13 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 if (response.data) {
                     if (response.data.authSuccess) {
                         $scope.status.error = false;
-                        $location.path('/bookworm/home');
+                        if($localStorage.redirectURL
+                            && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
+                            $location.path($localStorage.redirectURL);
+                            delete $localStorage.redirectURL;
+                        } else {
+                            $location.path('/bookworm/home');
+                        }
                     } else {
                         $scope.errorMessage = response.data.msg ? response.data.msg : Constants.ERROR_LOGIN_FAILED;
                         $scope.status.error = true;
@@ -209,6 +215,30 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             };
             $scope.searchUsers();
     }])
+    .controller('NetworkController', ['$scope','Constants',  'UsersService', 'BookwormAuthProvider',
+        function ($scope, Constants, UsersService, BookwormAuthProvider) {
+            $scope.pageSort = Constants.getDefaultPagingSortingData();
+            $scope.users = [];
+            $scope.search = {query : ''};
+            $scope.searchUsers = function() {
+                var options = $scope.pageSort;
+                if($scope.search.query.trim() != ''){
+                    options.query = $scope.search.query;
+                }
+                if(BookwormAuthProvider.isLoggedIn()) {
+                    var currentUser = BookwormAuthProvider.getUser();
+                    options.id = currentUser.id;
+                    UsersService.getUsersInNetwork(options)
+                    .then(function(response){
+                        if(response.data && response.data.items){
+                            $scope.users = response.data.items;
+                            $scope.pageSort.totalItems = response.data.totalItems;
+                        }
+                    });
+                }
+            };
+            $scope.searchUsers();
+    }])
     .controller('UserPasswordController', ['$scope','$routeParams', 'Constants',  'UsersService', 'BookwormAuthProvider',
         function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
             $scope.status = {error: false, success : false};
@@ -257,11 +287,40 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
     .controller('UserDetailsController', ['$scope','$routeParams','Constants',  'UsersService', 'BookwormAuthProvider',
         function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
 
+            $scope.status = {success : false, error : false};
             var options = Constants.getDefaultPagingSortingData();
             $scope.user = {};
             options.identifier = $routeParams.identifier;
             $scope.isUserContributor = function(){
                 return BookwormAuthProvider.isCurrentUser($scope.user);
+            };
+            $scope.sendFriendRequest = function () {
+                if(BookwormAuthProvider.isLoggedIn()
+                    && $scope.user
+                    && $scope.user.id) {
+                    var user = BookwormAuthProvider.getUser();
+                    user.friendId = $scope.user.id;
+                    UsersService.sendFriendRequest(user).then(function (response) {
+                        if (response.data.success) {
+                            $scope.status.error = false;
+                            $scope.status.success = true;
+                        } else {
+                            var err = response.data.error;
+                            $scope.errorMessage = err? err : Constants.DEFAULT_POST_ERROR_MESSAGE;
+                            $scope.status.error = true;
+                            $scope.status.success = false;
+                        }
+                    });
+                }
+            };
+            $scope.isUserAlreadyInNetwork = function() {
+                if(BookwormAuthProvider.isLoggedIn()) {
+                    var currentUser = BookwormAuthProvider.getUser();
+                    return $scope.user
+                        && $scope.user.network
+                        && $scope.user.network.indexOf(currentUser.id) !== -1
+                }
+                return false;
             };
             $scope.isLoggedIn = function() {
               return BookwormAuthProvider.isLoggedIn();
@@ -271,8 +330,13 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     if(response.data && response.data.items){
                         $scope.userDataAvailable = response.data.items.length > 0;
                         $scope.user = response.data.items[0];
+                        // TODO add already in network check - client
                     }
                 });
+            $scope.dismissAlert = function () {
+                $scope.status.success = false;
+                $scope.status.error = false;
+            };
     }])
     .controller('ImageUploadController', ['$scope','$uibModalInstance', '$timeout', 'Constants',  'UsersService', 'BookwormAuthProvider','user',
         function ($scope, $uibModalInstance, $timeout, Constants, UsersService, BookwormAuthProvider, user) {

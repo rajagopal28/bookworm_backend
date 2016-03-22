@@ -1,6 +1,7 @@
 // HomeController
-app.controller('HomeController', ['$scope', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
-    function ($scope, $location, UsersService, BookwormAuthProvider, formatUserName)  {
+app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserName',
+    function ($scope, $routeParams, $location, UsersService, BookwormAuthProvider, formatUserName)  {
+        $scope.status = {success : false, error : false};
         $scope.tabs = [{
             title : 'BookWorm',
             template :'./templates/about-site.html',
@@ -11,6 +12,29 @@ app.controller('HomeController', ['$scope', '$location', 'UsersService', 'Bookwo
             active : false}];
         $scope.loginPopup = function () {
             // console.log('Login');
+        };
+
+        var friendId = $routeParams.friendId;
+        if(friendId
+            && friendId.trim() !== ''
+            && BookwormAuthProvider.isLoggedIn()) {
+            var currentUser = BookwormAuthProvider.getUser();
+            currentUser.friendId = friendId;
+            UsersService.acceptFriendRequest(currentUser)
+                .then(function (response) {
+                    $scope.status.success = response.data
+                        && response.data.success;
+                    $scope.status.error = false;
+                    $scope.user = {};
+                }, function (error) {
+                    $scope.status.error = true;
+                    $scope.status.success = false;
+                });
+        }
+
+        $scope.dismissAlert = function () {
+            $scope.status.success = false;
+            $scope.status.error = false;
         };
         $scope.isLoggedIn = function () {
             return BookwormAuthProvider.isLoggedIn();

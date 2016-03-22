@@ -54,7 +54,8 @@ function Utils() {
             INVALID_CREDENTIAL : 'Current password incorrect',
             INVALID_RESET_LINK : 'Reset password link expired',
             CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
-            DEFAULT : 'Sorry!! Something went wrong! Try after sometime!'
+            DEFAULT : 'Sorry!! Something went wrong! Try after sometime!',
+            USER_ALREADY_IN_NETWORK : 'Cannot add user who is already in your network'
         },
         SMTP_CONFIG_KEY : 'smtpConfig',
         MONGO_CONFIG_KEY : 'mongoConfig',
@@ -73,8 +74,13 @@ function Utils() {
             USERNAME : 'username',
             CONTRIBUTOR : 'contributor',
             AUTHOR : 'author',
-            AUTHOR_IN_CHATS : 'chats.author'
+            IDENTIFIER : '_id',
+            AUTHOR_IN_CHATS : 'chats.author',
+            NETWORK : 'network',
+            TOKEN : 'token',
+            CHATS : 'chats'
         },
+        RESTRICT_PREFIX : '-',
         DEFAULT_PASSWORD_RESET_EXPIRATION : (1000 * 60 * 60 * 24 * 5), //<-- 5 days
         CRYPTO_DEFAULT_ITERATIONS : 10000,
         STRING_ENCODING_BASE_64 : 'base64',
@@ -131,7 +137,9 @@ function Utils() {
         'feedbackType' : 'feedback_type',
         'currentPassword' : 'current_password',
         'query' : 'query',
-        'identifier':'identifier'
+        'identifier':'identifier',
+        'friendId' : 'friend_id',
+        'network' : 'network'
     };
 
     function reverseKeyValuePairs(key_value_pairs) {
@@ -163,15 +171,16 @@ function Utils() {
     }
     var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
     this.parseRequestToDBKeys = function (requestAttributes) {
-        return convertKeysAndMapValues(requestAttributes, requestToDBKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
+        return convertKeysAndMapValues(requestAttributes, requestToDBKeys, [requestToDBKeys.id, dbToResponseKeys._id, dbToResponseKeys.network]);
     };
     this.parseDBToResponseKeys = function (db_key_values) {
-        return convertKeysAndMapValues(db_key_values, dbToResponseKeys, [requestToDBKeys.id, dbToResponseKeys._id]);
+        return convertKeysAndMapValues(db_key_values, dbToResponseKeys, [requestToDBKeys.id, dbToResponseKeys._id, dbToResponseKeys.network]);
     };
     function convertKeysAndMapValues(keyValuePairJSON, keyToKeyMap, skipList) {
         var jsonCheck = parseIfJSONString(keyValuePairJSON);
         if(jsonCheck) {
             keyValuePairJSON = jsonCheck;
+            console.log(jsonCheck);
         }
         if (typeof keyValuePairJSON !== self.constants.VARIABLE_TYPE_OBJECT ||
                 keyValuePairJSON instanceof Date) {
@@ -201,6 +210,14 @@ function Utils() {
             }
         }
     }
+    this.restrictField = function(fieldNameString) {
+        return this.constants.RESTRICT_PREFIX + fieldNameString;
+    };
+    this.buildNestedDocumentArrayPagination = function(fieldNameString, skipCount, itemsPerPage) {
+        var pagedJSON = {};
+        pagedJSON[fieldNameString] = { $slice : [skipCount, itemsPerPage]};
+        return pagedJSON;
+    };
     this.addRegexOption = function (value, caseSensitive) {
         if (!caseSensitive) {
             // value = '^' + value + '$';

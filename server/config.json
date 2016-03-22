@@ -6,9 +6,10 @@
     ".jpeg",
     ".bmp"
   ],
-  "DOMAIN" : "http://127.0.0.1",
+  "DOMAIN" : "http://127.0.0.1:8080",
   "RESET_PASSWORD_LINK" : "/#/bookworm/reset-password-link/",
   "VERIFY_ACCOUNT_LINK" : "/#/bookworm/verify-account-link/",
+  "ACCEPT_FRIEND_REQUEST_LINK" : "/#/bookworm/auth/accept-friend-link/",
   "mongoConfig" : {
     "connectionPrefix" : "mongodb://",
     "host" : "localhost",

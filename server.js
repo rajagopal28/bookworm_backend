@@ -414,6 +414,7 @@ app.get('/bookworm/api/users/all',
         Users.findUsersPaged(searchQuery,
             pagingSorting,
             function (err, items, totalCount) {
+                // TODO add already in network check - server
                 if (err) {
                     res.send(err);
                     console.error(JSON.stringify(err));
@@ -425,6 +426,30 @@ app.get('/bookworm/api/users/all',
                     });
                 }
             });
+});
+
+app.get('/bookworm/api/users/network/all',
+    function (req, res) {
+        var searchQuery = mUtils.parseRequestToDBKeys(req.query);
+        // searchQuery = Users.buildSearchQuery(searchQuery);
+        var pagingSorting = mUtils.getPagingSortingData(searchQuery);
+        console.log(searchQuery);
+        if(searchQuery._id) {
+            Users.findUsersInNetworkPaged(searchQuery,
+            pagingSorting,
+            function (err, items, totalCount) {
+                if (err) {
+                    res.send(err);
+                    console.error(JSON.stringify(err));
+                } else {
+                    var parsedItems = mUtils.parseDBToResponseKeys(items.network);
+                    res.json({
+                        'totalItems' : totalCount,
+                        'items' : parsedItems
+                    });
+                }
+            });
+        }
 });
 
 app.post('/bookworm/api/users/change-password',ensureAuthorized,
@@ -481,7 +506,7 @@ app.post('/bookworm/api/users/request-password-reset',
                     if(!error){
                         readConfigToSession(res,
                             function(serverConfig){
-                                user_account.link = serverConfig.DOMAIN
+                                user_account.email_link = serverConfig.DOMAIN
                                         +serverConfig.RESET_PASSWORD_LINK
                                     + user_account._id;
                                 Mailer.sendResetPasswordEmail(user_account);
@@ -516,6 +541,58 @@ app.post('/bookworm/api/users/reset-password',
             res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
         }
 });
+
+
+app.post('/bookworm/api/users/network/accept-request', ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (req.token
+            && user_item._id
+            && user_item.friend_id
+            && user_item._id !== user_item.friend_id )// check for not empty
+        {
+            Users.addToNetwork(user_item,
+                function (error, items) {
+                    if (error) {
+                        res.json({ success: false , error : error.msg});
+                    } else {
+                        Mailer.sendAcceptedFriendRequestEmail(items, user_item);
+                        res.json({success : true, items :items});
+                    }
+                 });
+        } else {
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
+        }
+});
+
+
+app.post('/bookworm/api/users/network/send-friend-request', ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (req.token
+            && user_item._id
+            && user_item.friend_id
+            && user_item._id !== user_item.friend_id)// check for not empty
+        {
+            Users.findUsersWithIdentifiers([user_item._id, user_item.friend_id],
+                function(err, items){
+                   readConfigToSession(res, function(serverConfig) {
+                        user_item.email_link =  serverConfig.DOMAIN
+                                        +serverConfig.ACCEPT_FRIEND_REQUEST_LINK
+                                    + user_item._id;
+                         Mailer.sendFriendRequestEmail(items, user_item);
+                        res.json({success: true, items : items});
+                   });
+                });
+        } else {
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
+        }
+});
+
 
 app.post('/bookworm/api/forums/add',ensureAuthorized,
     function (req, res) {

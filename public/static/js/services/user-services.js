@@ -26,6 +26,9 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         this.getUsers = function(options){
           return $http.get('/bookworm/api/users/all', {params : options}, {timeout: Constants.DEFAULT_HTTP_TIMEOUT});
         };
+        this.getUsersInNetwork = function(options){
+          return $http.get('/bookworm/api/users/network/all', {params : options}, {timeout: Constants.DEFAULT_HTTP_TIMEOUT});
+        };
         this.postImage = function(file){
             var user = BookwormAuthProvider.getUser();
 
@@ -59,5 +62,11 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         };
         this.verifyAccount = function(credentials){
             return $http.post('/bookworm/api/users/verify-account', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.sendFriendRequest = function(options){
+            return $http.post('/bookworm/api/users/network/send-friend-request', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.acceptFriendRequest = function(options){
+            return $http.post('/bookworm/api/users/network/accept-request', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
         };
 }]);

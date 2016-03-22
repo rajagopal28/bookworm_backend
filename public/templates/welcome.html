@@ -1,4 +1,16 @@
 <div class="main home">
+    <div ng-if="status.error" class="alert alert-error alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                aria-hidden="true">&times;</span></button>
+        <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>Something went wrong. Please try after some time.</strong>
+    </div>
+    <div ng-if="status.success" class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+                aria-hidden="true">&times;</span></button>
+        <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Success:</span>Friend added to your network</strong>
+    </div>
     <div class="jumbotron">
         <div class="container">
             <h2>Hello <span class="highlight">BookWorms</span> . It will often strike our minds that "What to do with

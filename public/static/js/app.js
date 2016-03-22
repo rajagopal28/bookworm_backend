@@ -70,6 +70,14 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/new-forum.html',
                     controller: 'NewForumController'
                 })
+                .when('/bookworm/auth/accept-friend-link/:friendId', {
+                    templateUrl: 'templates/welcome.html',
+                    controller: 'HomeController'
+                })
+                .when('/bookworm/auth/my-network', {
+                    templateUrl: 'templates/users.html',
+                    controller: 'NetworkController'
+                })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
                     controller: 'HomeController'
@@ -88,13 +96,15 @@ app.config(['$routeProvider', '$httpProvider',
 
             $httpProvider.interceptors.push('BookWormHTTPInterceptor');
         }])
-    .run(['$rootScope', '$location', 'BookwormAuthProvider', function ($rootScope, $location, BookwormAuthProvider) {
+    .run(['$rootScope', '$location', '$localStorage', 'BookwormAuthProvider',
+        function ($rootScope, $location,$localStorage, BookwormAuthProvider) {
         $rootScope.$on('$locationChangeStart', function (event, next, current) {
             // check only for authenticated pages
             if (next && next.indexOf('/bookworm/auth') !== -1) {
                 if (!BookwormAuthProvider.isLoggedIn()) {
                     // console.log('DENY : Redirecting to Login');
                     event.preventDefault();
+                    $localStorage.redirectURL = next.substring(next.indexOf('/bookworm'));
                     $location.path('/bookworm/login');
                 }
                 else {

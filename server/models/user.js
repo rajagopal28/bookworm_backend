@@ -29,6 +29,7 @@ function User(mongoose, mCrypto, mUtils) {
         is_verified : {type: Boolean, default: false},
         contributions: {type: Number, default: 0},
         token: String,
+        network : [{type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER }],
         created_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now}
     };
@@ -109,11 +110,18 @@ function User(mongoose, mCrypto, mUtils) {
         }
         return searchQuery;
     };
-    this.searchUsersWithUserNameQuery = function(usersList) {
-        var searchQuery = {username : {$in : []}};
+    this.searchUsersWithUserNameQuery = function(usersList, fieldToPopulate) {
+        var searchQuery = {};
+        console.log(arguments);
+        if(fieldToPopulate) {
+            searchQuery[fieldToPopulate] = {$in : []};
+        } else {
+            searchQuery.username = {$in : []};
+            fieldToPopulate = constants.FIELD.USERNAME;
+        }
         if(usersList && usersList.length){
             for(var index=0; index < usersList.length; index++){
-                searchQuery.username.$in.push(usersList[index]);
+                searchQuery[fieldToPopulate].$in.push(usersList[index]);
             }
             return searchQuery;
         }
@@ -126,7 +134,7 @@ function User(mongoose, mCrypto, mUtils) {
           }, function (error, worm) {
             if(error || !worm){
                 error = error ? error : {};
-             error.msg = !worm ? constants.ERROR_INVALID_ACCOUNT: null;
+             error.msg = !worm ? constants.ERROR.INVALID_ACCOUNT: null;
             }
             callback(error, worm);
         });
@@ -140,6 +148,8 @@ function User(mongoose, mCrypto, mUtils) {
                 if (worm && worm.is_verified) {
                     var authResponse = {};
                     authResponse.author_name = worm.getFullName();
+                    authResponse.first_name = worm.first_name();
+                    authResponse.last_name = worm.last_name();
                     authResponse.username = worm.username;
                     authResponse.thumbnail_url = worm.thumbnail_url;
                     authResponse.token = worm.token;
@@ -147,7 +157,7 @@ function User(mongoose, mCrypto, mUtils) {
                     worm.comparePassword(user.password, authResponse, cb);
                 } else {
                     var err = {};
-                    err.msg = worm && !worm.is_verified? constants.ERROR_ACCOUNT_NOT_VERIFIED : constants.ERROR_INVALID_ACCOUNT;
+                    err.msg = worm && !worm.is_verified? constants.ERROR.ACCOUNT_NOT_VERIFIED : constants.ERROR.INVALID_ACCOUNT;
                     cb(err, worm);
                 }
             }
@@ -155,26 +165,22 @@ function User(mongoose, mCrypto, mUtils) {
     };
     this.incrementContributionOfUser = function(username, token, callback) {
         Model
-            .findOneAndUpdate(
-                {username : username, token : token},
-                { $inc : { contributions : 1}})
-            .select('-password')
-            .select('-token')
-            .exec(function(err,item){
-                    callback(err,item);
-            });
+        .findOneAndUpdate(
+            {username : username, token : token},
+            { $inc : { contributions : 1}})
+        .select(mUtils.restrictField(constants.FIELD.PASSWORD))
+        .select(mUtils.restrictField(constants.FIELD.TOKEN))
+        .exec(function(err,item){
+                callback(err,item);
+        });
     };
     this.findUsersWithUsernames = function(usernames_array, callback) {
         var search_users = this.searchUsersWithUserNameQuery(usernames_array);
-            if(search_users){
-                Model
-                .find(search_users)
-                .select('-token')
-                .select('-password')
-                .exec(function(err, items){
-                    callback(err, items)
-                });
-            }
+        findListedUsers(search_users, callback);
+    };
+    this.findUsersWithIdentifiers = function(userIds_array, callback) {
+        var search_users = this.searchUsersWithUserNameQuery(userIds_array, constants.FIELD.IDENTIFIER);
+        findListedUsers(search_users, callback);
     };
     this.checkUniqueUsername = function(searchQuery, callback){
         searchQuery = {username : searchQuery.username};
@@ -205,8 +211,8 @@ function User(mongoose, mCrypto, mUtils) {
             } else {
                 Model
                     .find(searchQuery)
-                    .select('-password')
-                    .select('-token')
+                    .select(mUtils.restrictField(constants.FIELD.PASSWORD))
+                    .select(mUtils.restrictField(constants.FIELD.TOKEN))
                     .skip(pagingSorting.skipCount)
                     .limit(pagingSorting.itemsPerPage)
                     .sort(pagingSorting.sortField)
@@ -214,6 +220,35 @@ function User(mongoose, mCrypto, mUtils) {
                         callback(err, items, totalCount);
                     });
             }
+        });
+    };
+    this.getCountOfAllUsersInNetwork = function(searchQuery, callback) {
+        Model
+        .findOne(searchQuery)
+        .exec(function (err, items) {
+            callback(err, items.network.length);
+        });
+    };
+    this.findUsersInNetworkPaged = function(searchQuery, pagingSorting, callback) {
+        searchQuery = this.buildSearchQuery(searchQuery);
+        var nestedDocQuery = mUtils.buildNestedDocumentArrayPagination(constants.FIELD.NETWORK,
+                            1*pagingSorting.skipCount,
+                            1*pagingSorting.itemsPerPage);
+        this.getCountOfAllUsersInNetwork(searchQuery,
+            function(err, totalCount){
+                if(err){
+                    callback(err, null, 0);
+                } else {
+                    Model
+                        .findOne(searchQuery, nestedDocQuery)
+                        .select(mUtils.restrictField(constants.FIELD.PASSWORD))
+                        .select(mUtils.restrictField(constants.FIELD.TOKEN))
+                        .populate(constants.FIELD.NETWORK)
+                        .sort(pagingSorting.sortField)
+                        .exec(function (err, items) {
+                            callback(err, items, totalCount);
+                        });
+                }
         });
     };
     this.getCountOfUsers = function(searchQuery, callback) {
@@ -237,7 +272,7 @@ function User(mongoose, mCrypto, mUtils) {
                         function(error, item) {
                             if(error || !item.auth_success){
                                 error = error ? error : {};
-                                error.msg = !item.auth_success ? constants.ERROR_INVALID_CREDENTIAL : null;
+                                error.msg = !item.auth_success ? constants.ERROR.INVALID_CREDENTIAL : null;
                                 callback(error, item);
                             } else {
                                 worm.password = userItem.password;
@@ -254,7 +289,7 @@ function User(mongoose, mCrypto, mUtils) {
             function (error, user_account) {
                 if (error || !user_account) {
                     error = error ? error : {};
-                    error.msg = constants.ERROR_INVALID_ACCOUNT;
+                    error.msg = constants.ERROR.INVALID_ACCOUNT;
                     callback(error, null);
                 } else {
                     var now = new Date().getTime();
@@ -270,7 +305,7 @@ function User(mongoose, mCrypto, mUtils) {
             function(err, worm){
                 if(err || !worm){
                     err = error ? error : {};
-                    err.msg = constants.ERROR_INVALID_ACCOUNT;
+                    err.msg = constants.ERROR.INVALID_ACCOUNT;
                     callback(err,null);
                 } else {
                     var now = new Date();
@@ -281,7 +316,7 @@ function User(mongoose, mCrypto, mUtils) {
                             callback(e,response);
                         });
                     } else {
-                        var error = {msg : constants.ERROR_INVALID_RESET_LINK};
+                        var error = {msg : constants.ERROR.INVALID_RESET_LINK};
                         callback(error, null);
                     }
                 }
@@ -292,7 +327,7 @@ function User(mongoose, mCrypto, mUtils) {
             function(err, worm){
                 if(err || !worm){
                     err = error ? error : {};
-                    err.msg = constants.ERROR_INVALID_ACCOUNT;
+                    err.msg = constants.ERROR.INVALID_ACCOUNT;
                     callback(err,null);
                 } else {
                     worm.is_verified = true;
@@ -302,5 +337,44 @@ function User(mongoose, mCrypto, mUtils) {
                 }
         });
     };
+    this.addToNetwork = function(userItem, callback){
+        var search_users = this.searchUsersWithUserNameQuery([userItem._id, userItem.friend_id], constants.FIELD.IDENTIFIER);
+        findListedUsers(search_users,
+            function(err, items){
+                console.log(items);
+             if(items.length === 2 ) {
+                addUserToNetwork(items[0], items[1], function(err, savedItems) {
+                    if(err) {
+                        callback(err, null);
+                    } else {
+                        addUserToNetwork(items[1], items[0], callback)
+                    }
+                });
+             } else {
+                 callback({msg : constants.ERROR.INVALID_ACCOUNT}, null);
+             }
+        })
+    };
+    function addUserToNetwork(myInfo, friendInfo, callback) {
+        if(myInfo.network.indexOf(friendInfo._id) === -1) {
+            myInfo.network.push(friendInfo._id);
+            myInfo.save(function(err, item) {
+                callback(err, [myInfo, friendInfo]);
+            });
+        } else {
+            callback({msg : constants.ERROR.USER_ALREADY_IN_NETWORK}, null);
+        }
+    }
+    function findListedUsers(usersListQuery, callback) {
+       if(usersListQuery){
+            Model
+            .find(usersListQuery)
+            .select(mUtils.restrictField(constants.FIELD.PASSWORD))
+            .select(mUtils.restrictField(constants.FIELD.TOKEN))
+            .exec(function(err, items){
+                callback(err, items);
+            });
+        }
+    }
 };
 module.exports.User = User;

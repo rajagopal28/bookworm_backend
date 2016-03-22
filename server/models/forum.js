@@ -26,6 +26,8 @@ function Forum(mongoose, mUtils) {
             required: true
           },
         author: {type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER },
+        is_private : {type : Boolean, default: false},
+        visible_to : [{type: mongoose.Schema.Types.ObjectId, ref: constants.MODELS.USER }],
         chats: [charSchema],
         created_ts: {type: Date, default: Date.now},
         last_modified_ts: {type: Date, default: Date.now}
@@ -77,7 +79,7 @@ function Forum(mongoose, mUtils) {
                 callback(err, null, 0);
             } else {
                 Model.find(searchQuery)
-                .select('-chats')
+                .select(mUtils.restrictField(constants.FIELD.CHATS))
                 .populate(constants.FIELD.AUTHOR)
                 .skip(pagingSorting.skipCount)
                 .limit(pagingSorting.itemsPerPage)
