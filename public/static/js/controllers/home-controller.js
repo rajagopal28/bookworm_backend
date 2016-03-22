@@ -1,5 +1,5 @@
 // HomeController
-app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserName',
+app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserNameFilter',
     function ($scope, $routeParams, $location, UsersService, BookwormAuthProvider, formatUserName)  {
         $scope.status = {success : false, error : false};
         $scope.tabs = [{

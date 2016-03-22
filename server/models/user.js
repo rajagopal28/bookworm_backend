@@ -148,8 +148,8 @@ function User(mongoose, mCrypto, mUtils) {
                 if (worm && worm.is_verified) {
                     var authResponse = {};
                     authResponse.author_name = worm.getFullName();
-                    authResponse.first_name = worm.first_name();
-                    authResponse.last_name = worm.last_name();
+                    authResponse.first_name = worm.first_name;
+                    authResponse.last_name = worm.last_name;
                     authResponse.username = worm.username;
                     authResponse.thumbnail_url = worm.thumbnail_url;
                     authResponse.token = worm.token;
