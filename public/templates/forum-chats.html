@@ -26,6 +26,13 @@
                         Description: {{ forum.referredBook.description }}
                       </div>
                     </div>
+                    <div ng-if="isPrivate">
+                        <h4>Visible to</h4>
+                        <div ng-repeat="user in forum.visibleTo">
+                            <span ng-if="$index > 0">,</span>
+                            <span>{{ user | formatUserName}}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="container" ng-repeat="chat in forumChats">
                     <div class="meta">
@@ -40,7 +47,7 @@
                         </span>
 
                         <div class="count" ng-class="{ 'chat-owner' : isCommentatorAuthor(chat) }">
-                            Username: {{ forum.author.username }}
+                            Username: {{ chat.author.username }}
                         </div>
 
                     </div><!-- div meta -->

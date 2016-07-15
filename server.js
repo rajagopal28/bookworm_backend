@@ -593,6 +593,29 @@ app.post('/bookworm/api/users/network/send-friend-request', ensureAuthorized,
         }
 });
 
+app.post('/bookworm/api/users/network/remove-friend', ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var user_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(user_item);
+        if (req.token
+            && user_item._id
+            && user_item.friend_id
+            && user_item._id !== user_item.friend_id)// check for not empty
+        {
+            Users.removeFriendFromNetwork(user_item,
+                function (error, items) {
+                    if (error) {
+                        res.json({ success: false , error : error.msg});
+                    } else {
+                        res.json({success : true, items :items});
+                    }
+                 });
+        } else {
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
+        }
+});
+
 
 app.post('/bookworm/api/forums/add',ensureAuthorized,
     function (req, res) {
@@ -667,7 +690,29 @@ app.get('/bookworm/api/forums/all', function (req, res) {
     var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
     var pagingSorting = mUtils.getPagingSortingData(searchQuery);
     searchQuery = Forums.buildSearchQuery(searchQuery);
-    Forums.findForumsPaged(searchQuery,
+    Forums.findPublicForumsPaged(searchQuery,
+        pagingSorting,
+        function (err, items, totalCount) {
+            if (err) {
+                res.send(err);
+            } else {
+                console.log(items);
+                var parsedItems = mUtils.parseDBToResponseKeys(items);
+                console.log(parsedItems);
+                res.json({
+                    items : parsedItems,
+                    totalItems : totalCount
+                });
+            }
+        });
+});
+
+app.get('/bookworm/api/private-forums/all', ensureAuthorized, function (req, res) {
+    var inputParams = req.query;
+    var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+    var pagingSorting = mUtils.getPagingSortingData(searchQuery);
+    searchQuery = Forums.buildSearchQuery(searchQuery);
+    Forums.findPrivateForumsPaged(searchQuery,
         pagingSorting,
         function (err, items, totalCount) {
             if (err) {
@@ -694,10 +739,53 @@ app.get('/bookworm/api/forums/chats/all',
                 res.send(err);
             } else {
                 var parsed = mUtils.parseDBToResponseKeys(forum);
-                console.log(parsed);
-                res.send(parsed);
+                res.send({success : true, item :parsed});
             }
         });
+});
+
+app.get('/bookworm/api/private-forums/chats/all',
+    function (req, res) {
+        var inputParams = req.query;
+        var searchQuery = mUtils.parseRequestToDBKeys(inputParams);
+        searchQuery = Forums.buildSearchQuery(searchQuery);
+        Forums.getChatsOfPrivateForum(searchQuery, function (err, forum) {
+            if (err) {
+                res.send(err);
+            } else {
+                var parsed = mUtils.parseDBToResponseKeys(forum);
+                res.send({success : true, item :parsed});
+            }
+        });
+});
+
+app.post('/bookworm/api/private-forums/chats/add', ensureAuthorized,
+    function (req, res) {
+        console.log(req.body);
+        var chat_item = mUtils.parseRequestToDBKeys(req.body);
+        console.log(chat_item);
+        if (chat_item.forum_id)// check for not empty
+        {
+            Forums.addChatToPrivateForum(chat_item,
+                function (error, new_forum) {
+                    if (error) {
+                        res.send(error);
+                    } else {
+                        if (socket) {
+                            var item = {};
+                            item.forumId = new_forum._id;
+                            chat_item.created_ts = new Date();
+                            item.chat = mUtils.parseDBToResponseKeys(chat_item);
+                            console.log('in socket');
+                            socket.emit(constants.SOCKET_EVENT_NEW_CHAT, item);
+                        }
+                        res.json({success : true, item :new_forum});
+                    }
+
+                });
+        } else {
+            res.json({success: false, error : constants.ERROR.MISSING_FIELDS});
+        }
 });
 
 app.get('/bookworm/api/config', function (req, res) {

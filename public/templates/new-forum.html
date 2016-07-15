@@ -43,6 +43,12 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="isPrivate" class="control-label col-xs-2">Mark as Private<sup>*</sup></label>
+                        <div class="col-xs-5">
+                            <input type="checkbox" placeholder="(Will be visible to those you select from network)" class="form-control" id="isPrivate" ng-model="forum.isPrivate">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="inputPassword" class="control-label col-xs-2">Reference book</label>
                         <div class="col-xs-5">
                             <input ng-model="book.bookName" type="text" class="form-control" name="bookName"
@@ -51,6 +57,30 @@
                                    uib-typeahead="ibook.bookName for ibook in loadBookDetails($viewValue) | limitTo:8"
                                    typeahead-min-length="5" typeahead-on-select="onBookSelect($item, $model, $label)">
                             <input type="hidden" ng-model="book.bookName" value="{{ book.title }}"/>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-if="forum.isPrivate">
+                        <label for="forumTitle" class="control-label col-xs-2">Visible To<sup>*</sup></label>
+                        <div class="col-xs-5">
+                            <input type="text" class="form-control" id="userSelect"
+                                   ng-model="selectedUser.firstName"
+                                   placeholder="Varys the Spider"
+                                   typeahead-loading="loadingUsers"
+                                   uib-typeahead="user | formatUserName for user in loadUsersList($viewValue) | limitTo:8"
+                                   typeahead-min-length="3"
+                                   typeahead-on-select="onUserSelect($item, $model, $label)"/>
+                            <div class="item-list-row row">
+                                <div class="col-xs-6" ng-repeat="user in visibleToUsers">
+                                    <div class="item-container">
+                                        <div class="thumbnail"><img src="{{ user.thumbnailURL }}"/></div>
+                                        <div class="info">
+                                            <div><strong>Name: </strong>{{ user | formatUserName }}</div>
+                                            <div>{{ user.email }}</div>
+                                            <button class="btn btn-primary btn-sm" ng-click="removeUser($index)">Remove</button></div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                     <div class="form-group" ng-if="isLoggedIn()">

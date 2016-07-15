@@ -57,8 +57,6 @@ function User(mongoose, mCrypto, mUtils) {
         return this.first_name + ' ' + this.last_name;
     };
     userSchema.methods.comparePassword = function (candidatePassword, user, cb) {
-        console.log(hashString(candidatePassword));
-        console.log(this.password);
         var isMatch = candidatePassword &&
             this.password === hashString(candidatePassword);
         if(isMatch) {
@@ -112,7 +110,6 @@ function User(mongoose, mCrypto, mUtils) {
     };
     this.searchUsersWithUserNameQuery = function(usersList, fieldToPopulate) {
         var searchQuery = {};
-        console.log(arguments);
         if(fieldToPopulate) {
             searchQuery[fieldToPopulate] = {$in : []};
         } else {
@@ -154,7 +151,7 @@ function User(mongoose, mCrypto, mUtils) {
                     authResponse.thumbnail_url = worm.thumbnail_url;
                     authResponse.token = worm.token;
                     authResponse._id = worm._id;
-                    worm.comparePassword(user.password, authResponse, cb);
+                    worm.comparePassword(user.pass_key, authResponse, cb);
                 } else {
                     var err = {};
                     err.msg = worm && !worm.is_verified? constants.ERROR.ACCOUNT_NOT_VERIFIED : constants.ERROR.INVALID_ACCOUNT;
@@ -190,6 +187,9 @@ function User(mongoose, mCrypto, mUtils) {
             });
     };
     this.addNewUser = function(personal_info, callback){
+        // assign password to the right field and remove the old key
+        personal_info.password = personal_info.pass_key;
+        delete personal_info.pass_key;
         var new_user = new Model(personal_info);
         new_user.save(function (err, item) {
             callback(err, item);
@@ -230,20 +230,22 @@ function User(mongoose, mCrypto, mUtils) {
         });
     };
     this.findUsersInNetworkPaged = function(searchQuery, pagingSorting, callback) {
+        var myNetworkQuery = {_id : searchQuery._id};
+        delete searchQuery._id;
         searchQuery = this.buildSearchQuery(searchQuery);
         var nestedDocQuery = mUtils.buildNestedDocumentArrayPagination(constants.FIELD.NETWORK,
                             1*pagingSorting.skipCount,
                             1*pagingSorting.itemsPerPage);
-        this.getCountOfAllUsersInNetwork(searchQuery,
+        this.getCountOfAllUsersInNetwork(myNetworkQuery,
             function(err, totalCount){
                 if(err){
                     callback(err, null, 0);
                 } else {
                     Model
-                        .findOne(searchQuery, nestedDocQuery)
+                        .findOne(myNetworkQuery, nestedDocQuery)
                         .select(mUtils.restrictField(constants.FIELD.PASSWORD))
                         .select(mUtils.restrictField(constants.FIELD.TOKEN))
-                        .populate(constants.FIELD.NETWORK)
+                        .populate(constants.FIELD.NETWORK, null, searchQuery)
                         .sort(pagingSorting.sortField)
                         .exec(function (err, items) {
                             callback(err, items, totalCount);
@@ -310,7 +312,7 @@ function User(mongoose, mCrypto, mUtils) {
                 } else {
                     var now = new Date();
                     if(worm.password_reset_expiry_ts.getTime() >= now.getTime()) {
-                        worm.password = userItem.password;
+                        worm.password = userItem.pass_key;
                         worm.password_reset_expiry_ts = now;
                         worm.save(function(e, response){
                             callback(e,response);
@@ -355,9 +357,37 @@ function User(mongoose, mCrypto, mUtils) {
              }
         })
     };
+    this.removeFriendFromNetwork = function(userItem, callback){
+        var search_users = this.searchUsersWithUserNameQuery([userItem._id, userItem.friend_id], constants.FIELD.IDENTIFIER);
+        findListedUsers(search_users,
+            function(err, items){
+                console.log(items);
+             if(items.length === 2 ) {
+                removeUserFromNetwork(items[0], items[1], function(err, savedItems) {
+                    if(err) {
+                        callback(err, null);
+                    } else {
+                        removeUserFromNetwork(items[1], items[0], callback)
+                    }
+                });
+             } else {
+                 callback({msg : constants.ERROR.INVALID_ACCOUNT}, null);
+             }
+        })
+    };
     function addUserToNetwork(myInfo, friendInfo, callback) {
         if(myInfo.network.indexOf(friendInfo._id) === -1) {
             myInfo.network.push(friendInfo._id);
+            myInfo.save(function(err, item) {
+                callback(err, [myInfo, friendInfo]);
+            });
+        } else {
+            callback({msg : constants.ERROR.USER_ALREADY_IN_NETWORK}, null);
+        }
+    }
+    function removeUserFromNetwork(myInfo, friendInfo, callback) {
+        if(myInfo.network.indexOf(friendInfo._id) !== -1) {
+            myInfo.network.splice(myInfo.network.indexOf(friendInfo._id), 1);
             myInfo.save(function(err, item) {
                 callback(err, [myInfo, friendInfo]);
             });

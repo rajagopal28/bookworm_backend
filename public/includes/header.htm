@@ -12,6 +12,12 @@
                     </li>
                     <li ng-if="isLoggedIn()">
                         <a href="#/bookworm/auth/borrow">Books</a></li>
+                    <li ng-if="isLoggedIn()">
+                        <a href="#/bookworm/auth/forums">
+                            <i class="glyphicon glyphicon-plane"></i>
+                            Private Forums
+                            <span class="label label-info">New</span></a>
+                    </li>
                     <li>
                         <a href="#/bookworm/forums">Forums</a>
                     </li>
@@ -34,6 +40,9 @@
                             <li><a ng-href="#/bookworm/auth/users/{{ getUserName() }}"><span class="glyphicon glyphicon-cog"></span> Profile</a></li>
                             <li class="divider"></li>
                             <li><a ng-href="#/bookworm/auth/change-password"><span class="glyphicon glyphicon-lock"></span> Change password</a></li>
+                            <li class="divider"></li>
+                            <li><a ng-href="#/bookworm/auth/my-network"><span class="glyphicon glyphicon-tent"></span> Networks
+                                <span class="label label-info">New</span></a></li>
                             <li class="divider"></li>
                             <li><a ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
                         </ul>

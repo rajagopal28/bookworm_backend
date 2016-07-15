@@ -68,7 +68,12 @@
                             <button type="submit" ng-if="!isUserContributor() && !isUserAlreadyInNetwork()" class="btn btn-primary" ng-click="sendFriendRequest()">
                                 Add to network
                             </button>
-                            <span ng-if="isUserAlreadyInNetwork()" class="label label-success ng-binding">User in your network</span>
+                            <div ng-if="isUserAlreadyInNetwork()">
+                                <span class="label label-success ng-binding">User in your network</span>
+                                <button type="submit" class="btn btn-danger" ng-click="removeUserFromNetwork()">
+                                    Remove from network
+                                </button>
+                            </div>
                             <a type="submit" ng-if="isUserContributor()" class="btn btn-primary" ng-href="#/bookworm/auth/update-profile/{{ user.id }}">
                                 Edit
                             </a>

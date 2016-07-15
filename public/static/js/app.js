@@ -78,6 +78,14 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/users.html',
                     controller: 'NetworkController'
                 })
+                .when('/bookworm/auth/forums', {
+                    templateUrl: 'templates/forums.html',
+                    controller: 'PrivateForumController'
+                })
+                .when('/bookworm/auth/forums/:forumId', {
+                    templateUrl: 'templates/forum-chats.html',
+                    controller: 'PrivateForumChatController'
+                })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
                     controller: 'HomeController'

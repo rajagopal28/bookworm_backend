@@ -26,7 +26,8 @@
                                ng-class="{'glyphicon-chevron-down': status[forum.id].open, 'glyphicon-chevron-right': !status[forum.id].open}"></i>
                         </uib-accordion-heading>
                         {{ forum.description }}
-                        <a href="#/bookworm/forums/{{ forum.id }}">View talks</a>
+                        <a ng-if="!isPrivate" href="#/bookworm/forums/{{ forum.id }}">View talks</a>
+                        <a ng-if="isPrivate" href="#/bookworm/auth/forums/{{ forum.id }}">View talks</a>
                         <div class="meta">
                             <img src="{{ forum.author.thumbnailURL }}"
                                  alt="{{ forum.author | formatUserName }}"

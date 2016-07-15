@@ -14,4 +14,13 @@ app.service('ForumsService', ['$http', 'Constants', function ($http, Constants) 
     this.addChat = function (options) {
         return $http.post('/bookworm/api/forums/chats/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
     };
+    this.getPrivateForums = function (options) {
+        return $http.get('/bookworm/api/private-forums/all', {params: options});
+    };
+    this.allPrivateChats = function (options) {
+        return $http.get('/bookworm/api/private-forums/chats/all', {params: options});
+    };
+    this.addPrivateChat = function (options) {
+        return $http.post('/bookworm/api/private-forums/chats/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
+    };
 }]);

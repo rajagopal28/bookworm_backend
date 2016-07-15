@@ -69,4 +69,7 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         this.acceptFriendRequest = function(options){
             return $http.post('/bookworm/api/users/network/accept-request', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
         };
+        this.removeUserFromNetwork = function(options){
+            return $http.post('/bookworm/api/users/network/remove-friend', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
 }]);

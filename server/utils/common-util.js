@@ -55,7 +55,8 @@ function Utils() {
             INVALID_RESET_LINK : 'Reset password link expired',
             CLOUD_LOGIN_FAILED : 'Unable to login to cloud!!',
             DEFAULT : 'Sorry!! Something went wrong! Try after sometime!',
-            USER_ALREADY_IN_NETWORK : 'Cannot add user who is already in your network'
+            USER_ALREADY_IN_NETWORK : 'Cannot add user who is already in your network',
+            NO_ACCESS_TO_FORUM : 'You do not have access to this resource!'
         },
         SMTP_CONFIG_KEY : 'smtpConfig',
         MONGO_CONFIG_KEY : 'mongoConfig',
@@ -71,6 +72,7 @@ function Utils() {
         },
         FIELD : {
             PASSWORD : 'password',
+            CONFIRM_PASSWORD : 'confirmPassword',
             USERNAME : 'username',
             CONTRIBUTOR : 'contributor',
             AUTHOR : 'author',
@@ -78,7 +80,12 @@ function Utils() {
             AUTHOR_IN_CHATS : 'chats.author',
             NETWORK : 'network',
             TOKEN : 'token',
-            CHATS : 'chats'
+            CHATS : 'chats',
+            AUTHOR_TOKEN : 'author.token',
+            AUTHOR_PASSWORD : 'author.password',
+            CHAT_AUTHOR_TOKEN : 'chats.author.token',
+            CHAT_AUTHOR_PASSWORD : 'chats.author.password',
+            VISIBLE_TO : 'visible_to'
         },
         RESTRICT_PREFIX : '-',
         DEFAULT_PASSWORD_RESET_EXPIRATION : (1000 * 60 * 60 * 24 * 5), //<-- 5 days
@@ -139,8 +146,14 @@ function Utils() {
         'query' : 'query',
         'identifier':'identifier',
         'friendId' : 'friend_id',
-        'network' : 'network'
+        'network' : 'network',
+        'passKey' : 'pass_key',
+        'isPrivate' : 'is_private',
+        'visibleTo' : 'visible_to'
     };
+    var sensitiveKeys = [this.constants.FIELD.PASSWORD, this.constants.FIELD.CONFIRM_PASSWORD];
+    var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
+    var listOfKeysToSkipParsingTheirValues = [requestToDBKeys.id, dbToResponseKeys._id, dbToResponseKeys.network];
 
     function reverseKeyValuePairs(key_value_pairs) {
         var value_key_pairs = {}, key, value;
@@ -169,13 +182,25 @@ function Utils() {
         }
         return null;
     }
-    var dbToResponseKeys = reverseKeyValuePairs(requestToDBKeys);
     this.parseRequestToDBKeys = function (requestAttributes) {
-        return convertKeysAndMapValues(requestAttributes, requestToDBKeys, [requestToDBKeys.id, dbToResponseKeys._id, dbToResponseKeys.network]);
+        return convertKeysAndMapValues(requestAttributes, requestToDBKeys, listOfKeysToSkipParsingTheirValues);
     };
     this.parseDBToResponseKeys = function (db_key_values) {
-        return convertKeysAndMapValues(db_key_values, dbToResponseKeys, [requestToDBKeys.id, dbToResponseKeys._id, dbToResponseKeys.network]);
+        return convertKeysAndMapValues(db_key_values, dbToResponseKeys, listOfKeysToSkipParsingTheirValues);
     };
+    function removeSensitiveKeyValuePairs(inputJSONObject) {
+        if(inputJSONObject) {
+            var index, key;
+            for(index =0; index < sensitiveKeys.length; index++) {
+                key = sensitiveKeys[index];
+                if(inputJSONObject[key]) {
+                    inputJSONObject[key] = null;
+                    delete inputJSONObject[key];
+                }
+            }
+        }
+        return inputJSONObject;
+    }
     function convertKeysAndMapValues(keyValuePairJSON, keyToKeyMap, skipList) {
         var jsonCheck = parseIfJSONString(keyValuePairJSON);
         if(jsonCheck) {
@@ -194,13 +219,15 @@ function Utils() {
                 return keyValuePairJSON;
             } else {
                 var alteredKeyValuePairJSON = {}, key, value, changedKey;
+                // remove sensitive keys before parsing
+                keyValuePairJSON = removeSensitiveKeyValuePairs(keyValuePairJSON);
                 for (key in keyValuePairJSON) {
                     value = keyValuePairJSON[key];
                     changedKey = keyToKeyMap[key];
-                    if (changedKey) {
+                    if (changedKey && value) {
                         // console.log(changedKey);
                         if (skipList.indexOf(changedKey) === -1) {
-                            alteredKeyValuePairJSON[changedKey] = convertKeysAndMapValues(value,keyToKeyMap, skipList);
+                            alteredKeyValuePairJSON[changedKey] = convertKeysAndMapValues(value, keyToKeyMap, skipList);
                         } else {
                             alteredKeyValuePairJSON[changedKey] = value;
                         }

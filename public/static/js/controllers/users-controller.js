@@ -322,6 +322,16 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 }
                 return false;
             };
+            $scope.removeUserFromNetwork = function() {
+                if($scope.isUserAlreadyInNetwork()) {
+                    var currentUser = BookwormAuthProvider.getUser();
+                    var request = {id: currentUser.id, friendId : $scope.user.id};
+                    UsersService.removeUserFromNetwork(request)
+                        .then(function(response) {
+                            $scope.status.success = response.data.success && true;
+                        });
+                }
+            };
             $scope.isLoggedIn = function() {
               return BookwormAuthProvider.isLoggedIn();
             };
@@ -330,7 +340,6 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                     if(response.data && response.data.items){
                         $scope.userDataAvailable = response.data.items.length > 0;
                         $scope.user = response.data.items[0];
-                        // TODO add already in network check - client
                     }
                 });
             $scope.dismissAlert = function () {
