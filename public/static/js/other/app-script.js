@@ -36,3 +36,17 @@ pingServer = function (data) {
     });
 
 };
+function showConfirmationModal($uibModal, message, cb) {
+    var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: '../../../templates/confirmation-modal.html',
+        controller: 'ConfirmationModalCtrl',
+        size: 's',
+        resolve: {
+            message: {message : message}
+        }
+    });
+    modalInstance.result.then(function (result) {
+        cb(result);
+    });
+}

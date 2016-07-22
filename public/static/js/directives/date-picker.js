@@ -2,7 +2,7 @@ app.directive('datePickerInput', function(){
     return {
         restrict: 'E',
         scope : {
-            initDate : '='
+            dt : '='
         },
         templateUrl : '../../templates/datepicker-input-template.html',
         controller : 'DatepickerCtrl'
@@ -12,11 +12,6 @@ app.directive('datePickerInput', function(){
             $scope.dt = new Date();
         };
         $scope.status = {};
-        if($scope.initDate) {
-            $scope.dt = $scope.initDate;
-        } else {
-            $scope.today();
-        }
         $scope.clear = function () {
             $scope.dt = null;
         };

@@ -1,7 +1,7 @@
 // HomeController
-app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserNameFilter',
-    function ($scope, $routeParams, $location, UsersService, BookwormAuthProvider, formatUserName)  {
-        $scope.status = {success : false, error : false};
+app.controller('HomeController', ['$scope', '$routeParams', '$location', 'Constants', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserNameFilter',
+    function ($scope, $routeParams, $location, Constants, UsersService, BookwormAuthProvider, formatUserName)  {
+        $scope.messages = [];
         $scope.tabs = [{
             title : 'BookWorm',
             template :'./templates/about-site.html',
@@ -22,19 +22,17 @@ app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersS
             currentUser.friendId = friendId;
             UsersService.acceptFriendRequest(currentUser)
                 .then(function (response) {
-                    $scope.status.success = response.data
-                        && response.data.success;
-                    $scope.status.error = false;
+                    if(response.data.success) {
+                        $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FRIEND_ADDED));
+                    }
                     $scope.user = {};
                 }, function (error) {
-                    $scope.status.error = true;
-                    $scope.status.success = false;
+                    $scope.messages.push(Constants.getGetErrorMessage(error));
                 });
         }
 
-        $scope.dismissAlert = function () {
-            $scope.status.success = false;
-            $scope.status.error = false;
+        $scope.dismissAlert = function (index) {
+            $scope.messages.splice(index, 1);
         };
         $scope.isLoggedIn = function () {
             return BookwormAuthProvider.isLoggedIn();
@@ -60,5 +58,15 @@ app.controller('HomeController', ['$scope', '$routeParams', '$location', 'UsersS
         $scope.logout = function () {
             UsersService.logout();
             $location.path('/bookworm/home');
+        };
+}])
+.controller('ConfirmationModalCtrl', ['$scope','$uibModalInstance', 'Constants', 'message',
+    function ($scope, $uibModalInstance, Constants, message) {
+        $scope.message = (message && message.message) ? message.message : Constants.DEFAULT_CONFIRMATION_MESSAGE;
+        $scope.ok = function() {
+            $uibModalInstance.close();
+        };
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
         };
 }]);

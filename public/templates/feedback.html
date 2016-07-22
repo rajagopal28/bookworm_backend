@@ -10,17 +10,11 @@
         <div class="panel-heading">
             <h3 class="panel-title">Feedback</h3></div>
         <div class="panel-body">
-            <div class="alert alert-success alert-dismissible" role="alert" ng-show="status.success">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
+            <div ng-repeat="msg in messages" class="alert alert-{{ msg.type }} alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert($index)"><span
                         aria-hidden="true">&times;</span></button>
                 <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Done:</span>Success!</strong> Your feedback have been submitted. Thanks for sharing your good thoughts and supporting BookWorm.
-            </div>
-            <div class="alert alert-danger alert-dismissible" role="alert" ng-show="status.error">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="dismissAlert()"><span
-                        aria-hidden="true">&times;</span></button>
-                <strong><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>Error!</strong> Problem submitting the details. Try after sometime!
+                <span class="sr-only">{{ msg.type }}</span></strong>{{ msg.text }}
             </div>
             <div class="row">
                 <div class="col-xs-8">

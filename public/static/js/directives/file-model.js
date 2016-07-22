@@ -13,4 +13,3 @@ app.directive('fileModel', ['$parse', function ($parse) {
            }
         };
      }]);
-      

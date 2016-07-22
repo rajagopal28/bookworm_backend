@@ -5,10 +5,28 @@ app.constant('Constants', {
     SORT_ORDER_DESC : 'desc',
     DEFAULT_SORT_FIELD : 'createdTS',
     DEFAULT_LOCAL_IMAGES_PATH : '../static/images/',
+    DEFAULT_CONFIRMATION_MESSAGE : 'Are you sure want to perform this action?',
+    CONFIRM_REMOVE_FRIEND : 'Are you sure want to remove this user from your network?',
+    CONFIRM_ADD_FRIEND : 'Are you sure want to send friend request to this user?',
+    CONFIRM_ADD_BOOK : 'Are you sure want to add this book to the list?',
+    CONFIRM_EDIT_BOOK : 'Are you sure want to edit this book\'s details?',
+    CONFIRM_BORROW_BOOK : 'Are you sure want to send this borrow request?',
     DEFAULT_POST_ERROR_MESSAGE : 'Problem submitting the details. Please try after sometime!',
+    INFO_MESSAGE_AUTO_COMPLETE_FORM_BOOK : ' This form has autocomplete enabled for some fields. Type in \n ISBN or Book name to fill in details.',
+    DEFAULT_POST_SUCCESS_MESSAGE : 'Your data has been submitted!',
+    SUCCESS_MESSAGE_PASSWORD_RESET_REQUESTED : ' Your Will receive an email confirmation shortly!!',
+    SUCCESS_MESSAGE_PASSWORD_RESET_SENT : ' Your password has been reset!',
+    SUCCESS_MESSAGE_PASSWORD_REST_DONE : ' Password change successful!!',
+    SUCCESS_MESSAGE_FRIEND_REQUEST_SENT : ' Your request has been sent!',
+    SUCCESS_MESSAGE_FRIEND_ADDED : ' Friend added to your network',
+    SUCCESS_MESSAGE_IMAGE_UPLOADED : 'Your image has been uploaded to the file system. Please click save in update profile to apply it to profile.',
+    SUCCESS_MESSAGE_FEEDBACK_SENT : 'Your feedback have been submitted. Thanks for sharing your good thoughts and supporting BookWorm.',
+    SUCCESS_MESSAGE_BORROW_REQUEST_SENT : 'Your request has been sent to the user. You\'ll receive a direct email response.',
+    INFO_MESSAGE_REGISTRATION_EMAIL : 'Kindly give a valid email ID. \n The current system depends on emails to allow interaction between bookworms.\n We are working on bringing smarter ways of interactions.',
     MESSAGE_USERNAME_AVAILABLE : 'User name available',
     MESSAGE_USERNAME_UNAVAILABLE : 'User name is not available',
     MODAL_SIZE_LARGE : 'l',
+    MODAL_SIZE_SMALL : 's',
     MODAL_DISMISS_RESPONSE : 'cancel',
     DEFAULT_HTTP_TIMEOUT : '1000', // milliseconds
     DEFAULT_MIN_YEAR : 1900,
@@ -36,6 +54,12 @@ app.constant('Constants', {
 
     EVENT_NAME_DATE_SET : 'date-set',
     EVENT_NAME_NEW_CHAT : 'new-chat',
+    MSG_TYPE : {
+        SUCCESS: 'success',
+        ERROR: 'danger',
+        WARN: 'warning',
+        INFO: 'info'
+    },
     getDefaultPagingSortingData : function() {
         var pageSortDefaults = {
             itemsPerPage : this.DEFAULT_ITEMS_PER_PAGE,
@@ -46,5 +70,17 @@ app.constant('Constants', {
         };
         pageSortDefaults.primarySort[this.DEFAULT_SORT_FIELD] = this.SORT_ORDER_ASC;
         return pageSortDefaults;
+    },
+    getPostSuccessMessage: function(successMsg) {
+        return this.getMessage(successMsg? successMsg : this.DEFAULT_POST_SUCCESS_MESSAGE, this.MSG_TYPE.SUCCESS);
+    },
+    getPostErrorMessage: function(error) {
+        return this.getMessage(error && error.msg? error.msg : this.DEFAULT_DATA_ERROR_MESSAGE, this.MSG_TYPE.ERROR);
+    },
+    getGetErrorMessage: function(error) {
+        return this.getMessage(error && error.msg? error.msg : this.DEFAULT_DATA_ERROR_MESSAGE, this.MSG_TYPE.ERROR);
+    },
+    getMessage: function( message, type) {
+        return {text: message, type: type};
     }
 });

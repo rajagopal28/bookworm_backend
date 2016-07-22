@@ -65,6 +65,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
         var forumId = $routeParams.forumId;
         // console.log(forumId);
         $scope.newChat = {};
+        $scope.messages = [];
         $scope.loggedTime = new Date();
         $scope.currentUser = BookwormAuthProvider.getUser();
         $scope.isUserForumOwner = function() {
@@ -91,8 +92,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                 ForumsService.addChat(options)
                     .then(function (response) {
                         // console.log(response);
-                        //$scope.forumChats.push(options);
                         $scope.newChat.chatComment = '';
+                    }, function(error) {
+                        $scope.messages.push(Constants.getPostErrorMessage(error));
                     });
             }
         };
@@ -107,7 +109,12 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                     $scope.forum = response.data.item;
                     $scope.forumChats = response.data.item.chats;
                 }
+            }, function(error) {
+                $scope.messages.push(Constants.getGetErrorMessage(error));
             });
+        $scope.dismissAlert = function(index) {
+            $scope.messages.splice(index, 1);
+        };
         socket.on(Constants.EVENT_NAME_NEW_CHAT, function (chatInfo) {
             // console.log('choot');
             // console.log(chatInfo);
@@ -185,7 +192,7 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
             $scope.forum = {};
             $scope.visibleToUsers = [];
             var forumId = $routeParams.forumId;
-            $scope.status = {success : false, error: false};
+            $scope.messages = [];
             $scope.isLoggedIn = function () {
               return BookwormAuthProvider.isLoggedIn();
             };
@@ -205,7 +212,11 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                                     $scope.visibleToUsers = $scope.forum.visibleTo;
                                 }
                             }
+                        } else {
+                            $scope.messages.push(Constants.getGetErrorMessage());
                         }
+                    }, function(error) {
+                        $scope.messages.push(Constants.getGetErrorMessage(error));
                     });
             }
             $scope.isEditMode = function() {
@@ -222,11 +233,9 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                     .then(function(response) {
                         if (response && response.data) {
                             if (response.data.success) {
-                                $scope.status.success = true;
-                                $scope.status.error = false;
+                                $scope.messages.push(Constants.getPostSuccessMessage());
                             } else {
-                                $scope.status.error = true;
-                                $scope.status.success = false;
+                                $scope.messages.push(Constants.getGetErrorMessage());
                             }
                         }
                     });
@@ -245,13 +254,11 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                         .then(function(response) {
                             if (response && response.data) {
                                 if (response.data.success) {
-                                    $scope.status.success = true;
-                                    $scope.status.error = false;
+                                    $scope.messages.push(Constants.getPostSuccessMessage());
                                     $scope.book = {};
                                     $scope.forum = {};
                                 } else {
-                                    $scope.status.error = true;
-                                    $scope.status.success = false;
+                                    $scope.messages.push(Constants.getPostSuccessMessage());
                                 }
                             }
                         });
@@ -288,9 +295,8 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                         return response.data.items;
                     });
             };
-            $scope.dismissAlert = function() {
-                $scope.status.success = false;
-                $scope.status.error = false;
+            $scope.dismissAlert = function(index) {
+                $scope.messages.splice(index, 1);
             };
             $scope.onBookSelect = function ($item, $model, $label) {
                 $scope.book = $item;
