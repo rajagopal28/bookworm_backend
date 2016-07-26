@@ -2,24 +2,12 @@
   <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>BookWorm</title>
-        <!--        Static vendor CSS files      -->
-        <link rel="stylesheet" type="text/css" href="./vendors/css/bootstrap-3.3.5.min.css">
-        <link rel="stylesheet" type="text/css" href="./vendors/css/font-awesome-4.0.3.min.css">
-        <link rel="stylesheet" type="text/css" href="./vendors/css/ng-tags-input.min.css">
-        <link rel="stylesheet" type="text/css" href="./vendors/css/ng-tags-input.bootstrap.min.css">
+
         <!--        Static CSS files        -->
-        <link data-turbolinks-track="true" href="./static/css/main.css" media="all" rel="stylesheet">
+        <link data-turbolinks-track="true" href="./min/app.css" media="all" rel="stylesheet">
 
         <!--        Static Vendor Javascripts -->
-        <script src="./vendors/js/libraries/angular-1.4.8.min.js"></script>
-        <script src="./vendors/js/modules/angular-route-1.4.8.min.js"></script>
-        <script src="./vendors/js/modules/angular-storage-0.3.10.min.js"></script>
-        <script src="./vendors/js/libraries/jquery-2.1.4.min.js"></script>
-        <script src="./vendors/js/bootstrap-3.3.5.min.js"></script>
-        <script src="vendors/js/libraries/socket.io-1.3.7.min.js"></script>
-        <!--        Static Vendor module Javascripts -->
-        <script src="./vendors/js/modules/bootstrap-angular-ui.js"></script>
-        <script src="./vendors/js/modules/ng-tags-input.min.js"></script>
+        <script src="./min/vendors.js"></script>
     </head>
     <body ng-app="bookworm-ui">
         <div ng-include="'./includes/header.htm'"></div>
@@ -27,33 +15,6 @@
         <div ng-include="'./includes/footer.htm'"></div>
         <!--        Static app JS files      -->
         <!--        Static DOM related scripts -->
-        <script src="./static/js/other/app-script.js"></script>
-        <script src="./static/js/other/jquery-loader.js"></script>
-        <!--        Main App Module JS      -->
-        <script src="./static/js/app.js"></script>
-        <!--        Constants JS Files      -->
-        <script src="./static/js/constants/constants.js"></script>
-        <!--        Controller JS Files      -->
-        <script src="./static/js/controllers/home-controller.js"></script>
-        <script src="./static/js/controllers/users-controller.js"></script>
-        <script src="./static/js/controllers/books-controller.js"></script>
-        <script src="./static/js/controllers/forums-controller.js"></script>
-        <!--        Directive JS Files      -->
-        <script src="./static/js/directives/equals-directive.js"></script>
-        <script src="./static/js/directives/file-model.js"></script>
-        <script src="./static/js/directives/date-picker.js"></script>
-        <!--        Services JS Files      -->
-        <script src="./static/js/services/book-services.js"></script>
-        <script src="./static/js/services/config-services.js"></script>
-        <script src="./static/js/services/user-services.js"></script>
-        <script src="./static/js/services/forum-services.js"></script>
-        <script src="./static/js/services/google-services.js"></script>
-        <script src="./static/js/services/loader-services.js"></script>
-        <!--        Factories JS Files      -->
-        <script src="./static/js/factories/auth-provider.js"></script>
-        <script src="./static/js/factories/http-interceptor.js"></script>
-        <!--        Filters JS Files      -->
-        <script src="./static/js/filters/date-format-filter.js"></script>
-        <script src="./static/js/filters/name-format-filter.js"></script>
+        <script src="./min/app.js"></script>
     </body>
 </html>

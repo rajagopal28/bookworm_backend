@@ -10,6 +10,8 @@ app.constant('Constants', {
     CONFIRM_ADD_FRIEND : 'Are you sure want to send friend request to this user?',
     CONFIRM_ADD_BOOK : 'Are you sure want to add this book to the list?',
     CONFIRM_EDIT_BOOK : 'Are you sure want to edit this book\'s details?',
+    CONFIRM_ADD_FORUM : 'Are you sure want to add this forum?',
+    CONFIRM_EDIT_FORUM : 'Are you sure want to edit this forum?',
     CONFIRM_BORROW_BOOK : 'Are you sure want to send this borrow request?',
     DEFAULT_POST_ERROR_MESSAGE : 'Problem submitting the details. Please try after sometime!',
     INFO_MESSAGE_AUTO_COMPLETE_FORM_BOOK : ' This form has autocomplete enabled for some fields. Type in \n ISBN or Book name to fill in details.',

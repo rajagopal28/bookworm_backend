@@ -18,7 +18,7 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/users.html',
                     controller: 'UsersController'
                 })
-                .when('/bookworm/auth/users/:username', {
+                .when('/bookworm/auth/users/:identifier', {
                     templateUrl: 'templates/view-user.html',
                     controller: 'UserDetailsController'
                 })
@@ -70,6 +70,22 @@ app.config(['$routeProvider', '$httpProvider',
                     templateUrl: 'templates/new-forum.html',
                     controller: 'NewForumController'
                 })
+                .when('/bookworm/auth/accept-friend-link/:friendId', {
+                    templateUrl: 'templates/welcome.html',
+                    controller: 'HomeController'
+                })
+                .when('/bookworm/auth/my-network', {
+                    templateUrl: 'templates/users.html',
+                    controller: 'NetworkController'
+                })
+                .when('/bookworm/auth/forums', {
+                    templateUrl: 'templates/forums.html',
+                    controller: 'PrivateForumController'
+                })
+                .when('/bookworm/auth/forums/:forumId', {
+                    templateUrl: 'templates/forum-chats.html',
+                    controller: 'PrivateForumChatController'
+                })
                 .when('/bookworm/contact', {
                     templateUrl: 'templates/contact.html',
                     controller: 'HomeController'
@@ -88,13 +104,15 @@ app.config(['$routeProvider', '$httpProvider',
 
             $httpProvider.interceptors.push('BookWormHTTPInterceptor');
         }])
-    .run(['$rootScope', '$location', 'BookwormAuthProvider', function ($rootScope, $location, BookwormAuthProvider) {
+    .run(['$rootScope', '$location', '$localStorage', 'BookwormAuthProvider',
+        function ($rootScope, $location,$localStorage, BookwormAuthProvider) {
         $rootScope.$on('$locationChangeStart', function (event, next, current) {
             // check only for authenticated pages
             if (next && next.indexOf('/bookworm/auth') !== -1) {
                 if (!BookwormAuthProvider.isLoggedIn()) {
                     // console.log('DENY : Redirecting to Login');
                     event.preventDefault();
+                    $localStorage.redirectURL = next.substring(next.indexOf('/bookworm'));
                     $location.path('/bookworm/login');
                 }
                 else {
@@ -110,10 +128,30 @@ app.constant('Constants', {
     SORT_ORDER_DESC : 'desc',
     DEFAULT_SORT_FIELD : 'createdTS',
     DEFAULT_LOCAL_IMAGES_PATH : '../static/images/',
+    DEFAULT_CONFIRMATION_MESSAGE : 'Are you sure want to perform this action?',
+    CONFIRM_REMOVE_FRIEND : 'Are you sure want to remove this user from your network?',
+    CONFIRM_ADD_FRIEND : 'Are you sure want to send friend request to this user?',
+    CONFIRM_ADD_BOOK : 'Are you sure want to add this book to the list?',
+    CONFIRM_EDIT_BOOK : 'Are you sure want to edit this book\'s details?',
+    CONFIRM_ADD_FORUM : 'Are you sure want to add this forum?',
+    CONFIRM_EDIT_FORUM : 'Are you sure want to edit this forum?',
+    CONFIRM_BORROW_BOOK : 'Are you sure want to send this borrow request?',
     DEFAULT_POST_ERROR_MESSAGE : 'Problem submitting the details. Please try after sometime!',
+    INFO_MESSAGE_AUTO_COMPLETE_FORM_BOOK : ' This form has autocomplete enabled for some fields. Type in \n ISBN or Book name to fill in details.',
+    DEFAULT_POST_SUCCESS_MESSAGE : 'Your data has been submitted!',
+    SUCCESS_MESSAGE_PASSWORD_RESET_REQUESTED : ' Your Will receive an email confirmation shortly!!',
+    SUCCESS_MESSAGE_PASSWORD_RESET_SENT : ' Your password has been reset!',
+    SUCCESS_MESSAGE_PASSWORD_REST_DONE : ' Password change successful!!',
+    SUCCESS_MESSAGE_FRIEND_REQUEST_SENT : ' Your request has been sent!',
+    SUCCESS_MESSAGE_FRIEND_ADDED : ' Friend added to your network',
+    SUCCESS_MESSAGE_IMAGE_UPLOADED : 'Your image has been uploaded to the file system. Please click save in update profile to apply it to profile.',
+    SUCCESS_MESSAGE_FEEDBACK_SENT : 'Your feedback have been submitted. Thanks for sharing your good thoughts and supporting BookWorm.',
+    SUCCESS_MESSAGE_BORROW_REQUEST_SENT : 'Your request has been sent to the user. You\'ll receive a direct email response.',
+    INFO_MESSAGE_REGISTRATION_EMAIL : 'Kindly give a valid email ID. \n The current system depends on emails to allow interaction between bookworms.\n We are working on bringing smarter ways of interactions.',
     MESSAGE_USERNAME_AVAILABLE : 'User name available',
     MESSAGE_USERNAME_UNAVAILABLE : 'User name is not available',
     MODAL_SIZE_LARGE : 'l',
+    MODAL_SIZE_SMALL : 's',
     MODAL_DISMISS_RESPONSE : 'cancel',
     DEFAULT_HTTP_TIMEOUT : '1000', // milliseconds
     DEFAULT_MIN_YEAR : 1900,
@@ -141,6 +179,12 @@ app.constant('Constants', {
 
     EVENT_NAME_DATE_SET : 'date-set',
     EVENT_NAME_NEW_CHAT : 'new-chat',
+    MSG_TYPE : {
+        SUCCESS: 'success',
+        ERROR: 'danger',
+        WARN: 'warning',
+        INFO: 'info'
+    },
     getDefaultPagingSortingData : function() {
         var pageSortDefaults = {
             itemsPerPage : this.DEFAULT_ITEMS_PER_PAGE,
@@ -151,137 +195,139 @@ app.constant('Constants', {
         };
         pageSortDefaults.primarySort[this.DEFAULT_SORT_FIELD] = this.SORT_ORDER_ASC;
         return pageSortDefaults;
+    },
+    getPostSuccessMessage: function(successMsg) {
+        return this.getMessage(successMsg? successMsg : this.DEFAULT_POST_SUCCESS_MESSAGE, this.MSG_TYPE.SUCCESS);
+    },
+    getPostErrorMessage: function(error) {
+        return this.getMessage(error && error.msg? error.msg : this.DEFAULT_DATA_ERROR_MESSAGE, this.MSG_TYPE.ERROR);
+    },
+    getGetErrorMessage: function(error) {
+        return this.getMessage(error && error.msg? error.msg : this.DEFAULT_DATA_ERROR_MESSAGE, this.MSG_TYPE.ERROR);
+    },
+    getMessage: function( message, type) {
+        return {text: message, type: type};
     }
 });
 app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksService', 'GoogleAPIService',
-    function ($scope, $http, Constants, BooksService, GoogleAPIService) {
-        $scope.search = {};
-        $scope.pageSort = Constants.getDefaultPagingSortingData();
-        // TODO query locations not used
-        $scope.getLocations = function (queryText) {
-            // console.log(queryText);
-            return GoogleAPIService.getAddresses({'address': queryText})
-                .then(function (response) {
-                   if(response.data){
-                        // console.log(response);
-                        return response.data.results.map(function (item) {
-                            return item.formatted_address;
-                        });
-                   }
-                    return null;
-                });
-        };
-        $scope.genres = Constants.ALL_BOOK_GENRES;
-        $scope.search.sortAscending = true;
-        $scope.search.isAvailable = true;
-        $scope.genres = [];// ['Drama', 'Mystery'];
-        $scope.search.genres = $scope.genres;
+        function ($scope, $http, Constants, BooksService, GoogleAPIService) {
+            $scope.search = {};
+            $scope.pageSort = Constants.getDefaultPagingSortingData();
+            // TODO query locations not used
+            $scope.getLocations = function (queryText) {
+                // console.log(queryText);
+                return GoogleAPIService.getAddresses({'address': queryText})
+                    .then(function (response) {
+                        if (response.data) {
+                            // console.log(response);
+                            return response.data.results.map(function (item) {
+                                return item.formatted_address;
+                            });
+                        }
+                        return null;
+                    });
+            };
+            $scope.genres = Constants.ALL_BOOK_GENRES;
+            $scope.search.sortAscending = true;
+            $scope.search.isAvailable = true;
+            $scope.genres = [];// ['Drama', 'Mystery'];
+            $scope.search.genres = $scope.genres;
 
-       $scope.pageChanged = function() {
-        var options = $.extend({}, $scope.pageSort);
-        $scope.search.genres = [];
-        for (var index in $scope.genres) {
-            var text = $scope.genres[index].text ? $scope.genres[index].text : $scope.genres[index];
-            $scope.search.genres.push(text);
-        }
-        var sortOrder = $scope.search.sortAscending
-            ? Constants.SORT_ORDER_ASC
-            : Constants.SORT_ORDER_DESC;
-        $scope.pageSort.primarySort = {'lendDate' : sortOrder};
-        $scope.search = $.extend($scope.search, $scope.pageSort);
-        // console.log($scope.search);
-        BooksService.rentalBooks($scope.search)
-           .then(function (response) {
-              // console.log(response.data);
-               $scope.availableBooks = response.data.items;
-               $scope.pageSort.totalItems = response.data.totalItems;
-           });
-        };
-        // console.log($scope.availableBooks);
-        $scope.searchBooks = function () {
-            $scope.pageChanged();
-        };
-        $scope.pageChanged();
-    }])
-    .controller('ViewBookController', ['$scope', '$http','$routeParams', 'Constants', 'BooksService','BookwormAuthProvider',
-    function ($scope, $http, $routeParams, Constants, BooksService, BookwormAuthProvider) {
-        $scope.book = {};
-        $scope.status = {
-            success: false,
-            error: false
-        };
-        var bookId = $routeParams.bookId;
-        BooksService.rentalBooks({id:bookId})
-            .then(function(response){
-                if(response.data && response.data.items){
-                    $scope.bookDataAvailable =  response.data.items.length > 0;
-                    $scope.book = response.data.items[0];
-                    $scope.book.authorName = $scope.book.authorName.join(', ');
+            $scope.pageChanged = function () {
+                var options = $.extend({}, $scope.pageSort);
+                $scope.search.genres = [];
+                for (var index in $scope.genres) {
+                    var text = $scope.genres[index].text ? $scope.genres[index].text : $scope.genres[index];
+                    $scope.search.genres.push(text);
                 }
-            });
-        $scope.isUserContributor = function() {
-            return $scope.book
-                    && BookwormAuthProvider.isCurrentUser($scope.book.contributor);
-        };
-        $scope.borrowBook = function() {
-            var options = $scope.book;
-            // console.log('Requesting to borrow book');
-            var currentUser = BookwormAuthProvider.getUser();
-            if(options && currentUser && currentUser.username){
-               options.borrowerName = currentUser.username;
-               // console.log(options);
-               BooksService
-                .requestBook(options)
-                .then(function(response) {
-                    // console.log(response);
-                    if (response.data.success) {
-                        $scope.status.success = true;
-                        $scope.status.error = false;
-                    } else {
-                        $scope.status.error = true;
-                        $scope.status.success = false;
+                var sortOrder = $scope.search.sortAscending
+                    ? Constants.SORT_ORDER_ASC
+                    : Constants.SORT_ORDER_DESC;
+                $scope.pageSort.primarySort = {'lendDate': sortOrder};
+                $scope.search = $.extend($scope.search, $scope.pageSort);
+                // console.log($scope.search);
+                BooksService.rentalBooks($scope.search)
+                    .then(function (response) {
+                        // console.log(response.data);
+                        $scope.availableBooks = response.data.items;
+                        $scope.pageSort.totalItems = response.data.totalItems;
+                    });
+            };
+            // console.log($scope.availableBooks);
+            $scope.searchBooks = function () {
+                $scope.pageChanged();
+            };
+            $scope.pageChanged();
+        }])
+    .controller('ViewBookController', ['$scope', '$http', '$routeParams', '$uibModal', 'Constants', 'BooksService', 'BookwormAuthProvider',
+        function ($scope, $http, $routeParams, $uibModal, Constants, BooksService, BookwormAuthProvider) {
+            $scope.book = {};
+            $scope.messages = [];
+            var bookId = $routeParams.bookId;
+            BooksService.rentalBooks({id: bookId})
+                .then(function (response) {
+                    if (response.data && response.data.items) {
+                        $scope.bookDataAvailable = response.data.items.length > 0;
+                        $scope.book = response.data.items[0];
+                        $scope.book.authorName = $scope.book.authorName.join(', ');
                     }
                 });
-            }
-        };
-        $scope.dismissAlert = function() {
-            $scope.status.success = false;
-            $scope.status.error = false;
-        };
-        $scope.isLoggedIn = function() {
-          return BookwormAuthProvider.isLoggedIn();
-        };
-    }])
-    .controller('LendBookController', ['$scope', '$routeParams', '$http', 'Constants', 'ConfigService', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
-        function ($scope, $routeParams, $http, Constants, ConfigService, BooksService, BookwormAuthProvider, GoogleAPIService) {
-            $scope.book = {};
-            $scope.status = {
-                success: false,
-                error: false
+            $scope.isUserContributor = function () {
+                return $scope.book
+                    && BookwormAuthProvider.isCurrentUser($scope.book.contributor);
             };
+            $scope.borrowBook = function () {
+                showConfirmationModal($uibModal, Constants.CONFIRM_BORROW_BOOK, function() {
+                    var options = $scope.book;
+                    // console.log('Requesting to borrow book');
+                    var currentUser = BookwormAuthProvider.getUser();
+                    if (options && currentUser && currentUser.username) {
+                        options.borrowerName = currentUser.username;
+                        // console.log(options);
+                        BooksService
+                            .requestBook(options)
+                            .then(function (response) {
+                                // console.log(response);
+                                if (response.data.success) {
+                                    $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_BORROW_REQUEST_SENT));
+                                } else {
+                                    $scope.messages.push(Constants.getPostErrorMessage());
+                                }
+                            });
+                    }
+                });
+            };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+        }])
+    .controller('LendBookController', ['$scope', '$routeParams', '$http', '$uibModal', 'Constants', 'ConfigService', 'BooksService', 'BookwormAuthProvider', 'GoogleAPIService',
+        function ($scope, $routeParams, $http, $uibModal, Constants, ConfigService, BooksService, BookwormAuthProvider, GoogleAPIService) {
+            $scope.book = {};
+            $scope.messages = [];
+            $scope.messages.push(Constants.getMessage(Constants.INFO_MESSAGE_AUTO_COMPLETE_FORM_BOOK, Constants.MSG_TYPE.INFO));
             var noImageURL;
             ConfigService.getConfig()
-                .then(function(response){
-                    if(response.data && response.data) {
+                .then(function (response) {
+                    if (response.data && response.data) {
                         noImageURL = response.data.noImageURL;
                         $scope.book.thumbnailURL = noImageURL;
                     }
                 });
 
             var currentUser = BookwormAuthProvider.getUser();
-            var contributor = {};
-            if(currentUser) {
-                contributor = {
-                    authorName : currentUser.authorName,
-                    username : currentUser.username,
-                    thumbnailURL : currentUser.thumbnailURL
-                };
+            var contributor;
+            if (currentUser) {
+                contributor = currentUser.id;
             }
             var bookId = $routeParams.bookId;
-            if(bookId) {
-                BooksService.rentalBooks({id:bookId})
-                    .then(function(response){
-                        if(response.data && response.data.items){
+            if (bookId) {
+                BooksService.rentalBooks({id: bookId})
+                    .then(function (response) {
+                        if (response.data && response.data.items) {
                             $scope.book = response.data.items[0];
                             $scope.book.genresList = $scope.book.genres;
                             $scope.book.authorName = $scope.book.authorName.join(', ');
@@ -290,29 +336,30 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                         }
                     });
             }
-            $scope.isEditMode = function() {
-              return bookId && bookId.trim() !== '';
+            $scope.isEditMode = function () {
+                return bookId && bookId.trim() !== '';
             };
-            $scope.editBook = function() {
-              BooksService.editBook($scope.book)
-                    .then(function (response) {
-                        // console.log(response);
-                        if (response.success) {
-                            $scope.status.success = true;
-                            $scope.status.error = false;
-                        } else {
-                            $scope.status.error = true;
-                            $scope.status.success = false;
-                        }
-                    });
+            $scope.editBook = function () {
+                showConfirmationModal($uibModal, Constants.CONFIRM_EDIT_BOOK, function() {
+                    BooksService.editBook($scope.book)
+                        .then(function (response) {
+                            // console.log(response);
+                            if (response.data.success) {
+                                $scope.messages.push(Constants.getPostSuccessMessage());
+                            } else {
+                                $scope.messages.push(Constants.getPostErrorMessage());
+                            }
+                        });
+                });
             };
             $scope.loadBookDetails = function (searchText) {
                 var isbn = $scope.book.isbn;
                 // console.log("isbn=" + isbn);
                 // console.log("searchText=" + searchText);
+                var options = {};
                 if (!isNaN(isbn) && !(searchText && searchText.length)) {
                     if (Constants.GOOGLE_BOOK_VALID_ISBN_LENGTHS.indexOf(isbn.length) != -1) {
-                        var options = {
+                        options = {
                             q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_ISBN + isbn,
                             maxResults: Constants.GOOGLE_BOOKS_SEARCH_MAX_RESULTS
                         };
@@ -328,7 +375,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                     var newSearch = searchText.split(" ").join("+");
                     //  console.log('In else block');
                     //  console.log(newSearch);
-                    var options = {
+                    options = {
                         q: Constants.GOOGLE_BOOKS_SEARCH_PARAM_IN_TITLE + newSearch,
                         maxResults: Constants.GOOGLE_BOOKS_SEARCH_MAX_RESULTS
                     };
@@ -357,7 +404,7 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
             };
             $scope.lendBook = function () {
                 // console.log($scope.book);
-                if(!$scope.book.thumbnailURL) {
+                if (!$scope.book.thumbnailURL) {
                     $scope.book.thumbnailURL = noImageURL;
                 }
                 $scope.book.genres = [];
@@ -366,171 +413,292 @@ app.controller('BorrowBooksController', ['$scope', '$http', 'Constants', 'BooksS
                     $scope.book.genres.push(item.text);
                 }
                 $scope.book.contributor = contributor;
-                BooksService.lendBook($scope.book)
-                    .then(function (response) {
-                        // console.log(response);
-                        if (response.data.success) {
-                            $scope.status.success = true;
-                            $scope.status.error = false;
-                            $scope.book = {};
-                        } else {
-                            $scope.status.error = true;
-                            $scope.status.success = false;
-                        }
-                    });
+                showConfirmationModal($uibModal, Constants.CONFIRM_ADD_BOOK, function() {
+                    BooksService.lendBook($scope.book)
+                        .then(function (response) {
+                            // console.log(response);
+                            if (response.data.success) {
+                                $scope.messages.push(Constants.getPostSuccessMessage());
+                                $scope.book = {};
+                            } else {
+                                $scope.messages.push(Constants.getPostErrorMessage());
+                            }
+                        });
+                });
+            };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
             };
         }]);
 // ForumController
 app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'BookwormAuthProvider',
-    function ($scope, ForumsService, Constants, BookwormAuthProvider) {
-        $scope.status = {};
-        $scope.forums = [];
-        $scope.pageSort = Constants.getDefaultPagingSortingData();
-        $scope.pageChanged = function() {
-            var options = $scope.pageSort;
-            ForumsService.allForums(options)
-                .then(function (response) {
-                    $scope.status = {};
-                    $scope.forums = response.data.items;
-                    if($scope.forums && $scope.forums.length) {
-                        $scope.status[$scope.forums[0].id] = {open :true};
-                        // always open first one
-                    }
-                    $scope.pageSort.totalItems = response.data.totalItems;
-                    // console.log($scope.pageSort);
-                });
-        };
-        $scope.isLoggedIn = function () {
-          return BookwormAuthProvider.isLoggedIn();
-        };
-        // make service call to get list of forums
-        $scope.isCreatorAuthor = function (forum) {
-            return BookwormAuthProvider.isCurrentUser(forum.author);
-        };
-        $scope.pageChanged();
-    }])
-    .controller('ForumChatController', ['$scope', '$routeParams','Constants', 'ForumsService', 'BookwormAuthProvider',
-    function ($scope, $routeParams,Constants, ForumsService, BookwormAuthProvider) {
-        var forumId = $routeParams.forumId;
-        // console.log(forumId);
-        $scope.newChat = {};
-        $scope.loggedTime = new Date();
-        $scope.currentUser = BookwormAuthProvider.getUser();
-        $scope.isUserForumOwner = function() {
-            return $scope.forum && BookwormAuthProvider.isCurrentUser($scope.forum.author);
-        };
-        $scope.isCommentatorAuthor = function (chatItem) {
-            return BookwormAuthProvider.isCurrentUser(chatItem.author);
-        };
-        $scope.isLoggedIn = function () {
-          return BookwormAuthProvider.isLoggedIn();
-        };
-        var pageSort = Constants.getDefaultPagingSortingData();
-        $scope.addChat = function () {
-            if($scope.newChat.chatComment
-                && $scope.newChat.chatComment.trim() !== '') {
-                var options = $.extend({}, pageSort);
-                options.forumId = forumId;
-                options.chatComment = $scope.newChat.chatComment;
-                var authorInfo = ForumsService.getCurrentAuthorInfo();
-                if (authorInfo) {
-                    options.author = authorInfo;
-                }
-                ForumsService.addChat(options)
+        function ($scope, ForumsService, Constants, BookwormAuthProvider) {
+            $scope.status = {};
+            $scope.forums = [];
+            $scope.pageSort = Constants.getDefaultPagingSortingData();
+            $scope.pageChanged = function () {
+                var options = $scope.pageSort;
+                ForumsService.allForums(options)
                     .then(function (response) {
-                        // console.log(response);
-                        //$scope.forumChats.push(options);
-                        $scope.newChat.chatComment = '';
+                        $scope.status = {};
+                        $scope.forums = response.data.items;
+                        if ($scope.forums && $scope.forums.length) {
+                            $scope.status[$scope.forums[0].id] = {open: true};
+                            // always open first one
+                        }
+                        $scope.pageSort.totalItems = response.data.totalItems;
+                        // console.log($scope.pageSort);
                     });
-            }
-        };
-        $scope.forum = {};
-        $scope.forumChats = [];
-        // make service call to get list of forum chats
-        var options = {id: forumId};
-        ForumsService.allChats(options).then(
-            function (response) {
-                if (response.data) {
-                    $scope.forum = response.data;
-                    $scope.forumChats = response.data.chats;
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            // make service call to get list of forums
+            $scope.isCreatorAuthor = function (forum) {
+                return BookwormAuthProvider.isCurrentUser(forum.author);
+            };
+            $scope.pageChanged();
+        }])
+    .controller('PrivateForumController', ['$scope', 'ForumsService', 'Constants', 'BookwormAuthProvider',
+        function ($scope, ForumsService, Constants, BookwormAuthProvider) {
+            $scope.status = {};
+            $scope.forums = [];
+            $scope.isPrivate = true;
+            $scope.pageSort = Constants.getDefaultPagingSortingData();
+            $scope.pageChanged = function () {
+                if (BookwormAuthProvider.isLoggedIn()) {
+                    var authUser = BookwormAuthProvider.getUser();
+                    var options = $scope.pageSort;
+                    options.id = authUser.id;
+                    ForumsService.getPrivateForums(options)
+                        .then(function (response) {
+                            $scope.status = {};
+                            $scope.forums = response.data.items;
+                            if ($scope.forums && $scope.forums.length) {
+                                $scope.status[$scope.forums[0].id] = {open: true};
+                                // always open first one
+                            }
+                            $scope.pageSort.totalItems = response.data.totalItems;
+                            // console.log($scope.pageSort);
+                        });
+                }
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            // make service call to get list of forums
+            $scope.isCreatorAuthor = function (forum) {
+                return BookwormAuthProvider.isCurrentUser(forum.author);
+            };
+            $scope.pageChanged();
+        }])
+    .controller('ForumChatController', ['$scope', '$routeParams', 'Constants', 'ForumsService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, Constants, ForumsService, BookwormAuthProvider) {
+            var forumId = $routeParams.forumId;
+            // console.log(forumId);
+            $scope.newChat = {};
+            $scope.messages = [];
+            $scope.loggedTime = new Date();
+            $scope.currentUser = BookwormAuthProvider.getUser();
+            $scope.isUserForumOwner = function () {
+                return $scope.forum && BookwormAuthProvider.isCurrentUser($scope.forum.author);
+            };
+            $scope.isCommentatorAuthor = function (chatItem) {
+                return BookwormAuthProvider.isCurrentUser(chatItem.author);
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            var pageSort = Constants.getDefaultPagingSortingData();
+            $scope.addChat = function () {
+                if ($scope.newChat.chatComment
+                    && $scope.newChat.chatComment.trim() !== '') {
+                    var options = $.extend({}, pageSort);
+                    options.forumId = forumId;
+                    options.chatComment = $scope.newChat.chatComment;
+                    var authorInfo = BookwormAuthProvider.getUser();
+                    if (authorInfo) {
+                        options.author = authorInfo;
+                        // send author info so as to get it while receiving on socket broadcast
+                    }
+                    ForumsService.addChat(options)
+                        .then(function (response) {
+                            // console.log(response);
+                            $scope.newChat.chatComment = '';
+                        }, function (error) {
+                            $scope.messages.push(Constants.getPostErrorMessage(error));
+                        });
+                }
+            };
+            $scope.forum = {};
+            $scope.forumChats = [];
+            // make service call to get list of forum chats
+            var options = {id: forumId};
+            ForumsService.allChats(options).then(
+                function (response) {
+                    if (response.data
+                        && response.data.success) {
+                        $scope.forum = response.data.item;
+                        $scope.forumChats = response.data.item.chats;
+                    }
+                }, function (error) {
+                    $scope.messages.push(Constants.getGetErrorMessage(error));
+                });
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+            socket.on(Constants.EVENT_NAME_NEW_CHAT, function (chatInfo) {
+                // console.log('choot');
+                // console.log(chatInfo);
+                if (chatInfo.forumId === forumId) {
+                    $scope.forumChats.push(chatInfo.chat);
                 }
             });
-        socket.on(Constants.EVENT_NAME_NEW_CHAT, function (chatInfo) {
-            // console.log('choot');
-            // console.log(chatInfo);
-            if (chatInfo.forumId === forumId) {
-                $scope.forumChats.push(chatInfo.chat);
-            }
-        });
-    }])
-    .controller('NewForumController', ['$scope', '$routeParams', 'Constants', 'ForumsService', 'BooksService', 'GoogleAPIService', 'BookwormAuthProvider',
-        function ($scope, $routeParams, Constants, ForumsService, BooksService, GoogleAPIService, BookwormAuthProvider) {
-            $scope.book = {};
-            $scope.forum = {};
+        }])
+    .controller('PrivateForumChatController', ['$scope', '$routeParams', 'Constants', 'ForumsService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, Constants, ForumsService, BookwormAuthProvider) {
             var forumId = $routeParams.forumId;
-            $scope.status = {success : false, error: false};
-            $scope.isLoggedIn = function () {
-              return BookwormAuthProvider.isLoggedIn();
+            // console.log(forumId);
+            $scope.newChat = {};
+            $scope.isPrivate = true;
+            $scope.loggedTime = new Date();
+            $scope.currentUser = BookwormAuthProvider.getUser();
+            $scope.isUserForumOwner = function () {
+                return $scope.forum && BookwormAuthProvider.isCurrentUser($scope.forum.author);
             };
-            if(forumId) {
+            $scope.isCommentatorAuthor = function (chatItem) {
+                return BookwormAuthProvider.isCurrentUser(chatItem.author);
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            var pageSort = Constants.getDefaultPagingSortingData();
+            $scope.addChat = function () {
+                if ($scope.newChat.chatComment
+                    && $scope.newChat.chatComment.trim() !== '') {
+                    var options = $.extend({}, pageSort);
+                    options.forumId = forumId;
+                    options.chatComment = $scope.newChat.chatComment;
+                    var authorInfo = BookwormAuthProvider.getUser();
+                    if (authorInfo) {
+                        options.author = authorInfo;
+                        options.id = authorInfo.id;
+                        console.log(options);
+                        // send author info so as to get it while receiving on socket broadcast
+                        ForumsService.addPrivateChat(options)
+                            .then(function (response) {
+                                // console.log(response);
+                                //$scope.forumChats.push(options);
+                                $scope.newChat.chatComment = '';
+                            });
+                    }
+                }
+            };
+            $scope.forum = {};
+            $scope.forumChats = [];
+            // make service call to get list of forum chats
+            if (BookwormAuthProvider.isLoggedIn()) {
+                var authUser = BookwormAuthProvider.getUser();
+                var options = {forumId: forumId, id: authUser.id};
+                ForumsService.allPrivateChats(options)
+                    .then(function (response) {
+                        if (response.data
+                            && response.data.success) {
+                            $scope.forum = response.data.item;
+                            $scope.forumChats = response.data.item.chats;
+                        }
+                    });
+            }
+            socket.on(Constants.EVENT_NAME_NEW_CHAT, function (chatInfo) {
+                // console.log('choot');
+                // console.log(chatInfo);
+                if (chatInfo.forumId === forumId) {
+                    $scope.forumChats.push(chatInfo.chat);
+                }
+            });
+        }])
+    .controller('NewForumController', ['$scope', '$routeParams', '$uibModal', 'Constants', 'ForumsService', 'BooksService', 'UsersService', 'GoogleAPIService', 'BookwormAuthProvider', 'formatUserNameFilter',
+        function ($scope, $routeParams, $uibModal, Constants, ForumsService, BooksService, UsersService, GoogleAPIService, BookwormAuthProvider, formatUserName) {
+            $scope.book = {};
+            $scope.selectedUser = {};
+            $scope.forum = {};
+            $scope.visibleToUsers = [];
+            var forumId = $routeParams.forumId;
+            $scope.messages = [];
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            if (forumId) {
                 var options = Constants.getDefaultPagingSortingData();
                 options.id = forumId;
                 ForumsService
                     .allForums(options)
-                    .then(function(response){
-                        if(response.data && response.data.items){
+                    .then(function (response) {
+                        if (response.data && response.data.items) {
                             $scope.forum = response.data.items[0];
-                            if($scope.forum && $scope.forum.referredBook) {
-                                $scope.book = $scope.forum.referredBook;
+                            if ($scope.forum) {
+                                if ($scope.forum.referredBook) {
+                                    $scope.book = $scope.forum.referredBook;
+                                }
+                                if ($scope.forum.visibleTo) {
+                                    $scope.visibleToUsers = $scope.forum.visibleTo;
+                                }
                             }
+                        } else {
+                            $scope.messages.push(Constants.getGetErrorMessage());
                         }
+                    }, function (error) {
+                        $scope.messages.push(Constants.getGetErrorMessage(error));
                     });
             }
-            $scope.isEditMode = function() {
+            $scope.isEditMode = function () {
                 return forumId && forumId.trim() !== '';
             };
-            $scope.updateForum = function() {
+            $scope.updateForum = function () {
                 $scope.forum.referredBook = $scope.book;
-                var authorInfo = ForumsService.getCurrentAuthorInfo();
+                var authorInfo = BookwormAuthProvider.getUser();
                 if (authorInfo) {
-                    $scope.forum.author = authorInfo;
+                    $scope.forum.author = authorInfo.id;
                 }
-                ForumsService
-                    .updateForum($scope.forum)
-                    .then(function(response) {
-                        if (response && response.data) {
-                            if (response.data.success) {
-                                $scope.status.success = true;
-                                $scope.status.error = false;
-                            } else {
-                                $scope.status.error = true;
-                                $scope.status.success = false;
+                showConfirmationModal($uibModal, Constants.CONFIRM_EDIT_FORUM, function () {
+                    ForumsService
+                        .updateForum($scope.forum)
+                        .then(function (response) {
+                            if (response && response.data) {
+                                if (response.data.success) {
+                                    $scope.messages.push(Constants.getPostSuccessMessage());
+                                } else {
+                                    $scope.messages.push(Constants.getGetErrorMessage());
+                                }
                             }
-                        }
-                    });
+                        });
+                });
             };
             $scope.addForum = function () {
                 $scope.forum.referredBook = $scope.book;
-                var authorInfo = ForumsService.getCurrentAuthorInfo();
-                if (authorInfo) {
-                    $scope.forum.author = authorInfo;
-                }
-                // console.log($scope.forum);
-                ForumsService
-                    .addForum($scope.forum)
-                    .then(function(response) {
-                        if (response && response.data) {
-                            if (response.data.success) {
-                                $scope.status.success = true;
-                                $scope.status.error = false;
-                                $scope.book = {};
-                                $scope.forum = {};
-                            } else {
-                                $scope.status.error = true;
-                                $scope.status.success = false;
-                            }
-                        }
+                var authorInfo = BookwormAuthProvider.getUser();
+                if (authorInfo && authorInfo.id) {
+                    $scope.forum.author = authorInfo.id;
+                    $scope.forum.visibleTo = $scope.visibleToUsers.map(function (item) {
+                        return item.id;
                     });
+                    // console.log($scope.forum);
+                    showConfirmationModal($uibModal, Constants.CONFIRM_ADD_FORUM, function () {
+                        ForumsService
+                            .addForum($scope.forum)
+                            .then(function (response) {
+                                if (response && response.data) {
+                                    if (response.data.success) {
+                                        $scope.messages.push(Constants.getPostSuccessMessage());
+                                        $scope.book = {};
+                                        $scope.forum = {};
+                                    } else {
+                                        $scope.messages.push(Constants.getPostSuccessMessage());
+                                    }
+                                }
+                            });
+                    });
+                }
             };
             $scope.loadBookDetails = function (searchText) {
                 // console.log("searchText=" + searchText);
@@ -552,9 +720,19 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                         });
                 }
             };
-            $scope.dismissAlert = function() {
-                $scope.status.success = false;
-                $scope.status.error = false;
+            $scope.loadUsersList = function (searchText) {
+                var userInfo = BookwormAuthProvider.getUser();
+                var options = Constants.getDefaultPagingSortingData();
+                options.id = userInfo.id;
+                options.query = searchText;
+                return UsersService.getUsersInNetwork(options)
+                    .then(function (response) {
+                        //  console.log(response);
+                        return response.data.items;
+                    });
+            };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
             };
             $scope.onBookSelect = function ($item, $model, $label) {
                 $scope.book = $item;
@@ -562,10 +740,25 @@ app.controller('ForumController', ['$scope', 'ForumsService', 'Constants', 'Book
                 // console.log($model);
                 // console.log($label);
             };
-    }]);
+            $scope.onUserSelect = function ($item, $model, $label) {
+                var temp = $scope.visibleToUsers.filter(function (pivot) {
+                    return pivot.id == $item.id;
+                });
+                if (temp.length === 0) {
+                    $scope.visibleToUsers.push($item);
+                }
+                // console.log($item);
+                // console.log($model);
+                // console.log($label);
+            };
+            $scope.removeUser = function (indexToRemove) {
+                $scope.visibleToUsers.splice(indexToRemove, 1);
+            };
+        }]);
 // HomeController
-app.controller('HomeController', ['$scope', '$location', 'UsersService', 'BookwormAuthProvider',
-    function ($scope, $location, UsersService, BookwormAuthProvider)  {
+app.controller('HomeController', ['$scope', '$routeParams', '$location', 'Constants', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter','formatUserNameFilter',
+    function ($scope, $routeParams, $location, Constants, UsersService, BookwormAuthProvider, formatUserName)  {
+        $scope.messages = [];
         $scope.tabs = [{
             title : 'BookWorm',
             template :'./templates/about-site.html',
@@ -577,13 +770,34 @@ app.controller('HomeController', ['$scope', '$location', 'UsersService', 'Bookwo
         $scope.loginPopup = function () {
             // console.log('Login');
         };
+
+        var friendId = $routeParams.friendId;
+        if(friendId
+            && friendId.trim() !== ''
+            && BookwormAuthProvider.isLoggedIn()) {
+            var currentUser = BookwormAuthProvider.getUser();
+            currentUser.friendId = friendId;
+            UsersService.acceptFriendRequest(currentUser)
+                .then(function (response) {
+                    if(response.data.success) {
+                        $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FRIEND_ADDED));
+                    }
+                    $scope.user = {};
+                }, function (error) {
+                    $scope.messages.push(Constants.getGetErrorMessage(error));
+                });
+        }
+
+        $scope.dismissAlert = function (index) {
+            $scope.messages.splice(index, 1);
+        };
         $scope.isLoggedIn = function () {
             return BookwormAuthProvider.isLoggedIn();
         };
         $scope.getDisplayName = function() {
           var user = BookwormAuthProvider.getUser();
-            if (user && user.authorName) {
-                return user.authorName;
+            if (user) {
+                return formatUserName(user);
             }
         };
          $scope.getUserName = function() {
@@ -602,381 +816,419 @@ app.controller('HomeController', ['$scope', '$location', 'UsersService', 'Bookwo
             UsersService.logout();
             $location.path('/bookworm/home');
         };
+}])
+.controller('ConfirmationModalCtrl', ['$scope','$uibModalInstance', 'Constants', 'message',
+    function ($scope, $uibModalInstance, Constants, message) {
+        $scope.message = (message && message.message) ? message.message : Constants.DEFAULT_CONFIRMATION_MESSAGE;
+        $scope.ok = function() {
+            $uibModalInstance.close();
+        };
+        $scope.cancel = function() {
+            $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
+        };
 }]);
+
 app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibModal', 'Constants', 'ConfigService', 'UsersService', 'BookwormAuthProvider',
-    function ($scope, $routeParams, $uibModal, Constants, ConfigService, UsersService, BookwormAuthProvider) {
-        $scope.user = {};
-        var userId = $routeParams.userId;
-        $scope.user.gender = Constants.PARAM_VALUE_GENDER_MALE;
-        $scope.user.dob = new Date();
-        $scope.$on(Constants.EVENT_NAME_DATE_SET, function (event, args) {
-            // console.log(args);
-            // console.log('recieving date-set');
-            $scope.user.dob = args.selectedDate;
-        });
-        var noMaleImageURL, noFemaleImageURL, imagePath;
-        ConfigService.getConfig()
-            .then(function(response){
-                if(response.data && response.data) {
-                    noMaleImageURL = response.data.noMaleImageURL;
-                    noFemaleImageURL = response.data.noFemaleImageURL;
-                    imagePath = response.data.imagesDirectory
-                                    ? response.data.imagesDirectory
-                                    : Constants.DEFAULT_LOCAL_IMAGES_PATH;
+        function ($scope, $routeParams, $uibModal, Constants, ConfigService, UsersService, BookwormAuthProvider) {
+            $scope.user = {};
+            var userId = $routeParams.userId;
+            $scope.messages = [];
+            $scope.messages.push(Constants.getMessage(Constants.INFO_MESSAGE_REGISTRATION_EMAIL, Constants.MSG_TYPE.INFO));
+            $scope.user.gender = Constants.PARAM_VALUE_GENDER_MALE;
+            $scope.user.dob = new Date();
+            $scope.$on(Constants.EVENT_NAME_DATE_SET, function (event, args) {
+                // console.log(args);
+                // console.log('recieving date-set');
+                $scope.user.dob = args.selectedDate;
+            });
+            var noMaleImageURL, noFemaleImageURL, imagePath;
+            ConfigService.getConfig()
+                .then(function (response) {
+                    if (response.data && response.data) {
+                        noMaleImageURL = response.data.noMaleImageURL;
+                        noFemaleImageURL = response.data.noFemaleImageURL;
+                        imagePath = response.data.imagesDirectory
+                            ? response.data.imagesDirectory
+                            : Constants.DEFAULT_LOCAL_IMAGES_PATH;
+                        $scope.user.thumbnailURL = noMaleImageURL;
+                    }
+                });
+
+            $scope.genderChange = function () {
+                if (!$scope.user.thumbnailURL) {
+                    $scope.user.thumbnailURL = $scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE ? noMaleImageURL : noFemaleImageURL;
+                }
+                if ($scope.user.gender === Constants.PARAM_VALUE_GENDER_FEMALE
+                    && $scope.user.thumbnailURL === noMaleImageURL) {
+                    $scope.user.thumbnailURL = noFemaleImageURL;
+                } else if ($scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE
+                    && $scope.user.thumbnailURL === noFemaleImageURL) {
                     $scope.user.thumbnailURL = noMaleImageURL;
                 }
-            });
-
-        $scope.status = {
-            success: false,
-            warn: false,
-            error: false
-        };
-        $scope.genderChange = function() {
-            if(!$scope.user.thumbnailURL){
-                $scope.user.thumbnailURL = $scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE? noMaleImageURL : noFemaleImageURL;
-            }
-            if($scope.user.gender === Constants.PARAM_VALUE_GENDER_FEMALE
-                && $scope.user.thumbnailURL === noMaleImageURL) {
-                $scope.user.thumbnailURL = noFemaleImageURL;
-            } else if ($scope.user.gender === Constants.PARAM_VALUE_GENDER_MALE
-                 && $scope.user.thumbnailURL === noFemaleImageURL){
-                $scope.user.thumbnailURL = noMaleImageURL;
-            }
-        };
-        $scope.isEditMode = function() {
-            return userId && userId.trim() !== '';
-        };
-        if($scope.isEditMode()){
-            var options = Constants.getDefaultPagingSortingData();
-            options.id = userId;
-            UsersService.getUsers(options)
-                .then(function(response){
-                    if(response.data && response.data.items) {
-                        $scope.user = response.data.items[0];
-                    }
-                });
-        }
-        $scope.isUserContributor = function() {
-          return BookwormAuthProvider.isCurrentUser($scope.user);
-        };
-        $scope.isLoggedIn = function() {
-          return BookwormAuthProvider.isLoggedIn();
-        };
-        $scope.update = function () {
-            // console.log($scope.user);
-            UsersService.updateProfile($scope.user)
-                .then(function (response) {
-                    $scope.status.success = true;
-                    $scope.status.error = false;
-                    BookwormAuthProvider.updateUser($scope.user);
-                }, function (error) {
-                    $scope.status.error = true;
-                    $scope.status.success = false;
-                });
-
-        };
-        $scope.signup = function () {
-            // console.log($scope.user);
-            UsersService.registerUser($scope.user)
-                .then(function (response) {
-                    $scope.status.success = true;
-                    $scope.status.error = false;
-                    $scope.user = {};
-                }, function (error) {
-                    $scope.status.error = true;
-                    $scope.status.success = false;
-                });
-
-        };
-
-        $scope.checkUsername = function () {
-            UsersService.usernameUnique($scope.user)
-                .then(function (response) {
-                    // console.log(response);
-                    if (response.data) {
-                        $scope.user.isUsernameAvailable = response.data.isUsernameAvailable;
-                        if (response.data.isUsernameAvailable) {
-                            $scope.user.customMessage = Constants.MESSAGE_USERNAME_AVAILABLE;
-                        } else {
-                            $scope.user.customMessage = Constants.MESSAGE_USERNAME_UNAVAILABLE;
+            };
+            $scope.isEditMode = function () {
+                return userId && userId.trim() !== '';
+            };
+            if ($scope.isEditMode()) {
+                var options = Constants.getDefaultPagingSortingData();
+                options.id = userId;
+                UsersService.getUsers(options)
+                    .then(function (response) {
+                        if (response.data && response.data.items) {
+                            $scope.user = response.data.items[0];
                         }
+                    });
+            }
+            $scope.isUserContributor = function () {
+                return BookwormAuthProvider.isCurrentUser($scope.user);
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
+            $scope.update = function () {
+                // console.log($scope.user);
+                showConfirmationModal($uibModal, Constants.DEFAULT_CONFIRMATION_MESSAGE, function () {
+                    UsersService.updateProfile($scope.user)
+                        .then(function (response) {
+                            $scope.messages.push(Constants.getPostSuccessMessage());
+                            BookwormAuthProvider.updateUser($scope.user);
+                        }, function (error) {
+                            $scope.messages.push(Constants.getGetErrorMessage(error));
+                        });
+                });
+
+            };
+            $scope.signup = function () {
+                showConfirmationModal($uibModal, Constants.DEFAULT_CONFIRMATION_MESSAGE, function () {
+                    // console.log($scope.user);
+                    UsersService.registerUser($scope.user)
+                        .then(function (response) {
+                            $scope.messages.push(Constants.getPostSuccessMessage());
+                            $scope.user = {};
+                        }, function (error) {
+                            $scope.messages.push(Constants.getGetErrorMessage(error));
+                        });
+                });
+            };
+
+            $scope.checkUsername = function () {
+                UsersService.usernameUnique($scope.user)
+                    .then(function (response) {
+                        // console.log(response);
+                        if (response.data) {
+                            $scope.user.isUsernameAvailable = response.data.isUsernameAvailable;
+                            if (response.data.isUsernameAvailable) {
+                                $scope.user.customMessage = Constants.MESSAGE_USERNAME_AVAILABLE;
+                            } else {
+                                $scope.user.customMessage = Constants.MESSAGE_USERNAME_UNAVAILABLE;
+                            }
+                        }
+                    });
+            };
+            $scope.showImageUploadModal = function () {
+                var modalInstance = $uibModal.open({
+                    animation: true,
+                    templateUrl: '../../../templates/image-upload.html',
+                    controller: 'ImageUploadController',
+                    size: Constants.MODAL_SIZE_LARGE,
+                    resolve: {
+                        user: $scope.user
                     }
                 });
-        };
-         $scope.showImageUploadModal = function () {
-            var modalInstance = $uibModal.open({
-                animation: true,
-                templateUrl: '../../../templates/image-upload.html',
-                controller: 'ImageUploadController',
-                size: Constants.MODAL_SIZE_LARGE,
-                resolve: {
-                    user : $scope.user
-                }
-            });
-            modalInstance.result.then(function(result) {
-                // console.log(result);
-                if(result.data
-                    && result.data.success
-                    && result.data.fileAbsolutePath) {
-                    $scope.user.thumbnailURL = result.data.fileAbsolutePath;
-                }
-            });
-        };
-        $scope.dismissAlert = function () {
-            $scope.status.success = false;
-            $scope.status.error = false;
-            $scope.status.warn = false;
-        };
-    }])
-    .controller('UserLoginController', ['$scope', '$routeParams', '$location', '$uibModal', 'Constants', 'UsersService',
-        function ($scope, $routeParams, $location, $uibModal, Constants, UsersService) {
-        $scope.user = {};
-        $scope.status = {error: false, success : false};
-        $scope.dismissMessage = function () {
-            $scope.status.error = false;
-        };
-        var requestToken = $routeParams.requestToken;
-        if(requestToken){
-            $scope.user.token = requestToken;
-            UsersService.verifyAccount($scope.user).then(
-                function (response) {
-                    if (response.data.success) {
-                        $scope.status.error = false;
-                        $scope.status.success = true;
-                    } else {
-                        $scope.errorMessage = response.data.msg ? response.data.msg : Constants.DEFAULT_POST_ERROR_MESSAGE;
-                        $scope.status.error = true;
-                        $scope.status.success = false;
-                    }
-                }, function(error) {
-                    $scope.status.error = true;
-                    $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
-                    $scope.status.success = false;
-            });
-        }
-        $scope.login = function () {
-            UsersService.loginUser($scope.user).then(function (response) {
-                if (response.data) {
-                    if (response.data.authSuccess) {
-                        $scope.status.error = false;
-                        $location.path('/bookworm/home');
-                    } else {
-                        $scope.errorMessage = response.data.msg ? response.data.msg : Constants.ERROR_LOGIN_FAILED;
-                        $scope.status.error = true;
-                        $scope.status.success = false;
-                    }
-                } else {
-                    $scope.status.error = true;
-                    $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
-                    $scope.status.success = false;
-                }
-            });
-        };
-
-        $scope.sendResetPasswordRequest = function() {
-            UsersService.requestResetPassword($scope.user).then(function (response) {
-                    if (response.data.success) {
-                        $scope.status.error = false;
-                        $scope.status.success = true;
-                        $scope.user = {};
-                    } else {
-                        var err = response.data.error;
-                        $scope.errorMessage = err? err : Constants.DEFAULT_POST_ERROR_MESSAGE;
-                        $scope.status.error = true;
-                        $scope.status.success = false;
+                modalInstance.result.then(function (result) {
+                    // console.log(result);
+                    if (result.data
+                        && result.data.success
+                        && result.data.fileAbsolutePath) {
+                        $scope.user.thumbnailURL = result.data.fileAbsolutePath;
                     }
                 });
-        };
+            };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+        }])
+    .controller('UserLoginController', ['$scope', '$routeParams', '$location', '$uibModal', '$localStorage', 'Constants', 'UsersService',
+        function ($scope, $routeParams, $location, $uibModal, $localStorage, Constants, UsersService) {
+            $scope.user = {};
+            $scope.messages = [];
+            var requestToken = $routeParams.requestToken;
+            if (requestToken) {
+                $scope.user.token = requestToken;
+                UsersService.verifyAccount($scope.user).then(
+                    function (response) {
+                        if (response.data.success) {
+                            $scope.messages.push(Constants.getPostSuccessMessage());
+                        } else {
+                            $scope.messages.push(Constants.getPostErrorMessage());
+                        }
+                    }, function (error) {
+                        $scope.messages.push(Constants.getPostErrorMessage(error));
+                    });
+            }
+            $scope.login = function () {
+                UsersService.loginUser($scope.user).then(function (response) {
+                    if (response.data) {
+                        if (response.data.authSuccess) {
+                            if ($localStorage.redirectURL
+                                && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
+                                $location.path($localStorage.redirectURL);
+                                delete $localStorage.redirectURL;
+                            } else {
+                                $location.path('/bookworm/home');
+                            }
+                        } else {
+                            $scope.messages.push(Constants.getPostErrorMessage({msg: Constants.ERROR_LOGIN_FAILED}));
+                        }
+                    } else {
+                        $scope.messages.push(Constants.getPostErrorMessage());
+                    }
+                }, function (error) {
+                    $scope.messages.push(Constants.getPostErrorMessage(error));
+                });
+            };
 
-        $scope.dismissAlert = function () {
-            $scope.status.success = false;
-            $scope.status.error = false;
-        };
-    }])
-    .controller('UsersController', ['$scope','Constants',  'UsersService',
+            $scope.sendResetPasswordRequest = function () {
+                showConfirmationModal($uibModal, Constants.DEFAULT_CONFIRMATION_MESSAGE, function () {
+                    UsersService.requestResetPassword($scope.user).then(function (response) {
+                        if (response.data.success) {
+                            $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_PASSWORD_RESET_REQUESTED));
+                            $scope.user = {};
+                        } else {
+                            $scope.messages.push(Constants.getPostErrorMessage(response.data.error));
+                        }
+                    });
+                });
+            };
+
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+        }])
+    .controller('UsersController', ['$scope', 'Constants', 'UsersService',
         function ($scope, Constants, UsersService) {
             $scope.pageSort = Constants.getDefaultPagingSortingData();
             $scope.users = [];
-            $scope.search = {query : ''};
-            $scope.searchUsers = function() {
+            $scope.search = {query: ''};
+            $scope.searchUsers = function () {
                 var options = $scope.pageSort;
-                if($scope.search.query){
+                if ($scope.search.query) {
                     options.query = $scope.search.query;
                 }
                 UsersService.getUsers(options)
-                    .then(function(response){
-                        if(response.data && response.data.items){
+                    .then(function (response) {
+                        if (response.data && response.data.items) {
                             $scope.users = response.data.items;
                             $scope.pageSort.totalItems = response.data.totalItems;
                         }
                     });
             };
             $scope.searchUsers();
-    }])
-    .controller('UserPasswordController', ['$scope','$routeParams', 'Constants',  'UsersService', 'BookwormAuthProvider',
+        }])
+    .controller('NetworkController', ['$scope', 'Constants', 'UsersService', 'BookwormAuthProvider',
+        function ($scope, Constants, UsersService, BookwormAuthProvider) {
+            $scope.pageSort = Constants.getDefaultPagingSortingData();
+            $scope.users = [];
+            $scope.search = {query: ''};
+            $scope.searchUsers = function () {
+                var options = $scope.pageSort;
+                if ($scope.search.query.trim() != '') {
+                    options.query = $scope.search.query;
+                }
+                if (BookwormAuthProvider.isLoggedIn()) {
+                    var currentUser = BookwormAuthProvider.getUser();
+                    options.id = currentUser.id;
+                    UsersService.getUsersInNetwork(options)
+                        .then(function (response) {
+                            if (response.data && response.data.items) {
+                                $scope.users = response.data.items;
+                                $scope.pageSort.totalItems = response.data.totalItems;
+                            }
+                        });
+                }
+            };
+            $scope.searchUsers();
+        }])
+    .controller('UserPasswordController', ['$scope', '$routeParams', 'Constants', 'UsersService', 'BookwormAuthProvider',
         function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
-            $scope.status = {error: false, success : false};
+            $scope.messages = [];
             $scope.user = BookwormAuthProvider.getUser();
             var requestToken = $routeParams.requestToken;
             $scope.changePassword = function () {
-                if(BookwormAuthProvider.isLoggedIn()) {
+                if (BookwormAuthProvider.isLoggedIn()) {
                     UsersService.updatePassword($scope.user).then(function (response) {
                         if (response.data.success) {
-                            $scope.status.error = false;
-                            $scope.status.success = true;
+                            $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_PASSWORD_REST_DONE));
                             $scope.user = {};
                         } else {
-                            var err = response.data.error;
-                            $scope.errorMessage = err? err : Constants.DEFAULT_POST_ERROR_MESSAGE;
-                            $scope.status.error = true;
-                            $scope.status.success = false;
+                            $scope.messages.push(Constants.getPostErrorMessage(response.data.error));
                         }
                     });
                 }
             };
-            $scope.resetPassword = function() {
-                if(requestToken){
+            $scope.resetPassword = function () {
+                if (requestToken) {
                     $scope.user.token = requestToken;
                     UsersService.resetPassword($scope.user).then(function (response) {
                         if (response.data.success) {
-                            $scope.status.error = false;
-                            $scope.status.success = true;
+                            $scope.messages.push(Constants.getPostSuccessMessage());
                             $scope.user = {};
                         } else {
-                            var err = response.data.error;
-                            $scope.errorMessage = err? err : Constants.DEFAULT_POST_ERROR_MESSAGE;
-                            $scope.status.error = true;
-                            $scope.status.success = false;
+                            $scope.messages.push(Constants.getPostErrorMessage(response.data.error));
                         }
                     });
                 }
 
             };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+        }])
+    .controller('UserDetailsController', ['$scope', '$routeParams', '$uibModal', 'Constants', 'UsersService', 'BookwormAuthProvider',
+        function ($scope, $routeParams, $uibModal, Constants, UsersService, BookwormAuthProvider) {
 
-        $scope.dismissAlert = function () {
-            $scope.status.success = false;
-            $scope.status.error = false;
-        };
-    }])
-    .controller('UserDetailsController', ['$scope','$routeParams','Constants',  'UsersService', 'BookwormAuthProvider',
-        function ($scope, $routeParams, Constants, UsersService, BookwormAuthProvider) {
-
+            $scope.messages = [];
             var options = Constants.getDefaultPagingSortingData();
             $scope.user = {};
-            $scope.isUserContributor = function(){
+            options.identifier = $routeParams.identifier;
+            $scope.isUserContributor = function () {
                 return BookwormAuthProvider.isCurrentUser($scope.user);
             };
-            $scope.isLoggedIn = function() {
-              return BookwormAuthProvider.isLoggedIn();
+            $scope.sendFriendRequest = function () {
+                if (BookwormAuthProvider.isLoggedIn()
+                    && $scope.user
+                    && $scope.user.id) {
+                    showConfirmationModal($uibModal, Constants.CONFIRM_ADD_FRIEND, function () {
+                        var user = BookwormAuthProvider.getUser();
+                        user.friendId = $scope.user.id;
+                        UsersService.sendFriendRequest(user).then(function (response) {
+                            if (response.data.success) {
+                                $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FRIEND_REQUEST_SENT));
+                            } else {
+                                $scope.messages.push(Constants.getPostErrorMessage(response.data.error));
+                            }
+                        });
+                    });
+                }
             };
-            options.username = $routeParams.username;
+            $scope.isUserAlreadyInNetwork = function () {
+                if (BookwormAuthProvider.isLoggedIn()) {
+                    var currentUser = BookwormAuthProvider.getUser();
+                    return $scope.user
+                        && $scope.user.network
+                        && $scope.user.network.indexOf(currentUser.id) !== -1
+                }
+                return false;
+            };
+            $scope.removeUserFromNetwork = function () {
+                if ($scope.isUserAlreadyInNetwork()) {
+                    showConfirmationModal($uibModal, Constants.CONFIRM_REMOVE_FRIEND, function () {
+                        var currentUser = BookwormAuthProvider.getUser();
+                        var request = {id: currentUser.id, friendId: $scope.user.id};
+                        UsersService.removeUserFromNetwork(request)
+                            .then(function (response) {
+                                $scope.messages.push(Constants.getPostSuccessMessage());
+                            });
+                    });
+                }
+            };
+            $scope.isLoggedIn = function () {
+                return BookwormAuthProvider.isLoggedIn();
+            };
             UsersService.getUsers(options)
-                .then(function(response){
-                    if(response.data && response.data.items){
+                .then(function (response) {
+                    if (response.data && response.data.items) {
                         $scope.userDataAvailable = response.data.items.length > 0;
                         $scope.user = response.data.items[0];
                     }
                 });
-    }])
-    .controller('ImageUploadController', ['$scope','$uibModalInstance', '$timeout', 'Constants',  'UsersService', 'BookwormAuthProvider','user',
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+        }])
+    .controller('ImageUploadController', ['$scope', '$uibModalInstance', '$timeout', 'Constants', 'UsersService', 'BookwormAuthProvider', 'user',
         function ($scope, $uibModalInstance, $timeout, Constants, UsersService, BookwormAuthProvider, user) {
             $scope.user = user;
             $scope.profileThumbnail = null;
-            $scope.status = {error: false, success: false};
-            $scope.uploadImage = function() {
+            $scope.messages = [];
+            $scope.uploadImage = function () {
                 var file = $scope.profileThumbnail;
-                if(file && file.size < Constants.MAX_FILE_UPLOAD_LIMIT) {
+                if (file && file.size < Constants.MAX_FILE_UPLOAD_LIMIT) {
                     UsersService
-                    .postImage(file)
-                    .then(function(response){
-                        if(response && response.data){
-                            if(response.data.success) {
-                               $scope.status.error = false;
-                                $scope.status.success = true;
+                        .postImage(file)
+                        .then(function (response) {
+                            if (response.data.success) {
+                                $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_IMAGE_UPLOADED));
                                 $scope.user.thumbnailURL = $scope.user.thumbnailURL !== response.data.fileAbsolutePath
                                     ? response.data.fileAbsolutePath
                                     : response.data.fileAbsolutePath + '?lastmod=' + (new Date()).getTime();
-                                $timeout(function(){
-                                 $uibModalInstance.close(response.data);
+                                $timeout(function () {
+                                    $uibModalInstance.close(response.data);
                                 }, 10000);
                                 $scope.profileThumbnail = null;
                             } else {
-                                 $scope.status.error = true;
-                                $scope.status.success = false;
-                                $scope.errorMessage = response.data.error;
+                                $scope.messages.push(Constants.getPostErrorMessage({msg: response.data.error}));
                             }
-                        } else {
-                            $scope.status.error = true;
-                            $scope.status.success = false;
-                            $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
-                        }
-                    }, function(error) {
-                        if(error) {
-                            $scope.status.error = true;
-                            $scope.status.success = false;
-                            $scope.errorMessage = Constants.DEFAULT_POST_ERROR_MESSAGE;
-                        }
-                    });
-                }
-            };
-            $scope.dismissAlert = function() {
-                $scope.status.error = false;
-                $scope.status.success = false;
-            };
-            $scope.cancel = function() {
-                $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
-            };
-    }])
-    .controller('FeedbackController', ['$scope','Constants',  'UsersService', 'BookwormAuthProvider',
-        function ($scope, Constants, UsersService, BookwormAuthProvider) {
-            $scope.feedback = {feedbackType:'query'};
-            $scope.status = {success : false, error: false};
-            if(BookwormAuthProvider.isLoggedIn()) {
-                var currentUser = BookwormAuthProvider.getUser();
-                if(currentUser && currentUser.username) {
-                    var options = Constants.getDefaultPagingSortingData();
-                    options.username = currentUser.username;
-                    UsersService.getUsers(options)
-                    .then(function(response){
-                        if(response.data && response.data.items){
-                            $scope.feedback = $.extend($scope.feedback, response.data.items[0]);
-                            $scope.feedback.authorName = $scope.feedback.firstName + ' ' + $scope.feedback.lastName;
-                        }
-                    });
-                }
-            }
-            $scope.dismissAlert = function () {
-                $scope.status.error = false;
-                $scope.status.success = false;
-            };
-            $scope.sendFeedback = function() {
-                if($scope.feedback.feedbackComment){
-                    UsersService
-                        .postFeedback($scope.feedback)
-                        .then(function(response){
-                            if(response.data && response.data.success){
-                                $scope.status.error = false;
-                                $scope.status.success = true;
-                            } else {
-                                $scope.status.error = true;
-                                $scope.status.success = false;
+                        }, function (error) {
+                            if (error) {
+                                $scope.messages.push(Constants.getPostErrorMessage(error));
                             }
-                            $scope.feedback.feedbackComment = '';
-                        }, function(error) {
-                            $scope.status.error =  true;
-                            $scope.status.success = false;
-                            $scope.feedback.feedbackComment = '';
                         });
                 }
             };
-
-    }]);
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+            $scope.cancel = function () {
+                $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
+            };
+        }])
+    .controller('FeedbackController', ['$scope', 'Constants', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
+        function ($scope, Constants, UsersService, BookwormAuthProvider, formatUserName) {
+            $scope.feedback = {feedbackType: 'query'};
+            $scope.messages = [];
+            if (BookwormAuthProvider.isLoggedIn()) {
+                var currentUser = BookwormAuthProvider.getUser();
+                if (currentUser && currentUser.username) {
+                    var options = Constants.getDefaultPagingSortingData();
+                    options.username = currentUser.username;
+                    UsersService.getUsers(options)
+                        .then(function (response) {
+                            if (response.data && response.data.items) {
+                                $scope.feedback = $.extend($scope.feedback, response.data.items[0]);
+                                $scope.feedback.authorName = formatUserName($scope.feedback);
+                            }
+                        });
+                }
+            }
+            $scope.sendFeedback = function () {
+                showConfirmationModal($uibModal, Constants.DEFAULT_CONFIRMATION_MESSAGE, function () {
+                    if ($scope.feedback.feedbackComment) {
+                        UsersService
+                            .postFeedback($scope.feedback)
+                            .then(function (response) {
+                                if (response.data && response.data.success) {
+                                    $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FEEDBACK_SENT));
+                                } else {
+                                    $scope.messages.push(Constants.getPostErrorMessage({msg: response.data.error}));
+                                }
+                                $scope.feedback.feedbackComment = '';
+                            }, function (error) {
+                                $scope.messages.push(Constants.getPostErrorMessage(error));
+                                $scope.feedback.feedbackComment = '';
+                            });
+                    }
+                });
+            };
+            $scope.dismissAlert = function (index) {
+                $scope.messages.splice(index, 1);
+            };
+        }]);
 app.directive('datePickerInput', function(){
     return {
         restrict: 'E',
         scope : {
-            initDate : '='
+            dt : '='
         },
         templateUrl : '../../templates/datepicker-input-template.html',
         controller : 'DatepickerCtrl'
@@ -986,11 +1238,6 @@ app.directive('datePickerInput', function(){
             $scope.dt = new Date();
         };
         $scope.status = {};
-        if($scope.initDate) {
-            $scope.dt = $scope.initDate;
-        } else {
-            $scope.today();
-        }
         $scope.clear = function () {
             $scope.dt = null;
         };
@@ -1064,9 +1311,8 @@ app.directive('fileModel', ['$parse', function ($parse) {
            }
         };
      }]);
-      
-app.factory('BookwormAuthProvider', ['$http', '$localStorage',
-    function ($http, $localStorage) {
+app.factory('BookwormAuthProvider', ['$http', '$localStorage', 'formatUserNameFilter',
+    function ($http, $localStorage, formatUserName) {
         function urlBase64Decode(str) {
             var output = str.replace('-', '+').replace('_', '/');
             switch (output.length % 4) {
@@ -1109,9 +1355,12 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
                 && aUser.username === authenticatedUser.username ){
                 var newUser = {
                     authSuccess : authenticatedUser.authSuccess,
-                    authorName : ('' + (aUser.firstName ? aUser.firstName : '') + ' ' + (aUser.lastName ? aUser.lastName : '')).trim(),
+                    authorName : formatUserName(aUser),
+                    firstName : aUser.firstName,
+                    lastName: aUser.lastName,
                     username : aUser.username,
                     thumbnailURL : aUser.thumbnailURL,
+                    id : aUser.id,
                     token : authenticatedUser.token
                 };
                 $localStorage.user = JSON.stringify(newUser);
@@ -1121,6 +1370,11 @@ app.factory('BookwormAuthProvider', ['$http', '$localStorage',
         }
         function setUserFromToken(aUser) {
             $localStorage.token = aUser.token;
+            if(!aUser.authorName
+                && (aUser.firstName
+                    || aUser.lastName)) {
+                aUser.authorName = formatUserName(aUser);
+            }
             $localStorage.user = JSON.stringify(aUser);
             authenticatedUser = aUser;
         }
@@ -1209,6 +1463,17 @@ app.filter('formatDate', [function() {
       return input;
   };
 }]);
+app.filter('formatUserName', [function() {
+  return function(user) {
+      if(!user) {
+          return '';
+      }
+      var fullName = (user.firstName ? user.firstName : '')
+                    + ' '
+                    + (user.lastName ? user.lastName : '') ;
+      return fullName.trim();
+  };
+}]);
 /*
 
  var socket = io.connect('http://localhost:8080',{transports:['websocket']});
@@ -1247,6 +1512,20 @@ pingServer = function (data) {
     });
 
 };
+function showConfirmationModal($uibModal, message, cb) {
+    var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: '../../../templates/confirmation-modal.html',
+        controller: 'ConfirmationModalCtrl',
+        size: 's',
+        resolve: {
+            message: {message : message}
+        }
+    });
+    modalInstance.result.then(function (result) {
+        cb(result);
+    });
+}
 
 /*
  * Jquery Loader插件 中文叫菊花插件
@@ -1520,7 +1799,7 @@ app.service('ConfigService', ['$http', '$q', 'BookwormAuthProvider',
             return promise;
         };
     }]);
-app.service('ForumsService', ['$http', 'Constants', 'BookwormAuthProvider', function ($http, Constants, BookwormAuthProvider) {
+app.service('ForumsService', ['$http', 'Constants', function ($http, Constants) {
     this.addForum = function (options) {
         return $http.post('/bookworm/api/forums/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
     };
@@ -1536,16 +1815,14 @@ app.service('ForumsService', ['$http', 'Constants', 'BookwormAuthProvider', func
     this.addChat = function (options) {
         return $http.post('/bookworm/api/forums/chats/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
     };
-    this.getCurrentAuthorInfo = function(){
-        var currentUser = BookwormAuthProvider.getUser();
-        if(currentUser) {
-            return {
-                authorName : currentUser.authorName,
-                username : currentUser.username,
-                thumbnailURL : currentUser.thumbnailURL
-            };
-        }
-        return null;
+    this.getPrivateForums = function (options) {
+        return $http.get('/bookworm/api/private-forums/all', {params: options});
+    };
+    this.allPrivateChats = function (options) {
+        return $http.get('/bookworm/api/private-forums/chats/all', {params: options});
+    };
+    this.addPrivateChat = function (options) {
+        return $http.post('/bookworm/api/private-forums/chats/add', options, {timeout : Constants.DEFAULT_HTTP_TIMEOUT});
     };
 }]);
 app.service('GoogleAPIService', ['$http', function ($http) {
@@ -1619,6 +1896,9 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         this.getUsers = function(options){
           return $http.get('/bookworm/api/users/all', {params : options}, {timeout: Constants.DEFAULT_HTTP_TIMEOUT});
         };
+        this.getUsersInNetwork = function(options){
+          return $http.get('/bookworm/api/users/network/all', {params : options}, {timeout: Constants.DEFAULT_HTTP_TIMEOUT});
+        };
         this.postImage = function(file){
             var user = BookwormAuthProvider.getUser();
 
@@ -1652,5 +1932,14 @@ app.service('UsersService', ['$http', '$q', '$localStorage', 'Constants', 'Bookw
         };
         this.verifyAccount = function(credentials){
             return $http.post('/bookworm/api/users/verify-account', credentials, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.sendFriendRequest = function(options){
+            return $http.post('/bookworm/api/users/network/send-friend-request', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.acceptFriendRequest = function(options){
+            return $http.post('/bookworm/api/users/network/accept-request', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
+        };
+        this.removeUserFromNetwork = function(options){
+            return $http.post('/bookworm/api/users/network/remove-friend', options, {timeout: Constants.DEFAULT_HTTP_TIMEOUT})
         };
 }]);
