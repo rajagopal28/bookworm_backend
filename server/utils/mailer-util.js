@@ -89,7 +89,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         var template = templates.LEND_BOOK_SUCCESS_MAIL_CONTENT;
         var emailContentHTML = mUtils.formatWithArguments(
                                         template.html,
-                                        [user_info.getFullName()]);
+                                        [user_info.getFullName(), book_item.title]);
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address

@@ -59,7 +59,7 @@
                     <div class="form-group">
                         <div class="col-xs-offset-2 col-xs-8">
                             <button type="submit" class="btn btn-primary" ng-if="isLoggedIn()" ng-click="update()"
-                                    ng-disabled="!updateForm.$valid">Update
+                                    ng-disabled="!updateForm.$valid && !isEditMode()">Update
                             </button>
                         </div>
                     </div>

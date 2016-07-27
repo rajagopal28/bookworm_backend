@@ -39,6 +39,7 @@ function Utils() {
         LOG_FILE_RELATIVE_PATH : '/server/logfile.log',
         CONFIG_FILE_RELATIVE_PATH : '/server/config.json',
         TEMP_FILE_PATH : './public/static/images/',
+        TEMP_DIR_PATH : '/tmp',
         SOCKET_EVENT_CONNECTION : 'connection',
         SOCKET_EVENT_NEW_CHAT: 'new-chat',
         HTTP_REQUEST_EVENT_NAME : {

@@ -91,7 +91,7 @@ app.set(constants.APP.ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFA
 app.use(express.static(path.join(__dirname, constants.EXPRESS_CONFIG_STATIC_DIR)));
 app.use(favicon(__dirname + constants.APP.FAV_ICON_PATH));
 app.use(morgan(constants.MORGAN_LOG_TYPE_COMBINED, {stream: accessLogStream}));
-app.use(multipart());
+app.use(multipart({ uploadDir: process.env.OPENSHIFT_DATA_DIR ? process.env.OPENSHIFT_DATA_DIR : constants.TEMP_DIR_PATH }));
 app.use(bodyParser.json({type: constants.APP.BODY_PARSER_APPLICATION_JSON}));
 app.use(methodOverride(constants.APP.X_HTTP_METHOD_OVERRIDE_HEADER));
 // parse application/x-www-form-urlencoded
@@ -123,9 +123,9 @@ app.post('/bookworm/api/books/rental/add',ensureAuthorized,
                     res.json({success : true, item :new_rental_book});
                     // send email to thank contribution
                     if(new_rental_book.contributor
-                        && new_rental_book.contributor.username
+                        && item.contributor
                         && req.token) {
-                        Users.incrementContributionOfUser(new_rental_book.contributor.username,
+                        Users.incrementContributionOfUser(item.contributor,
                             req.token, function(err, item){
                                 console.log(item);
                                 if(err){
@@ -836,7 +836,7 @@ app.get('/test/test1', function (req, res) {
 
 // application -------------------------------------------------------------
 app.get('*', function (req, res) {
-    res.sendFile(__dirname + '/public/index-dev.html'); // load the single view file (angular will handle the page changes on the front-end)
+    res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;
@@ -940,7 +940,8 @@ function uploadFileToCloud(req, serverConfig, callback) {
     var cloudFileName = req.body.username;
     var fileExtension = path.extname(req.files.file.name).toLowerCase();
     var tempPath = req.files.file.path,
-        targetPath = constants.TEMP_FILE_PATH
+        targetPath = path.dirname(tempPath)
+                        + '/'
                         + cloudFileName
                         + fileExtension;
     if(req.files.file.length > constants.MAX_FILE_UPLOAD_SIZE) {
@@ -951,6 +952,7 @@ function uploadFileToCloud(req, serverConfig, callback) {
     if (ACCEPTED_FILE_PATHS
         && fileExtension
         && ACCEPTED_FILE_PATHS.indexOf(fileExtension) !== -1) {
+        // copy file from request to
         fs.rename(tempPath, targetPath, function(err) {
             if (err) {
                 console.log('Error!');

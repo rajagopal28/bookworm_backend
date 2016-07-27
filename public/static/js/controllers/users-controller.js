@@ -353,8 +353,8 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
                 $uibModalInstance.dismiss(Constants.MODAL_DISMISS_RESPONSE);
             };
         }])
-    .controller('FeedbackController', ['$scope', 'Constants', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
-        function ($scope, Constants, UsersService, BookwormAuthProvider, formatUserName) {
+    .controller('FeedbackController', ['$scope', '$uibModal', 'Constants', 'UsersService', 'BookwormAuthProvider', 'formatUserNameFilter',
+        function ($scope, $uibModal, Constants, UsersService, BookwormAuthProvider, formatUserName) {
             $scope.feedback = {feedbackType: 'query'};
             $scope.messages = [];
             if (BookwormAuthProvider.isLoggedIn()) {
