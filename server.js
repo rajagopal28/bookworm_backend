@@ -368,7 +368,7 @@ app.post('/bookworm/api/users/register',
                         res.send(err);
                         console.error(JSON.stringify(err));
                     } else {
-                        res.json({success : true, item : item});
+                        res.json({success : true, item : mUtils.parseDBToResponseKeys(item)});
                         console.log('Success insertion: ' + JSON.stringify(item));
                         readConfigToSession(res, function(configJSON){
                             item.email_link = configJSON.DOMAIN

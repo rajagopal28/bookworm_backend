@@ -40,7 +40,7 @@ app.constant('Constants', {
     PARAM_VALUE_GENDER_FEMALE : 'female',
     ERROR_LOGIN_FAILED : 'Invalid credentials!!',
     ERROR_MISSING_REQUIRED_FIELDS : 'Missing one or more required fields',
-    DEFAULT_DATA_ERROR_MESSAGE : 'Something went wring. Please try after sometime!',
+    DEFAULT_DATA_ERROR_MESSAGE : 'Something went wrong. Please try after sometime!',
     PARAM_USER_NAME : 'username',
     PARAM_USER_IMAGE_FILE_NAME : 'file',
     MAX_FILE_UPLOAD_LIMIT : '5242880', // Bytes --> 5MB

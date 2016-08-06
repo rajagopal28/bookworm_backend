@@ -138,20 +138,20 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             }
             $scope.login = function () {
                 UsersService.loginUser($scope.user).then(function (response) {
-                    if (response.data) {
-                        if (response.data.authSuccess) {
-                            if ($localStorage.redirectURL
-                                && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
-                                $location.path($localStorage.redirectURL);
-                                delete $localStorage.redirectURL;
-                            } else {
-                                $location.path('/bookworm/home');
-                            }
+                    if (response.data.authSuccess) {
+                        if ($localStorage.redirectURL
+                            && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
+                            $location.path($localStorage.redirectURL);
+                            delete $localStorage.redirectURL;
                         } else {
-                            $scope.messages.push(Constants.getPostErrorMessage({msg: Constants.ERROR_LOGIN_FAILED}));
+                            $location.path('/bookworm/home');
                         }
                     } else {
-                        $scope.messages.push(Constants.getPostErrorMessage());
+                        var error = {msg: Constants.ERROR_LOGIN_FAILED};
+                        if (response.data.msg) {
+                            error.msg = response.data.msg;
+                        }
+                        $scope.messages.push(Constants.getPostErrorMessage(error));
                     }
                 }, function (error) {
                     $scope.messages.push(Constants.getPostErrorMessage(error));
@@ -180,6 +180,9 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.pageSort = Constants.getDefaultPagingSortingData();
             $scope.users = [];
             $scope.search = {query: ''};
+             $scope.pageChanged = function () {
+                $scope.searchUsers();
+             };
             $scope.searchUsers = function () {
                 var options = $scope.pageSort;
                 if ($scope.search.query) {
@@ -200,6 +203,9 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.pageSort = Constants.getDefaultPagingSortingData();
             $scope.users = [];
             $scope.search = {query: ''};
+            $scope.pageChanged = function () {
+                $scope.searchUsers();
+             };
             $scope.searchUsers = function () {
                 var options = $scope.pageSort;
                 if ($scope.search.query.trim() != '') {

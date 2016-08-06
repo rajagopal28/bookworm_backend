@@ -147,7 +147,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
         console.log(emailContentHTML);
         var mailOptions = {
             from: fromEmail, // sender address
-            to: owner.email, // list of receivers
+            to: requester.email, // list of receivers
             subject: template.subject, // Subject line,
             text : template.plain,
             html: emailContentHTML // html body

@@ -115,9 +115,6 @@ app.config(['$routeProvider', '$httpProvider',
                     $localStorage.redirectURL = next.substring(next.indexOf('/bookworm'));
                     $location.path('/bookworm/login');
                 }
-                else {
-                    // console.log('ALLOW');
-                }
             }
         });
     }]);

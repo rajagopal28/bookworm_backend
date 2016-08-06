@@ -115,9 +115,6 @@ app.config(['$routeProvider', '$httpProvider',
                     $localStorage.redirectURL = next.substring(next.indexOf('/bookworm'));
                     $location.path('/bookworm/login');
                 }
-                else {
-                    // console.log('ALLOW');
-                }
             }
         });
     }]);
@@ -163,7 +160,7 @@ app.constant('Constants', {
     PARAM_VALUE_GENDER_FEMALE : 'female',
     ERROR_LOGIN_FAILED : 'Invalid credentials!!',
     ERROR_MISSING_REQUIRED_FIELDS : 'Missing one or more required fields',
-    DEFAULT_DATA_ERROR_MESSAGE : 'Something went wring. Please try after sometime!',
+    DEFAULT_DATA_ERROR_MESSAGE : 'Something went wrong. Please try after sometime!',
     PARAM_USER_NAME : 'username',
     PARAM_USER_IMAGE_FILE_NAME : 'file',
     MAX_FILE_UPLOAD_LIMIT : '5242880', // Bytes --> 5MB
@@ -781,6 +778,8 @@ app.controller('HomeController', ['$scope', '$routeParams', '$location', 'Consta
                 .then(function (response) {
                     if(response.data.success) {
                         $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FRIEND_ADDED));
+                    } else {
+                        $scope.messages.push(Constants.getPostErrorMessage({msg: response.data.msg}));
                     }
                     $scope.user = {};
                 }, function (error) {
@@ -968,20 +967,20 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             }
             $scope.login = function () {
                 UsersService.loginUser($scope.user).then(function (response) {
-                    if (response.data) {
-                        if (response.data.authSuccess) {
-                            if ($localStorage.redirectURL
-                                && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
-                                $location.path($localStorage.redirectURL);
-                                delete $localStorage.redirectURL;
-                            } else {
-                                $location.path('/bookworm/home');
-                            }
+                    if (response.data.authSuccess) {
+                        if ($localStorage.redirectURL
+                            && $localStorage.redirectURL.indexOf('/bookworm') !== -1) {
+                            $location.path($localStorage.redirectURL);
+                            delete $localStorage.redirectURL;
                         } else {
-                            $scope.messages.push(Constants.getPostErrorMessage({msg: Constants.ERROR_LOGIN_FAILED}));
+                            $location.path('/bookworm/home');
                         }
                     } else {
-                        $scope.messages.push(Constants.getPostErrorMessage());
+                        var error = {msg: Constants.ERROR_LOGIN_FAILED};
+                        if (response.data.msg) {
+                            error.msg = response.data.msg;
+                        }
+                        $scope.messages.push(Constants.getPostErrorMessage(error));
                     }
                 }, function (error) {
                     $scope.messages.push(Constants.getPostErrorMessage(error));
@@ -1010,6 +1009,9 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.pageSort = Constants.getDefaultPagingSortingData();
             $scope.users = [];
             $scope.search = {query: ''};
+             $scope.pageChanged = function () {
+                $scope.searchUsers();
+             };
             $scope.searchUsers = function () {
                 var options = $scope.pageSort;
                 if ($scope.search.query) {
@@ -1030,6 +1032,9 @@ app.controller('UserRegistrationController', ['$scope', '$routeParams', '$uibMod
             $scope.pageSort = Constants.getDefaultPagingSortingData();
             $scope.users = [];
             $scope.search = {query: ''};
+            $scope.pageChanged = function () {
+                $scope.searchUsers();
+             };
             $scope.searchUsers = function () {
                 var options = $scope.pageSort;
                 if ($scope.search.query.trim() != '') {

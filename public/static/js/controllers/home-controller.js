@@ -24,6 +24,8 @@ app.controller('HomeController', ['$scope', '$routeParams', '$location', 'Consta
                 .then(function (response) {
                     if(response.data.success) {
                         $scope.messages.push(Constants.getPostSuccessMessage(Constants.SUCCESS_MESSAGE_FRIEND_ADDED));
+                    } else {
+                        $scope.messages.push(Constants.getPostErrorMessage({msg: response.data.msg}));
                     }
                     $scope.user = {};
                 }, function (error) {
