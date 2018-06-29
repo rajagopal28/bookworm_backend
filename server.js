@@ -81,7 +81,11 @@ readConfigToSession(null, function(configFile) {
     }
 });
 
-
+io.on('connection', function(mSocket){
+  console.log('Client connected');
+  socket = mSocket;
+  mSocket.on('disconnect', () => console.log('Client disconnected'));
+});
 var db = mongoose.connection;
 
 db.once(constants.DB_EVENT_NAME_OPEN, function () {
