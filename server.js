@@ -382,7 +382,7 @@ app.post('/bookworm/api/users/register',
                         res.json({success : true, item : mUtils.parseDBToResponseKeys(item)});
                         console.log('Success insertion: ' + JSON.stringify(item));
                         readConfigToSession(res, function(configJSON){
-                            item.email_link = configJSON.DOMAIN
+                            item.email_link = (process.env.HEROKU_APP_URL || configJSON.DOMAIN)
                                         + configJSON.VERIFY_ACCOUNT_LINK
                                         + item._id;
                             Mailer.sendRegistrationConfirmation(item);// send email for confirmation
@@ -517,7 +517,7 @@ app.post('/bookworm/api/users/request-password-reset',
                     if(!error){
                         readConfigToSession(res,
                             function(serverConfig){
-                                user_account.email_link = process.env.HEROKU_APP_URL || serverConfig.DOMAIN
+                                user_account.email_link = (process.env.HEROKU_APP_URL || serverConfig.DOMAIN)
                                         +serverConfig.RESET_PASSWORD_LINK
                                     + user_account._id;
                                 Mailer.sendResetPasswordEmail(user_account);
@@ -592,7 +592,7 @@ app.post('/bookworm/api/users/network/send-friend-request', ensureAuthorized,
             Users.findUsersWithIdentifiers([user_item._id, user_item.friend_id],
                 function(err, items){
                    readConfigToSession(res, function(serverConfig) {
-                        user_item.email_link =  process.env.HEROKU_APP_URL || serverConfig.DOMAIN
+                        user_item.email_link =  (process.env.HEROKU_APP_URL || serverConfig.DOMAIN)
                                         +serverConfig.ACCEPT_FRIEND_REQUEST_LINK
                                     + user_item._id;
                          Mailer.sendFriendRequestEmail(items, user_item);
