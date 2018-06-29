@@ -20,8 +20,8 @@ var mongoose = require('mongoose')
     , book = require('./server/models/book')
     , user = require('./server/models/user')
     , forum = require('./server/models/forum')
-    , SERVER_HOST_IP = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
-    , SERVER_HOST_PORT = process.env.OPENSHIFT_NODEJS_PORT || 8080
+    , SERVER_HOST_IP = '0.0.0.0'
+    , SERVER_HOST_PORT = process.env.PORT || 8080
     , socketServer = app.listen(
         SERVER_HOST_PORT,
         SERVER_HOST_IP,
@@ -31,6 +31,7 @@ var mongoose = require('mongoose')
             + SERVER_HOST_PORT
             + 'on ip address '
             + SERVER_HOST_IP);
+        console.log('serrver address', socketServer.address());
     }), io = require('socket.io')(socketServer, {
         serveClient: true,
         path: '/socket.io'
