@@ -32,7 +32,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 html: '<h3>Dear {0} </h3><p> We have verified your email. Now you can contribute to fellow bookworms.</p><p> Thanks, BookWorm Team.</p>',
                                                 plain : 'We have verified your email'}
     };
-    this.setSMTPConfig = function(smtpConfig) {
+    this.setSMTPConfig = function(smtpConfig, username, password, fromEmail, feedbackToEmail) {
         if(smtpConfig) {
             // console.log(smtpConfig);
             smtpTransport = nodemailer.createTransport(smtpTransport(
@@ -40,12 +40,12 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                     secureConnection : false,
                     port: smtpConfig.port,
                     auth: {
-                        user: smtpConfig.username,
-                        pass: smtpConfig.password
+                        user: username,
+                        pass: password
                     }
             }));
-            fromEmail = smtpConfig.fromEmail;
-            feedbackToEmail = smtpConfig.feedbackToEmail;
+            fromEmail = fromEmail;
+            feedbackToEmail = feedbackToEmail;
         }
     };
     this.sendRegistrationConfirmation = function(user_info) {

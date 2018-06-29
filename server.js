@@ -53,7 +53,12 @@ console.log(mongoose.connection.readyState);
 
 
 readConfigToSession(null, function(configFile) {
-    Mailer.setSMTPConfig(configFile[constants.SMTP_CONFIG_KEY]);
+    var smtpUsername = process.env.SMTP_EMAIL_USERNAME || configFile[constants.SMTP_CONFIG_KEY].username;
+    var smptPassword = process.env.SMTP_EMAIL_PASSWORD || configFile[constants.SMTP_CONFIG_KEY].password;
+    var fromEmail = process.env.SMTP_EMAIL_FROM_EMAIL || configFile[constants.SMTP_CONFIG_KEY].fromEmail;
+    var feedbackToEmail = process.env.SMTP_EMAIL_FEEDBACK_TO_EMAIL || configFile[constants.SMTP_CONFIG_KEY].feedbackToEmail;
+
+    Mailer.setSMTPConfig(configFile[constants.SMTP_CONFIG_KEY], smtpUsername, smptPassword, fromEmail, feedbackToEmail);
     if (mongoose.connection.readyState != mongoose.Connection.STATES.connected) {
         var mongoConfig = configFile[constants.MONGO_CONFIG_KEY];
         if(mongoConfig) {
