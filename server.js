@@ -24,7 +24,6 @@ var mongoose = require('mongoose')
     , SERVER_HOST_PORT = process.env.PORT || 8080
     , socketServer = app.listen(
         SERVER_HOST_PORT,
-        SERVER_HOST_IP,
         function(){
         console.log((new Date())
             + ' Server is listening on port '
@@ -86,16 +85,17 @@ io.on('connection', function(mSocket){
   socket = mSocket;
   mSocket.on('disconnect', () => console.log('Client disconnected'));
 });
+
 var db = mongoose.connection;
 
 db.once(constants.DB_EVENT_NAME_OPEN, function () {
     console.log('MongoDB connection successful.');
 });
 // socket IO -----------------------------------------------------------------
-io.sockets.on(constants.SOCKET_EVENT_CONNECTION, function (mSocket) {
-    socket = mSocket;
-    console.log('new socket connection');
-});
+// io.sockets.on(constants.SOCKET_EVENT_CONNECTION, function (mSocket) {
+//     socket = mSocket;
+//     console.log('new socket connection');
+// });
 // all environments
 accessLogStream = fs.createWriteStream(__dirname + constants.LOG_FILE_RELATIVE_PATH, {flags: 'a'});
 app.set(constants.APP.ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFAULT_PORT);
