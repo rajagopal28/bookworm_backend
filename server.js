@@ -80,11 +80,11 @@ readConfigToSession(null, function(configFile) {
     }
 });
 
-io.on('connection', function(mSocket){
-  console.log('Client connected');
-  socket = mSocket;
-  mSocket.on('disconnect', () => console.log('Client disconnected'));
-});
+// io.on('connection', function(mSocket){
+//   console.log('Client connected');
+//   socket = mSocket;
+//   mSocket.on('disconnect', () => console.log('Client disconnected'));
+// });
 
 var db = mongoose.connection;
 
@@ -92,10 +92,10 @@ db.once(constants.DB_EVENT_NAME_OPEN, function () {
     console.log('MongoDB connection successful.');
 });
 // socket IO -----------------------------------------------------------------
-// io.sockets.on(constants.SOCKET_EVENT_CONNECTION, function (mSocket) {
-//     socket = mSocket;
-//     console.log('new socket connection');
-// });
+io.sockets.on(constants.SOCKET_EVENT_CONNECTION, function (mSocket) {
+    socket = mSocket;
+    console.log('new socket connection');
+});
 // all environments
 accessLogStream = fs.createWriteStream(__dirname + constants.LOG_FILE_RELATIVE_PATH, {flags: 'a'});
 app.set(constants.APP.ENV_VAR_PORT, process.env.PORT || constants.ENV_VALUE_DEFAULT_PORT);
@@ -847,7 +847,7 @@ app.get('/test/test1', function (req, res) {
 
 // application -------------------------------------------------------------
 app.get('*', function (req, res) {
-    res.sendFile(__dirname + '/public/index-dev.html'); // load the single view file (angular will handle the page changes on the front-end)
+    res.sendFile(__dirname + '/public/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 function ensureAuthorized(req, res, next) {
     var bearerToken;

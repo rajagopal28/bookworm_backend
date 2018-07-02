@@ -34,7 +34,7 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
     };
     this.setSMTPConfig = function(smtpConfig, username, password, fromEmail, feedbackToEmail) {
         if(smtpConfig) {
-            // console.log(smtpConfig);
+            console.log(smtpConfig, username, password, fromEmail, feedbackToEmail);
             smtpTransport = nodemailer.createTransport(smtpTransport(
                 {host : smtpConfig.host,
                     secureConnection : false,
