@@ -90,52 +90,52 @@ html {
 }
 
 .github {
-    background-image: url(../images/github.svg);
+    background-image: url(images/github.svg);
     background-position: center center
 }
 
 .linkedin {
-    background-image: url(../images/linkedin.svg);
+    background-image: url(images/linkedin.svg);
     background-position: center center
 }
 
 .twitter {
-    background-image: url(../images/twitter.svg);
+    background-image: url(images/twitter.svg);
     background-position: center center
 }
 /*
 .tumblr {
-    background-image: url(../images/tumblr.svg);
+    background-image: url(images/tumblr.svg);
     background-position: center center
 }
 
 .youtube {
-    background-image: url(../images/youtube.svg);
+    background-image: url(images/youtube.svg);
     background-position: center center
 }
 
 .pinterest {
-    background-image: url(../images/pinterest.svg);
+    background-image: url(images/pinterest.svg);
     background-position: center center
 }
 
 .vimeo {
-    background-image: url(../images/vimeo.svg);
+    background-image: url(images/vimeo.svg);
     background-position: center center
 } */
 
 .instagram {
-    background-image: url(../images/instagram.svg);
+    background-image: url(images/instagram.svg);
     background-position: center center
 }
 
 .facebook {
-    background-image: url(../images/facebook.svg);
+    background-image: url(images/facebook.svg);
     background-position: center center
 }
 
 .gplus {
-    background-image: url(../images/gplus.svg);
+    background-image: url(images/gplus.svg);
     background-position: center center
 }
 
@@ -168,7 +168,7 @@ html {
     padding-top: 15px;
 }
 .home .jumbotron {
-    background: url(../images/magic_book.jpg) center center;
+    background: url(images/magic_book.jpg) center center;
     background-size: cover;
     min-height: 600px;
     width: 100%
