@@ -1007,7 +1007,9 @@ function uploadFileToCloud(req, serverConfig, callback) {
                         apiRes.on(constants.HTTP_REQUEST_EVENT_NAME.END
                             , function() {
                                 // console.log(buff);
-                                fs.unlink(targetPath);
+                                fs.unlink(targetPath, function() {
+                                  console.log('IN FS UNLINK callback');
+                                });
                                 callback({fileName : cloudFileName + fileExtension, apiResponseString :buff});
                             });
                     });
