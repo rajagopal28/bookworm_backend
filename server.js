@@ -33,7 +33,9 @@ var mongoose = require('mongoose')
         console.log('serrver address', socketServer.address());
     }), io = require('socket.io')(socketServer, {
         serveClient: true,
-        path: '/socket.io'
+        path: '/socket.io',
+        transports: ['websocket'],
+        upgrade: false,
     })
     , methodOverride = require('method-override');
 //io.set('transports',['xhr-polling']);
