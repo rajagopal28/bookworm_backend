@@ -22,8 +22,7 @@ if (hostname !== '127.0.0.1') {
     BOOKWORM_APPLICATION_HOST = option.PROTOCOL
                                     + '://'
                                     + hostname
-                                    + ':'
-                                    + option.PORT;
+                                    + hostname.indexOf('herokuapp'=== -1) ? (':' + option.PORT ) : '';
 }
 var socket = io.connect(BOOKWORM_APPLICATION_HOST, {transports: ['websocket']});
 
