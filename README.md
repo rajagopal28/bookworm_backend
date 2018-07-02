@@ -30,7 +30,7 @@ The following are the technologies and libraries that I have used in this experi
 - I started with a base story but as time evolved, I started treating it like a real website that I’m gonna create and I’ve added a whole lot of things that made sense which are missed during the initial phase.
 - Initially I had no idea that there is a library/layer call Express that handles multi-routed requests, so I started with simple node JS 'hello world’ type applications.
 - The same applies to mongoose library, I’ve just started with the base mongoldb layer and started with dumping data and retrieving it without any proper Object oriented modeling and design formats.
-- So is the cloud related deployment, which is a very new area that I had no prior working experience. It was scary to mess with a machine which is remote and has running server packages which are not under your control directly.
+- So is the cloud related deployment, which is a very chnew area that I had no prior working experience. It was scary to mess with a machine which is remote and has running server packages which are not under your control directly.
 - This was a whole new experience to me, as I used to work only on core backend technologies which are object oriented and tied with relational database systems in a traditional way.
 
 ## Features and Use-cases:
@@ -43,6 +43,8 @@ The following are the technologies and libraries that I have used in this experi
 ## Repository and URL:
 
 - GitHub: https://github.com/rajagopal28/bookworm_backend
-- Live URL: http://bookworms-dextrous.rhcloud.com/#/bookworm/home
+- Live URL: https://book-worms-app.herokuapp.com/#/bookworm/home
+  - (OLD) http://bookworms-dextrous.rhcloud.com/#/bookworm/home
+- My Blog about the Whole experiment: https://blogsofraju.wordpress.com/2017/02/16/one-crazy-trip-through-bookworms/ 
 
 ### documentation yet to be updated
