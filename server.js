@@ -536,8 +536,8 @@ app.post('/bookworm/api/users/reset-password',
     function (req, res) {
         console.log(req.body);
         var user_item = mUtils.parseRequestToDBKeys(req.body);
-        console.log(user_item);
-        if (user_item.token && user_item.password)// check for not empty
+        // console.log(user_item);
+        if (user_item.token && user_item.pass_key)// check for not empty
         {
             Users.resetUserPassword(user_item,
                 function (error, item) {

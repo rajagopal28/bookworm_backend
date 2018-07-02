@@ -33,19 +33,18 @@ function Mailer(nodemailer, smtpTransport, mUtils) {
                                                 plain : 'We have verified your email'}
     };
     this.setSMTPConfig = function(smtpConfig, username, password, fromEmail, feedbackToEmail) {
+        var _self = this;
         if(smtpConfig) {
-            console.log(smtpConfig, username, password, fromEmail, feedbackToEmail);
-            smtpTransport = nodemailer.createTransport(smtpTransport(
-                {host : smtpConfig.host,
-                    secureConnection : false,
-                    port: smtpConfig.port,
-                    auth: {
-                        user: username,
-                        pass: password
-                    }
+            // console.log(smtpConfig, username, password, fromEmail, feedbackToEmail);
+            smtpTransport = nodemailer.createTransport(smtpTransport({
+                service: 'gmail',
+                auth: {
+                    user: username,
+                    pass: password
+                }
             }));
-            fromEmail = fromEmail;
-            feedbackToEmail = feedbackToEmail;
+            _self.fromEmail = fromEmail;
+            _self.feedbackToEmail = feedbackToEmail;
         }
     };
     this.sendRegistrationConfirmation = function(user_info) {
