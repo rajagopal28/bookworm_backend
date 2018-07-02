@@ -889,9 +889,11 @@ function readConfigToSession(res, callback) {
         });
 }
 function loginToCloudEnvironment(cloudConfig, callback){
+    var uname = process.env.SMARTFILE_CLOUD_AUTH_USERNAME || cloudConfig.username;
+    var pword = process.env.SMARTFILE_CLOUD_AUTH_PASSWORD || cloudConfig.password;
     var data = querystring.stringify({
-            login : cloudConfig.username,
-            password : cloudConfig.password
+            login : uname,
+            password : pword
         });
         var options = {
           host: cloudConfig.host,
