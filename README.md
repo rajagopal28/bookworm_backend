@@ -4,7 +4,69 @@ A typical book lover would love to buy a (paper-back) book, read it till his/her
 ## The solution:
 Having the problem statement explained, here comes the solution in the form of an application that helps me lend/borrow books from people having common interest. Converse and share information that are immersed in a diversified collection of people with varying thought process, through forums and chats.
 ## Architecture:
-![Architecture](https://file.ac/yPrgAzJsh9o/Public/image0.png)
+### Legacy - with OpenShift-1.0:
+![Architecture](https://file.ac/yPrgAzJsh9o/Public/image0.png?refresh=true)
+### Migrated - with Heroku + mLab:
+![Architecture](https://file.ac/yPrgAzJsh9o/Public/image1.png)
+### Relational schema of the backend:
+![Schema](https://file.ac/yPrgAzJsh9o/Public/image3.png)
+
+## Tech Nuances:
+ - **Socket.io - web socket based realtime chats** : Including web sockets was one of the major hightlights of bookworms. I was more excited to know that something like this can be done with nodejs or the architecture I have adapted or bookworms. As I had forums in mind for Phase-1, it came very much handy to help me work with this feature with socket.io. I had few initial hickups with setting up socket listeners in parallel to the actual web node in open shift and it became harder when I wanted to migrate to Heroku. However, as a lover of mathematic saying "There won't be a problem without a solution." I dug deeps both the times and fixed the issues. Following is how websocket is implemented with respect to forum. To be short, the user who posts the forum will also see the chat added after receiving the socket broadcast from the server. The forums page, irrespective of which forum the user in, will receive the broadcast but will add the chat to the UI only if the chat received is for the forum that is open right now.
+ ![Socket-Data-Flow](https://file.ac/yPrgAzJsh9o/Public/image2.png)
+ - **Crucial queries and object relations** :
+ 1. fetching private forums:
+     ```
+      your code here
+    ```
+ 2. fetching friends list:
+     ```
+      your code here
+     ```
+ - **Relationships and references in mongoose** : Fetching internal reference: As you can see in the schema diagram, we have internal referencing between users, books, forums and chats. A small snippet of mongoose de-referencing. Reference: http://mongoosejs.com/docs/populate.html
+     ```javascript
+        var mongoose = require('mongoose');
+        var Schema = mongoose.Schema;
+
+        var userSchema = Schema({
+          _id: Schema.Types.ObjectId,
+          name: String,
+          dob: Number
+          //.. other fields ...//
+        });
+
+        var forumSchema = Schema({
+          author: { type: Schema.Types.ObjectId, ref: 'User' },
+          title: String,
+          // Other Fields //
+          chats: [{ type: Schema.Types.ObjectId, ref: 'Chat' }]
+        });
+
+        var chatSchema = Schema({
+          forum: { type: Schema.Types.ObjectId, ref: 'Forum' },
+          content: String,
+          // Other Fields //
+          author: [{ type: Schema.Types.ObjectId, ref: 'user' }]
+        });
+
+        var Chat = mongoose.model('Chat', chatSchema);
+        var Forum = mongoose.model('Forum', storySchema);
+        var Person = mongoose.model('User', personSchema);
+        Forum.findOne({ title: /casino royale/i })
+         .populate('author', 'name') // only return the Persons name
+         .populate('chats')
+         .exec(function (err, story) {
+           if (err) return handleError(err);
+           // handle response with story object
+         });
+     ```
+ - **hooks in mongoose** :
+ - **crypto salt based hashing of passwords** :
+ - **Interceptors in angular** :
+ - **Grunt and it quick builds** :
+
+## Migration:
+  The site was initially deployed on OpenShift as Heroku was not supporting mongodb in their free tiers any form. But as of 2018, Redhat has stopped supporting their older version of OpenShift named 1.0 and the newer version does not seem friendly when compared to their previous versions and they mostly provide serverly less resources for free tier. As I wanted to keep the one favorite thing I loved coding for a long time alive I migrated the entire application to Heroku with mLab as the supporting mongodb backend. Eventhough mLab has lot of data restrictions for free users, it was worth the try as none really cares to use bookworms.
 ## Tech stack used:
 The following are the technologies and libraries that I have used in this experiment. I call it my MEAN stack experiment because of the 4 major techs I’ve used.
 
@@ -14,13 +76,15 @@ The following are the technologies and libraries that I have used in this experi
     - **requests**: Library used to handle external API requests to third party applications used in the flow of the application.
     - **mongoose**: Library that used for Object Oriented design of the data system in mongo db.
     - **multiparty**: To handle multipart file based requests
+    - **NodeMailer**: To send emails from the node app server
 - Angular JS: Angular JS as the interface to get connected with the backend system.
     - **Bootstrap JS**: Angular bootstrap library to help use various UI components that are built for angular JS in order to enhance the user experience.
 - **Grunt**: Build the UI assets on the client side by minifying and compressing respective files for quick loading.
 - **Node JS**: A lightweight Javascript based application server that runs the in order to process user data.
-    - **Socket-IO** on node JS: Socke IO to have interactive chat session in the forums section.
+    - **Socket-IO** on node JS: Socket IO to have interactive chat session in the forums section.
 - **SmartFile drive API**: A cloud based file storage system which exposed API. This is used to store the user profile pictures as of now.
 - **Open shift Cloud by Red-hat**: The first ever cloud platform I’ve ever learnt to use on my own. The PaaS provided by Red-hat and I’ve used the free gears(VMs) provided for the free account.
+- **Heroku+mLab**: The second ever cloud platform I’ve ever learnt to use on my own. Very easy to provision and manage. mLab is not out of the box for free slots but the internal connection string setting are not blocked and i was so much relieved.
 - **GitHub**: Used for Version control and repository management.
 
 ## Challenges Faced And Lessons learnt:
@@ -30,8 +94,12 @@ The following are the technologies and libraries that I have used in this experi
 - I started with a base story but as time evolved, I started treating it like a real website that I’m gonna create and I’ve added a whole lot of things that made sense which are missed during the initial phase.
 - Initially I had no idea that there is a library/layer call Express that handles multi-routed requests, so I started with simple node JS 'hello world’ type applications.
 - The same applies to mongoose library, I’ve just started with the base mongoldb layer and started with dumping data and retrieving it without any proper Object oriented modeling and design formats.
-- So is the cloud related deployment, which is a very chnew area that I had no prior working experience. It was scary to mess with a machine which is remote and has running server packages which are not under your control directly.
+- So is the cloud related deployment, which is a very new area that I had no prior working experience. It was scary to mess with a machine which is remote and has running server packages which are not under your control directly.
 - This was a whole new experience to me, as I used to work only on core backend technologies which are object oriented and tied with relational database systems in a traditional way.
+- More problems and stories can be found in my blog :D [Here](https://blogsofraju.wordpress.com/2017/02/16/one-crazy-trip-through-bookworms/).
+- While *migrating* to **heroku** I faced couple of issues with the existing code base.
+  - Static content and Asserts are not referenced properly due to directory access restrictions which was solved when the assets were moved to the actual referenced directory
+  - **Socket.io** port was dynamic and the client was not able to detect with the usual ssh and non-ssh web ports. For this issue I was breaking my head for couple of days and for the porblem solved with the solution mentioned in the below 2 URLS in reference.
 
 ## Features and Use-cases:
 
@@ -40,11 +108,67 @@ The following are the technologies and libraries that I have used in this experi
 - **Networking**: View other users, add them to your network by requesting them.
 - **Public and Private Forums**: Open chat topics based on any book to share opinions with all users or selected users from your network.
 
+## Views in App:
+### Home
+![Home](https://file.ac/yPrgAzJsh9o/Public/image100.png)
+### Authenticated Home
+![AuthenticatedHome](https://file.ac/yPrgAzJsh9o/Public/image101.png)
+![AuthenticatedHome](https://file.ac/yPrgAzJsh9o/Public/image102.png)
+### Lend Book
+![LendBook](https://file.ac/yPrgAzJsh9o/Public/image103.png)
+### List Books
+![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image104.png)
+![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image105.png)
+![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image106.png)
+### View Book
+![ViewBook](https://file.ac/yPrgAzJsh9o/Public/image107.png)
+### Edit Book
+![EditBook](https://file.ac/yPrgAzJsh9o/Public/image108.png)
+###Users
+![Users](https://file.ac/yPrgAzJsh9o/Public/image109.png)
+### Signup
+![Signup](https://file.ac/yPrgAzJsh9o/Public/image110.png)
+### Sign in
+![SignIn](https://file.ac/yPrgAzJsh9o/Public/image.png)111
+### Public Forums
+![PublicForums](https://file.ac/yPrgAzJsh9o/Public/image112.png)
+![PublicForums](https://file.ac/yPrgAzJsh9o/Public/image113.png)
+### Private Forums
+![PrivateForums](https://file.ac/yPrgAzJsh9o/Public/image114.png)
+### Network
+![Network](https://file.ac/yPrgAzJsh9o/Public/image115.png)
+### Profile/View User
+![Profile/View User](https://file.ac/yPrgAzJsh9o/Public/image116.png)
+### Change password
+![ChangePassword](https://file.ac/yPrgAzJsh9o/Public/image117.png)
+### Edit Profile
+![EditProfile](https://file.ac/yPrgAzJsh9o/Public/image118.png)
+![EditProfile](https://file.ac/yPrgAzJsh9o/Public/image119.png)
+### Feedback
+![Feedback](https://file.ac/yPrgAzJsh9o/Public/image120.png)
+### About and Contact
+![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image121.png)
+![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image122.png)
+![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image123.png)
+
+
+
+
 ## Repository and URL:
 
 - GitHub: https://github.com/rajagopal28/bookworm_backend
 - Live URL: https://book-worms-app.herokuapp.com/#/bookworm/home
   - (OLD) http://bookworms-dextrous.rhcloud.com/#/bookworm/home
-- My Blog about the Whole experiment: https://blogsofraju.wordpress.com/2017/02/16/one-crazy-trip-through-bookworms/ 
+- My Blog about the Whole experiment: https://blogsofraju.wordpress.com/2017/02/16/one-crazy-trip-through-bookworms/
 
-### documentation yet to be updated
+## References:
+ - https://www.sitepoint.com/deploy-rest-api-in-30-mins-mlab-heroku/
+ - https://hackernoon.com/herokus-handshake-with-mlab-7fea651fa8c2
+ - Socket session sharing issue: https://blog.heroku.com/session-affinity-ga
+  - Client side fix: https://stackoverflow.com/a/44962432
+- http://www.bypeople.com/css-chat/
+- https://github.com/linnovate/mean-on-openshift
+- http://www.sitepoint.com/5-minutes-to-min-safe-angular-code-with-grunt/
+- https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest
+- http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
+- https://www.mongodb.com/blog/post/joins-and-other-aggregation-enhancements-coming-in-mongodb-3-2-part-1-of-3-introduction
