@@ -15,13 +15,30 @@ Having the problem statement explained, here comes the solution in the form of a
  - **Socket.io - web socket based realtime chats** : Including web sockets was one of the major hightlights of bookworms. I was more excited to know that something like this can be done with nodejs or the architecture I have adapted or bookworms. As I had forums in mind for Phase-1, it came very much handy to help me work with this feature with socket.io. I had few initial hickups with setting up socket listeners in parallel to the actual web node in open shift and it became harder when I wanted to migrate to Heroku. However, as a lover of mathematic saying "There won't be a problem without a solution." I dug deeps both the times and fixed the issues. Following is how websocket is implemented with respect to forum. To be short, the user who posts the forum will also see the chat added after receiving the socket broadcast from the server. The forums page, irrespective of which forum the user in, will receive the broadcast but will add the chat to the UI only if the chat received is for the forum that is open right now.
  ![Socket-Data-Flow](https://file.ac/yPrgAzJsh9o/Public/image2.png)
  - **Crucial queries and object relations** :
- 1. fetching private forums:
-     ```
-      your code here
+ 1. fetching private forums: the mongoose modeling is bit complicated when if comes to references and de-references. In case of private forums the ask is to fetch all forums which has the logged in user in their visible_to list or created by the user. Also to de-reference the other users to which the forum is visible to.
+     ```javascript
+     searchQuery.is_private = true;
+     searchQuery['$or'] =
+         [{ author : mongoose.mongo.ObjectId(searchQuery._id)},
+             { visible_to : mongoose.mongo.ObjectId(searchQuery._id) }];
     ```
  2. fetching friends list:
-     ```
-      your code here
+     ```javascript
+       var mongoose = require('mongoose');
+       var userSchema = Schema({
+         _id: Schema.Types.ObjectId,
+         name: String,
+         dob: Number,
+         network: [{ type: Schema.Types.ObjectId, ref: 'User' }]// internal reference to users
+         //.. other fields ...//
+       });
+       var User = mongoose.model('User', userSchema);
+       User.findOne(myNetworkQuery, nestedDocQuery)
+           .populate('network', null, searchQuery)
+           .sort(pagingSorting.sortField)
+           .exec(function (err, items) {
+               callback(err, items, totalCount);
+           });
      ```
  - **Relationships and references in mongoose** : Fetching internal reference: As you can see in the schema diagram, we have internal referencing between users, books, forums and chats. A small snippet of mongoose de-referencing. Reference: http://mongoosejs.com/docs/populate.html
      ```javascript
@@ -51,7 +68,7 @@ Having the problem statement explained, here comes the solution in the form of a
 
         var Chat = mongoose.model('Chat', chatSchema);
         var Forum = mongoose.model('Forum', storySchema);
-        var Person = mongoose.model('User', personSchema);
+        var User = mongoose.model('User', userSchema);
         Forum.findOne({ title: /casino royale/i })
          .populate('author', 'name') // only return the Persons name
          .populate('chats')
@@ -60,11 +77,83 @@ Having the problem statement explained, here comes the solution in the form of a
            // handle response with story object
          });
      ```
- - **hooks in mongoose** :
- - **crypto salt based hashing of passwords** :
- - **Interceptors in angular** :
- - **Grunt and it quick builds** :
+ - **hooks in mongoose** : We have pre and post action hooks in mongoose which helps us manipulate the data before and after performing actions, such as insert, update, delete and select, on a particular collection tied model. Following code sample is what I used to encrypt the password using crypto library. Following is how the event hooks are handled in mongoose.
+     ```javascript
+        var mongoose = require('mongoose');
+        var Schema = mongoose.Schema;
 
+        var userSchema = Schema({
+          _id: Schema.Types.ObjectId,
+          name: String,
+          dob: Number,
+          password: String,
+          //.. other fields ...//
+        });
+        userSchema.pre('save', function(next) {
+          var user = this;
+          user.password = methodToHashPassword(user.password);
+          // ...other actions like updating timestamp and such
+          next();
+        });
+     ```
+ - **crypto salt based hashing of passwords** : Password security only came to my mind a little later when I actually started feeling bookworms as an actual website and not a pet project. On intensive research on the addons that help encrypting data in nodejs, crypto was promising. Had a lot of issues with dependencies and node version mismatch due to crypto and bcrypt compatibility issues due to downgrade of older node version that OpenShift was supporting. Following is the sample of the function that I used inside mongoose hooks to help encrypt password.
+     ```javascript
+        var crypto = require('crypto');
+
+        function hashStringWithSale(password, salt/*I used a constant salt so that it would be better throughout*/){
+          var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+          hash.update(password);
+          return hash.digest('hex');
+      };
+     ```
+ - **Interceptors in angular** : interceptors are one of the fascinating concept that I found in Angular 1.0. They act the same way as the filters in J2EE based web frameworks. They intercept the api or any calls that go through the $http module and do whatever you want. I used them for 2 purposes, to put a loading overlay and to add auth information to the headers so that the data api knows the logged in user. Here is the code of the interceptor factory.
+ ```javascript
+       app.factory('BookWormHTTPInterceptor', ['$q', '$location', '$localStorage', 'Constants', 'LoaderService',
+           function ($q, $location, $localStorage, Constants, LoaderService) {
+             return {
+                 'request': function (config) {
+                     if(url.isAPIUrl() && url.isAuthenticationNeeded()) {
+                       // add auth info to header in the api
+                     }
+                     LoaderService.activateSpinner();
+                     return config;
+                 },
+                 'responseError': function (response) {
+                    // on errors redirect to login with error
+                     LoaderService.deactivateSpinner();
+                     return $q.reject(response);
+                 },
+                 'response': function (response) {
+                     LoaderService.deactivateSpinner();
+                     return response;
+                 }
+             };
+         }]);
+ ```
+
+ - **Grunt and it quick builds** : I was initially thinking to just reference all the module files as such but the concept of minifying and increasing a high performant site intrigued me and I looked into Grunt and Gulp. Gulp as too complicated for what I was trying to achieve so grunt looked simpler, syntax wise. Following is the shortened version of my Grunt build.
+ ```javascript
+ grunt.initConfig({
+     pkg: grunt.file.readJSON('package.json'),
+       //grunt task configuration will go here
+     ngAnnotate: {
+         // compile angular code to plain js code
+     },
+     concat: {
+        // concat all the js and css files that are from vendor and app
+     },
+     uglify: {
+         // uglifying vendor and app static css
+     },
+     cssmin: {
+          // minifying cssmin
+     }
+
+ });
+ grunt.loadNpmTasks(/* All needed npm tasks for grunt*/);
+ //register grunt default task
+ grunt.registerTask('default', ['ngAnnotate', 'concat', 'uglify', 'cssmin']);
+ ```
 ## Migration:
   The site was initially deployed on OpenShift as Heroku was not supporting mongodb in their free tiers any form. But as of 2018, Redhat has stopped supporting their older version of OpenShift named 1.0 and the newer version does not seem friendly when compared to their previous versions and they mostly provide serverly less resources for free tier. As I wanted to keep the one favorite thing I loved coding for a long time alive I migrated the entire application to Heroku with mLab as the supporting mongodb backend. Eventhough mLab has lot of data restrictions for free users, it was worth the try as none really cares to use bookworms.
 ## Tech stack used:
@@ -172,3 +261,4 @@ The following are the technologies and libraries that I have used in this experi
 - https://nodejs.org/api/crypto.html#crypto_crypto_pbkdf2sync_password_salt_iterations_keylen_digest
 - http://stackoverflow.com/questions/5681851/mongodb-combine-data-from-multiple-collections-into-one-how
 - https://www.mongodb.com/blog/post/joins-and-other-aggregation-enhancements-coming-in-mongodb-3-2-part-1-of-3-introduction
+- Mongoose: http://mongoosejs.com/docs/middleware.html
