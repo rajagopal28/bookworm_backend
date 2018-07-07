@@ -15,14 +15,14 @@ Having the problem statement explained, here comes the solution in the form of a
  - **Socket.io - web socket based realtime chats** : Including web sockets was one of the major hightlights of bookworms. I was more excited to know that something like this can be done with nodejs or the architecture I have adapted or bookworms. As I had forums in mind for Phase-1, it came very much handy to help me work with this feature with socket.io. I had few initial hickups with setting up socket listeners in parallel to the actual web node in open shift and it became harder when I wanted to migrate to Heroku. However, as a lover of mathematic saying "There won't be a problem without a solution." I dug deeps both the times and fixed the issues. Following is how websocket is implemented with respect to forum. To be short, the user who posts the forum will also see the chat added after receiving the socket broadcast from the server. The forums page, irrespective of which forum the user in, will receive the broadcast but will add the chat to the UI only if the chat received is for the forum that is open right now.
  ![Socket-Data-Flow](https://file.ac/yPrgAzJsh9o/Public/image2.png)
  - **Crucial queries and object relations** :
- 1. fetching private forums: the mongoose modeling is bit complicated when if comes to references and de-references. In case of private forums the ask is to fetch all forums which has the logged in user in their visible_to list or created by the user. Also to de-reference the other users to which the forum is visible to.
+ 1. *fetching private forums*: the mongoose modeling is bit complicated when if comes to references and de-references. In case of private forums the ask is to fetch all forums which has the logged in user in their visible_to list or created by the user. Also to de-reference the other users to which the forum is visible to.
      ```javascript
      searchQuery.is_private = true;
      searchQuery['$or'] =
          [{ author : mongoose.mongo.ObjectId(searchQuery._id)},
              { visible_to : mongoose.mongo.ObjectId(searchQuery._id) }];
     ```
- 2. fetching friends list:
+ 2. *fetching friends list*: As the concept of networks is nested in a duplex way, i.e., user1 will be in user2's network and viceversa. So on saving it was crucial to save the users mututually in each other's network. The query to filter should make sure that the internal reference fo the same model does not conflict. Following is the code snippet for de-referencing the users from network.
      ```javascript
        var mongoose = require('mongoose');
        var userSchema = Schema({
