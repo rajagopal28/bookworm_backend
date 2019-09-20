@@ -5,15 +5,15 @@ A typical book lover would love to buy a (paper-back) book, read it till his/her
 Having the problem statement explained, here comes the solution in the form of an application that helps me lend/borrow books from people having common interest. Converse and share information that are immersed in a diversified collection of people with varying thought process, through forums and chats.
 ## Architecture:
 ### Legacy - with OpenShift-1.0:
-![Architecture](https://file.ac/yPrgAzJsh9o/Public/image0.png?refresh=true)
+![Architecture](./images/image0.png?refresh=true)
 ### Migrated - with Heroku + mLab:
-![Architecture](https://file.ac/yPrgAzJsh9o/Public/image1.png)
+![Architecture](./images/image1.png)
 ### Relational schema of the backend:
-![Schema](https://file.ac/yPrgAzJsh9o/Public/image3.png)
+![Schema](./images/image3.png)
 
 ## Tech Nuances:
  - **Socket.io - web socket based realtime chats** : Including web sockets was one of the major hightlights of bookworms. I was more excited to know that something like this can be done with nodejs or the architecture I have adapted or bookworms. As I had forums in mind for Phase-1, it came very much handy to help me work with this feature with socket.io. I had few initial hickups with setting up socket listeners in parallel to the actual web node in open shift and it became harder when I wanted to migrate to Heroku. However, as a lover of mathematic saying "There won't be a problem without a solution." I dug deeps both the times and fixed the issues. Following is how websocket is implemented with respect to forum. To be short, the user who posts the forum will also see the chat added after receiving the socket broadcast from the server. The forums page, irrespective of which forum the user in, will receive the broadcast but will add the chat to the UI only if the chat received is for the forum that is open right now.
- ![Socket-Data-Flow](https://file.ac/yPrgAzJsh9o/Public/image2.png)
+ ![Socket-Data-Flow](./images/image2.png)
  - **Crucial queries and object relations** :
  1. *fetching private forums*: the mongoose modeling is bit complicated when if comes to references and de-references. In case of private forums the ask is to fetch all forums which has the logged in user in their visible_to list or created by the user. Also to de-reference the other users to which the forum is visible to.
      ```javascript
@@ -199,46 +199,46 @@ The following are the technologies and libraries that I have used in this experi
 
 ## Views in App:
 ### Home
-![Home](https://file.ac/yPrgAzJsh9o/Public/image100.png)
+![Home](./images/image100.png)
 ### Authenticated Home
-![AuthenticatedHome](https://file.ac/yPrgAzJsh9o/Public/image101.png)
-![AuthenticatedHome](https://file.ac/yPrgAzJsh9o/Public/image102.png)
+![AuthenticatedHome](./images/image101.png)
+![AuthenticatedHome](./images/image102.png)
 ### Lend Book
-![LendBook](https://file.ac/yPrgAzJsh9o/Public/image103.png)
+![LendBook](./images/image103.png)
 ### List Books
-![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image104.png)
-![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image105.png)
-![ListBooks](https://file.ac/yPrgAzJsh9o/Public/image106.png)
+![ListBooks](./images/image104.png)
+![ListBooks](./images/image105.png)
+![ListBooks](./images/image106.png)
 ### View Book
-![ViewBook](https://file.ac/yPrgAzJsh9o/Public/image107.png)
+![ViewBook](./images/image107.png)
 ### Edit Book
-![EditBook](https://file.ac/yPrgAzJsh9o/Public/image108.png)
+![EditBook](./images/image108.png)
 ### Users
-![Users](https://file.ac/yPrgAzJsh9o/Public/image109.png)
+![Users](./images/image109.png)
 ### Signup
-![Signup](https://file.ac/yPrgAzJsh9o/Public/image110.png)
+![Signup](./images/image110.png)
 ### Sign in
-![SignIn](https://file.ac/yPrgAzJsh9o/Public/image111.png)
+![SignIn](./images/image111.png)
 ### Public Forums
-![PublicForums](https://file.ac/yPrgAzJsh9o/Public/image112.png)
-![PublicForums](https://file.ac/yPrgAzJsh9o/Public/image113.png)
+![PublicForums](./images/image112.png)
+![PublicForums](./images/image113.png)
 ### Private Forums
-![PrivateForums](https://file.ac/yPrgAzJsh9o/Public/image114.png)
+![PrivateForums](./images/image114.png)
 ### Network
-![Network](https://file.ac/yPrgAzJsh9o/Public/image115.png)
+![Network](./images/image115.png)
 ### Profile/View User
-![Profile/View User](https://file.ac/yPrgAzJsh9o/Public/image116.png)
+![Profile/View User](./images/image116.png)
 ### Change password
-![ChangePassword](https://file.ac/yPrgAzJsh9o/Public/image117.png)
+![ChangePassword](./images/image117.png)
 ### Edit Profile
-![EditProfile](https://file.ac/yPrgAzJsh9o/Public/image118.png)
-![EditProfile](https://file.ac/yPrgAzJsh9o/Public/image119.png)
+![EditProfile](./images/image118.png)
+![EditProfile](./images/image119.png)
 ### Feedback
-![Feedback](https://file.ac/yPrgAzJsh9o/Public/image120.png)
+![Feedback](./images/image120.png)
 ### About and Contact
-![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image121.png)
-![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image122.png)
-![About-and-Contact](https://file.ac/yPrgAzJsh9o/Public/image123.png)
+![About-and-Contact](./images/image121.png)
+![About-and-Contact](./images/image122.png)
+![About-and-Contact](./images/image123.png)
 
 
 
