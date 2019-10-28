@@ -4,7 +4,7 @@
   "description": "Backend for Book Worm Mobile Application",
   "dependencies": {
     "mongodb": "2.0.42",
-    "mongoose": "4.1.5",
+    "mongoose": "5.7.7",
     "body-parser": "1.13.3",
     "express": "4.13.3",
     "express-generator": "4.13.1",
