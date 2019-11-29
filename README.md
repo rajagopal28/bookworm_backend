@@ -5,9 +5,9 @@ A typical book lover would love to buy a (paper-back) book, read it till his/her
 Having the problem statement explained, here comes the solution in the form of an application that helps me lend/borrow books from people having common interest. Converse and share information that are immersed in a diversified collection of people with varying thought process, through forums and chats.
 ## Architecture:
 ### Legacy - with OpenShift-1.0:
-![Architecture](./images/image0.png?refresh=true)
+![Architecture1](./images/image1.png)
 ### Migrated - with Heroku + mLab:
-![Architecture](./images/image1.png)
+![Architecture2](./images/image0.png)
 ### Relational schema of the backend:
 ![Schema](./images/image3.png)
 
